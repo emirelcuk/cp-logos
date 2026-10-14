@@ -1,0 +1,8 @@
+{
+  "name": "loadout-rules",
+  "private": true,
+  "description": "Savaş uçağı istasyon yükleme kuralları editörü ve XML dışa aktarımı",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

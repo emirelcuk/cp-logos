@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yükleme Kuralları</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Yükleme Kuralları Editörü</div>
+    <input id="project-name" class="project-name" aria-label="Proje adı">
+    <div class="actions">
+      <button data-action="new">Yeni</button>
+      <button data-action="open">Aç (JSON)</button>
+      <button data-action="save">Kaydet (JSON)</button>
+      <button data-action="sample">Örnek yükle</button>
+      <input type="file" id="file-input" accept=".json,application/json" hidden>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="main"></main>
+
+  <script src="js/model.js"></script>
+  <script src="js/xml-export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
