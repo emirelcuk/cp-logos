@@ -69,7 +69,7 @@ test('otomatik yerleşim: sol uçtan sağ uca, merkez hatta gövde', function ()
   const p = M.sampleProject();
   const ac = p.aircraft[0];
   SH.applyAutoLayout(ac);
-  const mains = ac.stations.filter(function (s) { return !s.parentId; });
+  const mains = ac.stations.filter(SH.isMain);
   const xs = mains.map(function (s) { return s.x; });
   for (let i = 1; i < xs.length; i++) assert.ok(xs[i] > xs[i - 1], 'x sırası artmalı: ' + xs.join(','));
   const center = mains.find(function (s) { return s.location === 'CENTER'; });
@@ -102,7 +102,7 @@ function codes(ac) { return ac.stations.map(function (s) { return s.code; }).joi
 test('istasyonlar soldan sağa 1den numaralanır, ek noktalar ana istasyonun ardından gelir', function () {
   const ac = M.sampleProject().aircraft[0];
   SH.arrangeStations(ac);
-  assert.strictEqual(codes(ac), '1 2 3 4 5 5L 5R 6 7 8 9');
+  assert.strictEqual(codes(ac), '1 2 3 4 5 5L 5R 6 7 8 9 GUN');
   // 5L çizimde solda, 5R sağda.
   const byCode = {};
   ac.stations.forEach(function (s) { byCode[s.code] = s; });
@@ -140,7 +140,7 @@ test('ana istasyonu silinen ek nokta bağımsız istasyona dönüşür', functio
   ac.stations.splice(ac.stations.indexOf(five), 1);
   SH.arrangeStations(ac);
   assert.ok(ac.stations.every(function (s) { return !s.parentId; }));
-  assert.strictEqual(ac.stations.length, 10);
+  assert.strictEqual(ac.stations.length, 11);
 });
 
 test('standart katalog gerçek isimleri içerir ve tekrar eklemez', function () {
@@ -151,4 +151,42 @@ test('standart katalog gerçek isimleri içerir ve tekrar eklemez', function () 
   assert.ok(added > 20);
   assert.strictEqual(M.mergeStandardCatalog(p), 0);
   assert.deepStrictEqual(M.validate(p).filter(function (i) { return i.level === 'error'; }), []);
+});
+
+test('top istasyonu numaralandırmaya girmez; birden fazla top GUN1, GUN2 olur', function () {
+  const ac = M.sampleProject().aircraft[1];
+  const g1 = Object.assign(M.newStation(), { type: 'GUN' });
+  const g2 = Object.assign(M.newStation(), { type: 'GUN' });
+  ac.stations.push(g1, g2);
+  SH.arrangeStations(ac);
+  assert.strictEqual(codes(ac), '1 2 3 4 5 GUN1 GUN2');
+  ac.stations.splice(ac.stations.indexOf(g2), 1);
+  SH.arrangeStations(ac);
+  assert.strictEqual(g1.code, 'GUN');
+});
+
+test('top: mermi kapasitesi aşımı hata, çap uyuşmazlığı uyarı verir', function () {
+  const p = M.sampleProject();
+  const gunStation = p.aircraft[0].stations.find(function (s) { return s.type === 'GUN'; });
+  const gun = gunStation.loads[0];
+  gun.children[0].qty = 9999;
+  const ammo30 = p.catalog.ammo.find(function (a) { return a.code === 'PGU-13/B'; });
+  gun.children.push(M.newLoadNode('ammo', ammo30.id));
+  // Top istasyonuna doğrudan mühimmat takılamaz.
+  gunStation.loads.push(M.newLoadNode('munition', p.catalog.munitions[0].id));
+  const issues = M.validate(p);
+  const msg = function (re) { return issues.some(function (i) { return re.test(i.message); }); };
+  assert.ok(msg(/mermi kapasitesini \(511\) aşıyor/));
+  assert.ok(issues.some(function (i) { return i.level === 'warning' && /Çap uyuşmuyor/.test(i.message); }));
+  assert.ok(msg(/top istasyonu altına takılamaz/));
+});
+
+test('XML top ve mühimmatı içerir', function () {
+  const p = M.sampleProject();
+  p.aircraft.forEach(function (a) { SH.arrangeStations(a); });
+  const xml = X.EXPORTERS.generic.exportProject(p, M);
+  assert.ok(xml.includes('<Gun code="M61A1" name="Vulcan 20 mm altı namlulu top" caliber="20x102" capacity="511"/>'));
+  assert.ok(xml.includes('<Ammo code="PGU-28/B"'));
+  assert.ok(xml.includes('<Station code="GUN" type="GUN"'));
+  assert.ok(xml.includes('<Allow type="AMMO" ref="PGU-28/B" maxQty="511"/>'));
 });

@@ -3,14 +3,16 @@
  * Tarayıcıda window.LoadoutModel, Node'da module.exports olarak kullanılır.
  *
  * Proje yapısı:
- *   catalog.munitions / racks / subracks : tanımlı mağazalar (store)
+ *   catalog.munitions / racks / subracks / guns / ammo : tanımlı mağazalar (store)
  *   aircraft[].stations[].loads          : istasyona izin verilen yükleme ağacı
  *   aircraft[].constraints               : istasyonlar arası kurallar
  *
  * Yükleme ağacı (LoadNode):
- *   { id, kind: 'rack'|'subrack'|'munition', refId, qty, children: [LoadNode] }
+ *   { id, kind: 'rack'|'subrack'|'munition'|'gun'|'ammo', refId, qty, children: [LoadNode] }
  *   Bir düğümün çocukları birbirinin ALTERNATİFİDİR (hangisi takılabilir).
- *   qty: o öğeden ebeveyne en fazla kaç adet takılabileceği.
+ *   qty: o öğeden ebeveyne en fazla kaç adet takılabileceği (top mühimmatında mermi adedi).
+ *
+ * İstasyon tipleri: STATION (numaralı istasyon / ek nokta) ve GUN (dahili top, numarasız).
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -20,17 +22,25 @@
 
   const SCHEMA_VERSION = 1;
 
-  const KINDS = ['munition', 'rack', 'subrack'];
-  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack' };
-  const CATALOG_KEY = { munition: 'munitions', rack: 'racks', subrack: 'subracks' };
+  const KINDS = ['munition', 'rack', 'subrack', 'gun', 'ammo'];
+  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack', gun: 'Top', ammo: 'Top mühimmatı' };
+  const CATALOG_KEY = { munition: 'munitions', rack: 'racks', subrack: 'subracks', gun: 'guns', ammo: 'ammo' };
+  // Pozisyon alanının anlamı: rack/subrack için takma yeri sayısı, top için mermi kapasitesi.
+  const HAS_POSITIONS = { rack: true, subrack: true, gun: true };
 
-  // Hangi düğümün altına ne takılabilir.
+  // Hangi düğümün altına ne takılabilir. Top podları rack altına takılabilir.
   const ALLOWED_CHILDREN = {
-    station: ['rack', 'subrack', 'munition'],
-    rack: ['subrack', 'munition'],
+    station: ['rack', 'subrack', 'munition', 'gun'],
+    gunStation: ['gun'],
+    rack: ['subrack', 'munition', 'gun'],
     subrack: ['munition'],
+    gun: ['ammo'],
     munition: [],
+    ammo: [],
   };
+  const PARENT_LABELS = { station: 'istasyon', gunStation: 'top istasyonu' };
+
+  const STATION_TYPES = { STATION: 'İstasyon', GUN: 'Top (GUN)' };
 
   const LOCATIONS = { LEFT: 'Sol', CENTER: 'Merkez', RIGHT: 'Sağ' };
 
@@ -52,14 +62,22 @@
     return {
       schemaVersion: SCHEMA_VERSION,
       name: 'Yeni Proje',
-      catalog: { munitions: [], racks: [], subracks: [] },
+      catalog: emptyCatalog(),
       aircraft: [],
     };
+  }
+
+  function emptyCatalog() {
+    const c = {};
+    KINDS.forEach(function (k) { c[CATALOG_KEY[k]] = []; });
+    return c;
   }
 
   function newStore(kind) {
     const base = { id: newId(kind), code: '', name: '', notes: '' };
     if (kind === 'munition') return Object.assign(base, { category: '' });
+    if (kind === 'ammo') return Object.assign(base, { caliber: '', category: '' });
+    if (kind === 'gun') return Object.assign(base, { caliber: '', positions: 500 });
     return Object.assign(base, { positions: 1 });
   }
 
@@ -71,7 +89,7 @@
     // code ve location soldan sağa sıralamayla otomatik verilir (AircraftShapes.arrangeStations).
     // parentId/suffix: ek takma noktası ise bağlı olduğu ana istasyon ve son eki (ör. 5 + 'L' = 5L).
     // x, y: uçak çizimindeki konum (null ise otomatik yerleştirilir).
-    return { id: newId('st'), code: '', name: '', parentId: null, suffix: '', location: 'CENTER', x: null, y: null, loads: [] };
+    return { id: newId('st'), type: 'STATION', code: '', name: '', parentId: null, suffix: '', location: 'CENTER', x: null, y: null, loads: [] };
   }
 
   function newLoadNode(kind, refId) {
@@ -102,7 +120,7 @@
   /* Eski veya eksik projeleri güncel şemaya tamamlar. */
   function normalizeProject(p) {
     const out = Object.assign(emptyProject(), p || {});
-    out.catalog = Object.assign({ munitions: [], racks: [], subracks: [] }, out.catalog || {});
+    out.catalog = Object.assign(emptyCatalog(), out.catalog || {});
     KINDS.forEach(function (kind) {
       out.catalog[CATALOG_KEY[kind]] = out.catalog[CATALOG_KEY[kind]].map(function (s) {
         return stripObsolete(Object.assign(newStore(kind), s));
@@ -144,7 +162,9 @@
         if (!s.code) add('error', where, 'Kod boş olamaz.');
         else if (seen[s.code]) add('error', where, 'Kod tekrar ediyor: ' + s.code);
         seen[s.code] = true;
-        if (kind !== 'munition' && !(Number(s.positions) >= 1)) add('error', where, 'Pozisyon sayısı en az 1 olmalı.');
+        if (HAS_POSITIONS[kind] && !(Number(s.positions) >= 1)) {
+          add('error', where, kind === 'gun' ? 'Mermi kapasitesi en az 1 olmalı.' : 'Pozisyon sayısı en az 1 olmalı.');
+        }
       });
     });
 
@@ -170,7 +190,8 @@
         }
         if (!st.loads.length) add('warning', stWhere, 'İstasyona hiçbir yük izni tanımlı değil.');
 
-        st.loads.forEach(function (n) { validateNode(project, n, 'station', null, stWhere, add); });
+        const parentKind = st.type === 'GUN' ? 'gunStation' : 'station';
+        st.loads.forEach(function (n) { validateNode(project, n, parentKind, null, stWhere, add); });
       });
 
       const stationIds = {};
@@ -196,19 +217,25 @@
     const label = KIND_LABELS[node.kind] + ' ' + storeLabel(store);
     const here = where + ' / ' + label;
     if (ALLOWED_CHILDREN[parentKind].indexOf(node.kind) < 0) {
-      add('error', here, KIND_LABELS[node.kind] + ', ' + (KIND_LABELS[parentKind] || 'istasyon') + ' altına takılamaz.');
+      add('error', here, KIND_LABELS[node.kind] + ', ' + (KIND_LABELS[parentKind] || PARENT_LABELS[parentKind]) + ' altına takılamaz.');
     }
     if (!store) add('error', here, 'Katalogda bulunmayan öğeye referans.');
     if (!(Number(node.qty) >= 1)) add('error', here, 'Adet en az 1 olmalı.');
     if (parentStore && Number(node.qty) > Number(parentStore.positions)) {
       add('error', here, 'Adet (' + node.qty + '), ' + storeLabel(parentStore) +
-        ' pozisyon sayısını (' + parentStore.positions + ') aşıyor.');
+        (node.kind === 'ammo' ? ' mermi kapasitesini (' : ' pozisyon sayısını (') + parentStore.positions + ') aşıyor.');
     }
-    if (store && node.kind !== 'munition') {
+    if (store && node.kind === 'ammo' && parentStore && parentStore.caliber && store.caliber &&
+        normCaliber(parentStore.caliber) !== normCaliber(store.caliber)) {
+      add('warning', here, 'Çap uyuşmuyor: top ' + parentStore.caliber + ', mühimmat ' + store.caliber + '.');
+    }
+    if (store && ALLOWED_CHILDREN[node.kind].length) {
       if (!(node.children || []).length) add('warning', here, 'Altına hiçbir yük izni tanımlı değil.');
     }
     (node.children || []).forEach(function (c) { validateNode(project, c, node.kind, store, where, add); });
   }
+
+  function normCaliber(c) { return String(c).toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x'); }
 
   /* ---------------------------------------------------------------- örnek veri */
 
@@ -249,6 +276,31 @@
       ['LAU-118', 'AGM-88 lançeri', 1],
       ['LAU-88', 'Üçlü AGM-65 lançeri', 3],
     ],
+    // [kod, ad, çap, mermi kapasitesi] — kapasite uçağa göre değişebilir, kendi verinizle doğrulayın.
+    gun: [
+      ['M61A1', 'Vulcan 20 mm altı namlulu top', '20x102', 511],
+      ['M61A2', 'Hafifletilmiş Vulcan 20 mm top', '20x102', 480],
+      ['GAU-22/A', '25 mm dört namlulu top', '25x137', 182],
+      ['GAU-12/U', 'Equalizer 25 mm beş namlulu top', '25x137', 300],
+      ['GAU-8/A', 'Avenger 30 mm yedi namlulu top', '30x173', 1174],
+      ['GPU-5/A', '30 mm harici top podu', '30x173', 353],
+      ['DEFA 554', '30 mm revolver top', '30x113', 125],
+      ['GSh-30-1', '30 mm tek namlulu top', '30x165', 150],
+    ],
+    // [kod, ad, çap, tip]
+    ammo: [
+      ['M56A3', '20 mm yüksek infilaklı yakıcı', '20x102', 'HEI'],
+      ['M55A2', '20 mm eğitim mermisi', '20x102', 'TP'],
+      ['M53', '20 mm zırh delici yakıcı', '20x102', 'API'],
+      ['PGU-28/B', '20 mm yarı zırh delici yüksek infilaklı yakıcı', '20x102', 'SAPHEI'],
+      ['PGU-27/A', '20 mm eğitim mermisi', '20x102', 'TP'],
+      ['PGU-20/U', '25 mm zırh delici yakıcı', '25x137', 'API'],
+      ['PGU-23/U', '25 mm eğitim mermisi', '25x137', 'TP'],
+      ['PGU-47/U', '25 mm zırh delici patlayıcı', '25x137', 'APEX'],
+      ['PGU-13/B', '30 mm yüksek infilaklı yakıcı', '30x173', 'HEI'],
+      ['PGU-14/B', '30 mm zırh delici yakıcı', '30x173', 'API'],
+      ['PGU-15/B', '30 mm eğitim mermisi', '30x173', 'TP'],
+    ],
     subrack: [
       ['TER-9', 'Üçlü ejektör rack', 3],
       ['MER-10', 'Çoklu ejektör rack', 6],
@@ -258,7 +310,7 @@
   };
 
   function standardCatalog() {
-    const out = { munitions: [], racks: [], subracks: [] };
+    const out = emptyCatalog();
     STANDARD_CATALOG.munition.forEach(function (r) {
       out.munitions.push(Object.assign(newStore('munition'), { code: r[0], name: r[1], category: r[2] }));
     });
@@ -266,6 +318,12 @@
       STANDARD_CATALOG[kind].forEach(function (r) {
         out[CATALOG_KEY[kind]].push(Object.assign(newStore(kind), { code: r[0], name: r[1], positions: r[2] }));
       });
+    });
+    STANDARD_CATALOG.gun.forEach(function (r) {
+      out.guns.push(Object.assign(newStore('gun'), { code: r[0], name: r[1], caliber: r[2], positions: r[3] }));
+    });
+    STANDARD_CATALOG.ammo.forEach(function (r) {
+      out.ammo.push(Object.assign(newStore('ammo'), { code: r[0], name: r[1], caliber: r[2], category: r[3] }));
     });
     return out;
   }
@@ -288,14 +346,11 @@
     const p = emptyProject();
     p.name = 'Örnek Proje';
     p.catalog = standardCatalog();
-    const S = function (code) {
-      const all = p.catalog.munitions.concat(p.catalog.racks, p.catalog.subracks);
-      return all.find(function (x) { return x.code === code; });
-    };
     const kindOf = function (code) {
-      if (p.catalog.racks.indexOf(S(code)) >= 0) return 'rack';
-      if (p.catalog.subracks.indexOf(S(code)) >= 0) return 'subrack';
-      return 'munition';
+      return KINDS.find(function (k) { return p.catalog[CATALOG_KEY[k]].some(function (x) { return x.code === code; }); });
+    };
+    const S = function (code) {
+      return p.catalog[CATALOG_KEY[kindOf(code)]].find(function (x) { return x.code === code; });
     };
     // n('MAU-12', [n('MK-82'), n('TER-9', [n('MK-82', [], 3)])])
     const n = function (code, children, qty) {
@@ -341,7 +396,9 @@
     a5.loads.push(n('FT-300'), n('AN/ALQ-131'));
     a5l.loads.push(n('AN/AAQ-13'));
     a5r.loads.push(n('AN/AAQ-33'), n('AN/AAQ-28'));
-    a.stations.push(a1, a2, a3, a4, a5, a5l, a5r, a6, a7, a8, a9);
+    const aGun = Object.assign(newStation(), { type: 'GUN', code: 'GUN', name: 'Dahili top' });
+    aGun.loads.push(n('M61A1', [n('PGU-28/B', [], 511), n('M56A3', [], 511), n('PGU-27/A', [], 511)]));
+    a.stations.push(a1, a2, a3, a4, a5, a5l, a5r, a6, a7, a8, a9, aGun);
     a.constraints.push(
       rule('SYMMETRIC', [a1, a9], { description: 'Kanat ucu füzeleri simetrik.' }),
       rule('SYMMETRIC', [a3, a7], { description: 'Orta kanat yükleri simetrik olmalı.' }),
@@ -359,7 +416,7 @@
     const b5 = st('5', 'Sağ dış kanat', 'RIGHT');
     [b1, b5].forEach(function (s) { s.loads.push(aamRail()); });
     [b2, b4].forEach(function (s) { s.loads.push(n('MAU-12', [n('MK-82'), n('GBU-12'), n('FT-370')])); });
-    b3.loads.push(n('FT-300'), n('MAU-12', [n('MK-84'), n('GBU-31')]));
+    b3.loads.push(n('FT-300'), n('MAU-12', [n('MK-84'), n('GBU-31'), n('GPU-5/A', [n('PGU-13/B', [], 353), n('PGU-15/B', [], 353)])]));
     b.stations.push(b1, b2, b3, b4, b5);
     b.constraints.push(
       rule('SYMMETRIC', [b2, b4], { description: 'İç kanat yükleri simetrik.' })
@@ -375,6 +432,8 @@
     KIND_LABELS: KIND_LABELS,
     CATALOG_KEY: CATALOG_KEY,
     ALLOWED_CHILDREN: ALLOWED_CHILDREN,
+    HAS_POSITIONS: HAS_POSITIONS,
+    STATION_TYPES: STATION_TYPES,
     LOCATIONS: LOCATIONS,
     CONSTRAINT_TYPES: CONSTRAINT_TYPES,
     newId: newId,

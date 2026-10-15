@@ -47,7 +47,7 @@
 
   /* ------------------------------------------------------------ genel format */
 
-  const TAG_BY_KIND = { munition: 'Munition', rack: 'Rack', subrack: 'Subrack' };
+  const TAG_BY_KIND = { munition: 'Munition', rack: 'Rack', subrack: 'Subrack', gun: 'Gun', ammo: 'Ammo' };
 
   function genericExport(project, model) {
     const codeOf = function (kind, id) {
@@ -60,7 +60,10 @@
         code: s.code,
         name: s.name,
         category: kind === 'munition' ? s.category : undefined,
-        positions: kind !== 'munition' ? s.positions : undefined,
+        type: kind === 'ammo' ? s.category : undefined,
+        caliber: kind === 'gun' || kind === 'ammo' ? s.caliber : undefined,
+        positions: kind === 'rack' || kind === 'subrack' ? s.positions : undefined,
+        capacity: kind === 'gun' ? s.positions : undefined,
       }, s.notes ? [el('Notes', {}, [s.notes])] : []);
     };
 
@@ -80,6 +83,7 @@
         el('Stations', {}, ac.stations.map(function (st) {
           return el('Station', {
             code: st.code,
+            type: st.type === 'GUN' ? 'GUN' : undefined,
             parent: st.parentId ? stationCode[st.parentId] : undefined,
             name: st.name,
             location: st.location,
@@ -102,6 +106,8 @@
         el('Munitions', {}, project.catalog.munitions.map(function (s) { return storeEl('munition', s); })),
         el('Racks', {}, project.catalog.racks.map(function (s) { return storeEl('rack', s); })),
         el('Subracks', {}, project.catalog.subracks.map(function (s) { return storeEl('subrack', s); })),
+        el('Guns', {}, project.catalog.guns.map(function (s) { return storeEl('gun', s); })),
+        el('Ammunition', {}, project.catalog.ammo.map(function (s) { return storeEl('ammo', s); })),
       ]),
       el('AircraftList', {}, project.aircraft.map(aircraftEl)),
     ]));

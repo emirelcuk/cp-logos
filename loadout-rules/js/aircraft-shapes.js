@@ -20,6 +20,7 @@
       fins: [{ x: 0, y1: 400, y2: 482 }],
       // İstasyonların kanat üzerinde dizileceği hat (sağ yarı, kökten uca) ve gövde hattı.
       wing: { root: [36, 288], tip: [166, 328] },
+      gun: [-20, 170],
       body: { y1: 250, y2: 340 },
     },
     twin: {
@@ -29,6 +30,7 @@
       canopy: { y: 100, rx: 10, ry: 30 },
       fins: [{ x: 36, y1: 395, y2: 478 }, { x: -36, y1: 395, y2: 478 }],
       wing: { root: [52, 282], tip: [168, 318] },
+      gun: [44, 190],
       body: { y1: 240, y2: 360 },
     },
     delta: {
@@ -37,6 +39,7 @@
       canopy: { y: 104, rx: 9, ry: 30 },
       fins: [{ x: 0, y1: 360, y2: 466 }],
       wing: { root: [30, 360], tip: [130, 412] },
+      gun: [-18, 180],
       body: { y1: 300, y2: 420 },
     },
     none: {
@@ -44,6 +47,7 @@
       half: [],
       fins: [],
       wing: { root: [30, 250], tip: [170, 250] },
+      gun: [0, 80],
       body: { y1: 150, y2: 400 },
     },
   };
@@ -61,7 +65,18 @@
   // Merkez hattına bu kadar yakın istasyonlar gövde (CENTER) sayılır.
   const CENTER_TOLERANCE = 12;
 
-  function isMain(s) { return !s.parentId; }
+  // Ana istasyon: numaralı, ek nokta veya top değil.
+  function isMain(s) { return !s.parentId && s.type !== 'GUN'; }
+  function isGun(s) { return s.type === 'GUN'; }
+
+  function placeGuns(aircraft, onlyMissing) {
+    const shape = shapeOf(aircraft.silhouette);
+    aircraft.stations.filter(isGun).forEach(function (g, i) {
+      if (onlyMissing && hasPosition(g)) return;
+      g.x = round(VIEW.cx + shape.gun[0] + (shape.gun[0] < 0 ? -1 : 1) * 18 * i);
+      g.y = round(shape.gun[1] + 14 * i);
+    });
+  }
 
   function locationOf(x) {
     if (Math.abs(x - VIEW.cx) <= CENTER_TOLERANCE) return 'CENTER';
@@ -126,6 +141,7 @@
   function ensurePositions(aircraft) {
     let changed = false;
     const mains = aircraft.stations.filter(isMain);
+    if (aircraft.stations.some(function (s) { return isGun(s) && !hasPosition(s); })) { placeGuns(aircraft, true); changed = true; }
     if (mains.some(function (s) { return !hasPosition(s); })) {
       const layout = autoLayout(aircraft);
       mains.forEach(function (s) {
@@ -146,6 +162,7 @@
   /* Otomatik yerleşim; locations verilirse yalnızca o gruplardaki (LEFT/CENTER/RIGHT) istasyonlar taşınır. */
   function applyAutoLayout(aircraft, locations) {
     const layout = autoLayout(aircraft);
+    if (!locations) placeGuns(aircraft, false);
     aircraft.stations.filter(isMain).forEach(function (s) {
       if (locations && locations.indexOf(s.location) < 0) return;
       s.x = layout[s.id].x; s.y = layout[s.id].y;
@@ -174,7 +191,9 @@
     aircraft.stations.forEach(function (s) { byId[s.id] = s; });
     // Ana istasyonu silinmiş ek noktalar bağımsız istasyon olur.
     aircraft.stations.forEach(function (s) {
-      if (s.parentId && (!byId[s.parentId] || byId[s.parentId].parentId)) { s.parentId = null; s.suffix = ''; }
+      const parent = s.parentId ? byId[s.parentId] : null;
+      if (s.parentId && (!parent || parent.parentId || isGun(parent))) { s.parentId = null; s.suffix = ''; }
+      if (isGun(s)) { s.parentId = null; s.suffix = ''; }
     });
     const mains = aircraft.stations.filter(isMain).sort(function (a, b) { return a.x - b.x || a.y - b.y; });
     const ordered = [];
@@ -187,6 +206,13 @@
         side.location = locationOf(side.x);
         ordered.push(side);
       });
+    });
+    // Toplar numarasız: tek ise GUN, birden fazla ise soldan sağa GUN1, GUN2...
+    const guns = aircraft.stations.filter(isGun).sort(function (a, b) { return a.x - b.x || a.y - b.y; });
+    guns.forEach(function (g, i) {
+      g.code = guns.length === 1 ? 'GUN' : 'GUN' + (i + 1);
+      g.location = locationOf(g.x);
+      ordered.push(g);
     });
     aircraft.stations.splice.apply(aircraft.stations, [0, aircraft.stations.length].concat(ordered));
     const after = aircraft.stations.map(function (s) { return s.id + ':' + s.code + ':' + s.location; }).join('|');
@@ -206,6 +232,8 @@
     arrangeStations: arrangeStations,
     placeSides: placeSides,
     sidesOf: sidesOf,
+    isMain: isMain,
+    isGun: isGun,
     locationOf: locationOf,
   };
 });

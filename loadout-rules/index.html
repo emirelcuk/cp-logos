@@ -8,17 +8,25 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Yükleme Kuralları Editörü</div>
-    <input id="project-name" class="project-name" aria-label="Proje adı">
-    <div class="actions">
-      <button data-action="new">Yeni</button>
-      <button data-action="open">Aç (JSON)</button>
-      <button data-action="save">Kaydet (JSON)</button>
-      <button data-action="sample">Örnek yükle</button>
-      <input type="file" id="file-input" accept=".json,application/json" hidden>
+    <div class="topbar-row">
+      <div class="brand">
+        <span class="brand-icon"></span>
+        <div class="brand-text">
+          <b>Yükleme Kuralları</b>
+          <span>İstasyon · Rack · Mühimmat</span>
+        </div>
+      </div>
+      <input id="project-name" class="project-name" aria-label="Proje adı" placeholder="Proje adı">
+      <div class="actions">
+        <button data-action="new"><span>Yeni</span></button>
+        <button data-action="open"><span>Aç</span></button>
+        <button data-action="save"><span>Kaydet</span></button>
+        <button data-action="sample"><span>Örnek</span></button>
+        <input type="file" id="file-input" accept=".json,application/json" hidden>
+      </div>
     </div>
+    <nav class="tabs" id="tabs"></nav>
   </header>
-  <nav class="tabs" id="tabs"></nav>
   <main id="main"></main>
 
   <script src="js/model.js"></script>
