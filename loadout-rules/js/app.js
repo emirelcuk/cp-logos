@@ -8,11 +8,13 @@
 
   const M = window.LoadoutModel;
   const X = window.LoadoutXml;
+  const SH = window.AircraftShapes;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
   const STORAGE_KEY = 'loadout-rules.project.v1';
 
   const state = {
     project: loadFromStorage() || M.sampleProject(),
-    view: 'catalog',
+    view: 'aircraft',
     catalogKind: 'munition',
     aircraftId: null,
     stationId: null,
@@ -124,8 +126,8 @@
   /* ------------------------------------------------------------ sekmeler */
 
   const TABS = [
+    { id: 'aircraft', label: 'Uçaklar' },
     { id: 'catalog', label: 'Katalog' },
-    { id: 'aircraft', label: 'Uçaklar ve İstasyonlar' },
     { id: 'validation', label: 'Doğrulama' },
     { id: 'xml', label: 'XML Çıktısı' },
   ];
@@ -164,16 +166,13 @@
       })),
     ]);
 
-    const headers = ['Kod', 'Ad'].concat(isMunition ? ['Kategori'] : ['Pozisyon'], ['Ağırlık (kg)'],
-      isMunition ? [] : ['Taşıma limiti (kg)'], ['Not', '']);
+    const headers = ['Kod', 'Ad', isMunition ? 'Kategori' : 'Pozisyon', 'Not', ''];
 
     const rows = list.map(function (s) {
       return h('tr', {}, [
         h('td', {}, field(null, s, 'code')),
         h('td', {}, field(null, s, 'name')),
         isMunition ? h('td', {}, field(null, s, 'category')) : h('td', { class: 'num' }, field(null, s, 'positions', { type: 'number' })),
-        h('td', { class: 'num' }, field(null, s, 'weightKg', { type: 'number', step: 'any' })),
-        isMunition ? null : h('td', { class: 'num' }, field(null, s, 'maxLoadKg', { type: 'number', step: 'any' })),
         h('td', {}, field(null, s, 'notes')),
         h('td', {}, h('button', {
           class: 'small danger',
@@ -230,6 +229,7 @@
           class: 'small primary',
           onclick: function () {
             const a = M.newAircraft();
+            a.code = 'UCAK-' + (state.project.aircraft.length + 1);
             state.project.aircraft.push(a);
             state.aircraftId = a.id; state.stationId = null;
             rerender();
@@ -246,18 +246,23 @@
         : h('div', { class: 'empty' }, 'Henüz uçak yok.'),
     ]);
 
-    if (!ac) return h('div', { class: 'layout' }, [nav, h('div', {}, '')]);
+    if (!ac) return h('div', { class: 'layout' }, [nav, h('div', { class: 'panel empty' }, 'Başlamak için soldan bir uçak ekleyin.')]);
 
+    if (SH.ensurePositions(ac)) persist();
     const st = currentStation(ac);
     return h('div', { class: 'layout' }, [nav, h('div', {}, [
       renderAircraftInfo(ac),
+      h('div', { class: 'stage' }, [
+        renderDrawing(ac, st),
+        st ? renderStationPanel(ac, st) : h('div', { class: 'panel empty' }, 'İstasyon eklemek için çizimin altındaki düğmeleri kullanın.'),
+      ]),
       renderStations(ac, st),
-      st ? renderLoadTree(ac, st) : null,
       renderConstraints(ac),
     ])]);
   }
 
   function renderAircraftInfo(ac) {
+    const shapeOptions = Object.keys(SH.SHAPES).map(function (k) { return { value: k, label: SH.SHAPES[k].label }; });
     return h('div', { class: 'panel' }, [
       h('div', { class: 'panel-head' }, [
         h('h2', {}, 'Uçak bilgisi'),
@@ -270,9 +275,13 @@
           },
         }, 'Uçağı sil'),
       ]),
-      h('div', { class: 'grid2' }, [
+      h('div', { class: 'grid3' }, [
         field('Kod', ac, 'code', { onInput: renderNavLater }),
         field('Ad', ac, 'name'),
+        h('label', { class: 'field' }, [
+          h('span', {}, 'Çizim'),
+          select(ac, 'silhouette', shapeOptions, function () { SH.applyAutoLayout(ac); rerender(); }),
+        ]),
       ]),
       field('Not', ac, 'notes', { multiline: true }),
     ]);
@@ -285,17 +294,204 @@
     if (li && ac) li.firstChild.textContent = ac.code || '(kodsuz)';
   }
 
+  /* ---- uçak çizimi */
+
+  function svg(tag, attrs, children) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (attrs[k] === undefined || attrs[k] === null) return;
+      if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    });
+    [].concat(children || []).forEach(function (c) {
+      if (c == null) return;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+
+  function loadSummary(st) {
+    if (!st.loads.length) return 'Yük izni tanımlı değil';
+    const lines = [];
+    const walk = function (n, depth) {
+      const store = M.findStore(state.project, n.kind, n.refId);
+      lines.push(new Array(depth + 1).join('  ') + (store ? store.code : '?') + (n.qty > 1 ? ' ×' + n.qty : ''));
+      n.children.forEach(function (c) { walk(c, depth + 1); });
+    };
+    st.loads.forEach(function (n) { walk(n, 0); });
+    return lines.join('\n');
+  }
+
+  function renderDrawing(ac, selected) {
+    const V = SH.VIEW;
+    const shape = SH.shapeOf(ac.silhouette);
+    const root = svg('svg', { viewBox: '0 0 ' + V.width + ' ' + V.height, class: 'aircraft-svg', role: 'img', 'aria-label': (ac.code || 'Uçak') + ' istasyon yerleşimi' });
+
+    root.appendChild(svg('line', { x1: V.cx, y1: 4, x2: V.cx, y2: V.height - 4, class: 'centerline' }));
+    const outline = SH.outlinePath(ac.silhouette);
+    if (outline) root.appendChild(svg('path', { d: outline, class: 'airframe' }));
+    shape.fins.forEach(function (f) {
+      root.appendChild(svg('line', { x1: V.cx + f.x, y1: f.y1, x2: V.cx + f.x, y2: f.y2, class: 'fin' }));
+    });
+    if (shape.canopy) root.appendChild(svg('ellipse', { cx: V.cx, cy: shape.canopy.y, rx: shape.canopy.rx, ry: shape.canopy.ry, class: 'canopy' }));
+
+    ac.stations.forEach(function (st) {
+      const isSel = selected && st.id === selected.id;
+      const cls = 'station' + (st.loads.length ? ' loaded' : ' empty') + (isSel ? ' selected' : '');
+      const labelBelow = st.location === 'CENTER' || st.y < 60;
+      const g = svg('g', { class: cls, transform: 'translate(' + st.x + ',' + st.y + ')', tabindex: 0 }, [
+        svg('title', {}, (st.code || '(kodsuz)') + (st.name ? ' — ' + st.name : '') + '\n' + loadSummary(st)),
+        svg('circle', { r: isSel ? 13 : 10 }),
+        svg('text', { y: labelBelow ? 26 : -17, 'text-anchor': 'middle' }, st.code || '?'),
+      ]);
+      g.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); state.stationId = st.id; render(); }
+      });
+      makeDraggable(root, g, st);
+      root.appendChild(g);
+    });
+
+    const addButton = function (loc, label) {
+      return h('button', { class: 'small', onclick: function () { addStation(ac, loc); } }, label);
+    };
+
+    return h('div', { class: 'panel drawing' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, (ac.code || 'Uçak') + ' — ' + ac.stations.length + ' istasyon'),
+        h('button', {
+          class: 'small',
+          title: 'İstasyonları sol uçtan sağ uca listedeki sıraya göre yeniden diz',
+          onclick: function () { SH.applyAutoLayout(ac); rerender(); },
+        }, 'Otomatik yerleştir'),
+      ]),
+      root,
+      h('div', { class: 'legend' }, [
+        h('span', {}, [h('i', { class: 'dot loaded' }), 'Yük izni var']),
+        h('span', {}, [h('i', { class: 'dot empty' }), 'Tanımsız']),
+        h('span', { class: 'hint' }, 'Tıkla: seç · Sürükle: taşı'),
+      ]),
+      h('div', { class: 'add-row' }, [
+        addButton('LEFT', '+ Sol kanat'),
+        addButton('CENTER', '+ Gövde'),
+        addButton('RIGHT', '+ Sağ kanat'),
+      ]),
+    ]);
+  }
+
+  /* İstasyon işaretini sürükleyerek konumunu değiştirir; hareketsiz tıklama seçim yapar. */
+  function makeDraggable(svgRoot, g, st) {
+    g.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      const ctm = svgRoot.getScreenCTM();
+      if (!ctm) return;
+      const inv = ctm.inverse();
+      const toSvg = function (ev) {
+        const p = svgRoot.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+        return p.matrixTransform(inv);
+      };
+      const start = toSvg(e);
+      const origin = { x: st.x, y: st.y };
+      let moved = false;
+      g.setPointerCapture(e.pointerId);
+      g.classList.add('dragging');
+
+      const onMove = function (ev) {
+        const p = toSvg(ev);
+        const dx = p.x - start.x, dy = p.y - start.y;
+        if (!moved && Math.hypot(dx, dy) < 3) return;
+        moved = true;
+        st.x = clamp(Math.round(origin.x + dx), 12, SH.VIEW.width - 12);
+        st.y = clamp(Math.round(origin.y + dy), 12, SH.VIEW.height - 12);
+        g.setAttribute('transform', 'translate(' + st.x + ',' + st.y + ')');
+      };
+      const onUp = function () {
+        g.removeEventListener('pointermove', onMove);
+        g.removeEventListener('pointerup', onUp);
+        g.removeEventListener('pointercancel', onUp);
+        state.stationId = st.id;
+        rerender();
+      };
+      g.addEventListener('pointermove', onMove);
+      g.addEventListener('pointerup', onUp);
+      g.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function nextStationCode(ac) {
+    let max = 0;
+    ac.stations.forEach(function (s) {
+      const m = /(\d+)$/.exec(s.code || '');
+      if (m) max = Math.max(max, Number(m[1]));
+    });
+    return 'STA' + (max + 1);
+  }
+
+  /* Yeni istasyonu kendi konum grubunun sonuna ekler (sol → merkez → sağ sırası korunur). */
+  function addStation(ac, location) {
+    const s = M.newStation();
+    s.code = nextStationCode(ac);
+    s.location = location;
+    const rank = { LEFT: 0, CENTER: 1, RIGHT: 2 };
+    let at = ac.stations.length;
+    for (let i = 0; i < ac.stations.length; i++) {
+      if (rank[ac.stations[i].location] > rank[location]) { at = i; break; }
+    }
+    ac.stations.splice(at, 0, s);
+    SH.ensurePositions(ac);
+    state.stationId = s.id;
+    rerender();
+  }
+
+  /* ---- seçili istasyon */
+
+  function renderStationPanel(ac, st) {
+    const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
+    const related = ac.constraints.filter(function (c) { return c.stationIds.indexOf(st.id) >= 0; });
+    const codeOf = function (id) { const s = ac.stations.find(function (x) { return x.id === id; }); return s ? s.code : '?'; };
+    return h('div', { class: 'panel station-panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, 'İstasyon ' + (st.code || '(kodsuz)')),
+      ]),
+      h('div', { class: 'grid3' }, [
+        field('Kod', st, 'code', { onInput: refreshDrawingLabel(st) }),
+        field('Ad', st, 'name'),
+        h('label', { class: 'field' }, [h('span', {}, 'Konum'), select(st, 'location', locOptions, rerender)]),
+      ]),
+      h('h3', { style: 'margin-top:6px' }, 'İzin verilen yükler'),
+      h('p', { class: 'hint' },
+        'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin bir üst seviyeye en fazla kaç adet takılabileceğidir.'),
+      renderNodeList(st.loads, 'station'),
+      addButtons(st.loads, 'station'),
+      related.length ? h('div', { class: 'related' }, [
+        h('h3', {}, 'Bu istasyonu içeren kurallar'),
+        h('ul', {}, related.map(function (c) {
+          const def = M.CONSTRAINT_TYPES[c.type] || { label: c.type };
+          return h('li', {}, [h('b', {}, def.label), ': ', c.stationIds.map(codeOf).join(', '), c.description ? ' — ' + c.description : '']);
+        })),
+      ]) : null,
+    ]);
+  }
+
+  // Kod yazılırken çizimdeki etiketi odak kaybetmeden günceller.
+  function refreshDrawingLabel(st) {
+    return function () {
+      const sel = document.querySelector('.aircraft-svg .station.selected text');
+      if (sel) sel.textContent = st.code || '?';
+    };
+  }
+
   function renderStations(ac, selected) {
     const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
     const rows = ac.stations.map(function (st, i) {
       return h('tr', { class: selected && st.id === selected.id ? 'selected' : '' }, [
         h('td', {}, field(null, st, 'code')),
         h('td', {}, field(null, st, 'name')),
-        h('td', {}, select(st, 'location', locOptions)),
-        h('td', { class: 'num' }, field(null, st, 'maxLoadKg', { type: 'number', step: 'any' })),
-        h('td', {}, st.loads.length + ' seçenek'),
+        h('td', {}, select(st, 'location', locOptions, rerender)),
+        h('td', {}, st.loads.length ? st.loads.length + ' seçenek' : h('span', { class: 'muted' }, 'yok')),
         h('td', { style: 'white-space:nowrap' }, [
-          h('button', { class: 'small', onclick: function () { state.stationId = st.id; render(); } }, 'Yükleri düzenle'),
+          h('button', { class: 'small', onclick: function () { state.stationId = st.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, 'Seç'),
           ' ',
           h('button', { class: 'small', title: 'Yukarı', disabled: i === 0, onclick: function () { move(ac.stations, i, -1); } }, '↑'),
           h('button', { class: 'small', title: 'Aşağı', disabled: i === ac.stations.length - 1, onclick: function () { move(ac.stations, i, 1); } }, '↓'),
@@ -314,20 +510,11 @@
     });
 
     return h('div', { class: 'panel' }, [
-      h('div', { class: 'panel-head' }, [
-        h('h2', {}, 'İstasyonlar'),
-        h('button', {
-          class: 'primary',
-          onclick: function () {
-            const s = M.newStation();
-            s.code = 'STA' + (ac.stations.length + 1);
-            ac.stations.push(s); state.stationId = s.id; rerender();
-          },
-        }, '+ İstasyon ekle'),
-      ]),
+      h('div', { class: 'panel-head' }, [h('h2', {}, 'İstasyon listesi')]),
+      h('p', { class: 'hint' }, 'Sıra, XML çıktısındaki ve "Otomatik yerleştir" düzenindeki sırayı belirler.'),
       ac.stations.length
         ? h('div', { class: 'table-wrap' }, h('table', {}, [
-          h('thead', {}, h('tr', {}, ['Kod', 'Ad', 'Konum', 'Maks. yük (kg)', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
+          h('thead', {}, h('tr', {}, ['Kod', 'Ad', 'Konum', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
           h('tbody', {}, rows),
         ]))
         : h('div', { class: 'empty' }, 'Henüz istasyon yok.'),
@@ -342,19 +529,6 @@
   }
 
   /* ---- yükleme ağacı */
-
-  function renderLoadTree(ac, st) {
-    return h('div', { class: 'panel' }, [
-      h('div', { class: 'panel-head' }, [
-        h('h2', {}, 'İstasyon ' + (st.code || '(kodsuz)') + ' — izin verilen yükler'),
-      ]),
-      h('p', { class: 'hint' },
-        'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin bir üst seviyeye en fazla kaç adet takılabileceğidir. ' +
-        'Rack altına subrack veya mühimmat, subrack altına mühimmat eklenebilir.'),
-      renderNodeList(st.loads, 'station'),
-      addButtons(st.loads, 'station'),
-    ]);
-  }
 
   function renderNodeList(nodes, parentKind) {
     if (!nodes.length) return h('div', { class: 'empty' }, parentKind === 'station' ? 'Bu istasyona henüz yük izni tanımlanmadı.' : null);
@@ -373,15 +547,11 @@
     const list = state.project.catalog[M.CATALOG_KEY[n.kind]];
     const options = [{ value: '', label: '— seçin —' }].concat(list.map(function (s) { return { value: s.id, label: M.storeLabel(s) }; }));
     if (n.refId && !M.findStore(state.project, n.kind, n.refId)) options.push({ value: n.refId, label: '(silinmiş öğe)' });
-    const weight = h('span', { class: 'weight' });
-    const updateWeight = function () { weight.textContent = 'en fazla ' + M.worstCaseWeight(state.project, n) + ' kg'; };
-    updateWeight();
     return h('div', { class: 'tree-node' }, [
       h('span', { class: 'kind ' + n.kind }, M.KIND_LABELS[n.kind]),
       select(n, 'refId', options, function () { rerender(); }),
       h('span', {}, 'Maks. adet'),
-      (function () { const f = field(null, n, 'qty', { type: 'number', onInput: updateWeight }); f.classList.add('qty'); f.min = 1; return f; })(),
-      weight,
+      (function () { const f = field(null, n, 'qty', { type: 'number' }); f.classList.add('qty'); f.min = 1; return f; })(),
       h('button', {
         class: 'small danger',
         onclick: function () {

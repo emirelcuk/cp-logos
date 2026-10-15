@@ -60,9 +60,7 @@
         code: s.code,
         name: s.name,
         category: kind === 'munition' ? s.category : undefined,
-        weightKg: s.weightKg,
         positions: kind !== 'munition' ? s.positions : undefined,
-        maxLoadKg: kind !== 'munition' && Number(s.maxLoadKg) > 0 ? s.maxLoadKg : undefined,
       }, s.notes ? [el('Notes', {}, [s.notes])] : []);
     };
 
@@ -84,7 +82,6 @@
             code: st.code,
             name: st.name,
             location: st.location,
-            maxLoadKg: Number(st.maxLoadKg) > 0 ? st.maxLoadKg : undefined,
           }, st.loads.map(loadEl));
         })),
         ac.constraints.length ? el('Constraints', {}, ac.constraints.map(function (c) {

@@ -1,0 +1,1413 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yükleme Kuralları</title>
+  <style>
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --text: #1d2433;
+  --muted: #667085;
+  --border: #d5d9e0;
+  --accent: #2459c4;
+  --accent-soft: #e6eefc;
+  --danger: #c4322b;
+  --warn: #b26b00;
+  --ok: #1f7a3a;
+  --rack: #6a3fc1;
+  --subrack: #0b7d8c;
+  --munition: #b34a12;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+
+.topbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #1d2433; color: #fff; flex-wrap: wrap; }
+.brand { font-weight: 600; }
+.project-name { flex: 1; min-width: 160px; max-width: 360px; background: #2c3549; color: #fff; border: 1px solid #3d4862; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.topbar button { background: #2c3549; color: #fff; border-color: #3d4862; }
+
+.tabs { display: flex; gap: 2px; padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; padding: 10px 14px; white-space: nowrap; }
+.tabs button.active { border-bottom-color: var(--accent); color: var(--accent); font-weight: 600; }
+.badge { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px; font-size: 11px; color: #fff; background: var(--danger); text-align: center; }
+.badge.warn { background: var(--warn); }
+
+main { padding: 16px; }
+.layout { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+.panel h2 { margin: 0 0 10px; font-size: 16px; }
+.panel h3 { margin: 0 0 8px; font-size: 14px; }
+.panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.panel-head h2, .panel-head h3 { margin: 0; flex: 1; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 0 0 10px; }
+
+button { font: inherit; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: inherit; cursor: pointer; }
+button:hover { filter: brightness(0.96); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: var(--danger); }
+button.small { padding: 2px 7px; font-size: 12px; }
+input, select, textarea { font: inherit; padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: inherit; width: 100%; }
+textarea { resize: vertical; }
+label.field { display: block; margin-bottom: 8px; }
+label.field span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 12px; }
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { padding: 7px 9px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; gap: 6px; }
+.list li:hover { background: var(--bg); }
+.list li.selected { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.list .sub { color: var(--muted); font-weight: normal; font-size: 12px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; }
+tr.selected td { background: var(--accent-soft); }
+td.num input { max-width: 100px; }
+.table-wrap { overflow-x: auto; }
+
+.tree { list-style: none; margin: 0; padding-left: 0; }
+.tree .tree { padding-left: 22px; border-left: 1px dashed var(--border); margin-left: 9px; }
+.tree-node { display: flex; align-items: center; gap: 6px; padding: 4px 0; flex-wrap: wrap; }
+.kind { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; }
+.kind.rack { background: var(--rack); }
+.kind.subrack { background: var(--subrack); }
+.kind.munition { background: var(--munition); }
+.tree-node select { width: auto; min-width: 140px; max-width: 100%; flex: 0 1 auto; }
+.tree-node input.qty { width: 64px; }
+.alt-note { color: var(--muted); font-size: 12px; font-style: italic; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 12px; font-size: 12.5px; cursor: pointer; user-select: none; }
+.chip input { width: auto; margin: 0; }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); }
+
+.issue { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.issue .lvl { font-weight: 700; font-size: 12px; min-width: 60px; }
+.issue.error .lvl { color: var(--danger); }
+.issue.warning .lvl { color: var(--warn); }
+.issue .where { color: var(--muted); font-size: 12.5px; }
+.ok { color: var(--ok); font-weight: 600; }
+
+pre.xml { background: #1d2433; color: #e3e8f2; padding: 14px; border-radius: 8px; overflow: auto; max-height: 70vh; font: 12.5px/1.5 ui-monospace, Consolas, monospace; }
+.empty { color: var(--muted); padding: 12px 0; }
+
+.muted { color: var(--muted); }
+
+/* Uçak çizimi ve istasyon paneli */
+.stage { display: grid; grid-template-columns: minmax(280px, 440px) 1fr; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } }
+.drawing { position: sticky; top: 8px; }
+.aircraft-svg { display: block; width: 100%; max-height: 72vh; background: linear-gradient(#f7f9fc, #eef2f8); border: 1px solid var(--border); border-radius: 8px; touch-action: none; user-select: none; }
+.aircraft-svg .airframe { fill: #c9d2df; stroke: #5b6a82; stroke-width: 1.5; stroke-linejoin: round; }
+.aircraft-svg .canopy { fill: #7f95b5; stroke: #5b6a82; }
+.aircraft-svg .fin { stroke: #5b6a82; stroke-width: 4; stroke-linecap: round; }
+.aircraft-svg .centerline { stroke: #b8c2d1; stroke-dasharray: 4 6; }
+.aircraft-svg .station { cursor: grab; outline: none; }
+.aircraft-svg .station.dragging { cursor: grabbing; }
+.aircraft-svg .station circle { fill: #fff; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 2; }
+.aircraft-svg .station.loaded circle { fill: var(--accent); stroke: #fff; stroke-dasharray: none; }
+.aircraft-svg .station.selected circle { stroke: #f2a900; stroke-width: 4; stroke-dasharray: none; }
+.aircraft-svg .station:focus-visible circle { stroke: #f2a900; stroke-width: 3; }
+.aircraft-svg .station text { font: 600 12px system-ui, sans-serif; fill: var(--text); paint-order: stroke; stroke: #f4f6fa; stroke-width: 3px; pointer-events: none; }
+.aircraft-svg .station.selected text { fill: var(--accent); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 8px; font-size: 12.5px; }
+.legend .hint { margin: 0 0 0 auto; }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.dot.loaded { background: var(--accent); }
+.dot.empty { background: #fff; box-shadow: inset 0 0 0 2px var(--muted); }
+.add-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.related { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.related ul { margin: 0; padding-left: 18px; font-size: 13px; }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Yükleme Kuralları Editörü</div>
+    <input id="project-name" class="project-name" aria-label="Proje adı">
+    <div class="actions">
+      <button data-action="new">Yeni</button>
+      <button data-action="open">Aç (JSON)</button>
+      <button data-action="save">Kaydet (JSON)</button>
+      <button data-action="sample">Örnek yükle</button>
+      <input type="file" id="file-input" accept=".json,application/json" hidden>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="main"></main>
+
+  <script>
+/*
+ * Veri modeli, örnek veri ve doğrulama.
+ * Tarayıcıda window.LoadoutModel, Node'da module.exports olarak kullanılır.
+ *
+ * Proje yapısı:
+ *   catalog.munitions / racks / subracks : tanımlı mağazalar (store)
+ *   aircraft[].stations[].loads          : istasyona izin verilen yükleme ağacı
+ *   aircraft[].constraints               : istasyonlar arası kurallar
+ *
+ * Yükleme ağacı (LoadNode):
+ *   { id, kind: 'rack'|'subrack'|'munition', refId, qty, children: [LoadNode] }
+ *   Bir düğümün çocukları birbirinin ALTERNATİFİDİR (hangisi takılabilir).
+ *   qty: o öğeden ebeveyne en fazla kaç adet takılabileceği.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LoadoutModel = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const SCHEMA_VERSION = 1;
+
+  const KINDS = ['munition', 'rack', 'subrack'];
+  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack' };
+  const CATALOG_KEY = { munition: 'munitions', rack: 'racks', subrack: 'subracks' };
+
+  // Hangi düğümün altına ne takılabilir.
+  const ALLOWED_CHILDREN = {
+    station: ['rack', 'subrack', 'munition'],
+    rack: ['subrack', 'munition'],
+    subrack: ['munition'],
+    munition: [],
+  };
+
+  const LOCATIONS = { LEFT: 'Sol', CENTER: 'Merkez', RIGHT: 'Sağ' };
+
+  const CONSTRAINT_TYPES = {
+    SYMMETRIC: { label: 'Simetrik', help: 'Listelenen istasyonlar aynı yükü taşımalı.' },
+    EXCLUSIVE: { label: 'Birbirini dışlar', help: 'Listelenen istasyonlardan en fazla biri yüklenebilir.' },
+    REQUIRES: { label: 'Gerektirir', help: 'İlk istasyon yüklenirse diğerleri de yüklenmeli.' },
+    MAX_TOTAL: { label: 'Toplam üst sınır', help: 'Seçilen mühimmattan listelenen istasyonlarda toplam en fazla N adet.' },
+  };
+
+  let idCounter = 0;
+  function newId(prefix) {
+    idCounter += 1;
+    return (prefix || 'id') + '_' + Date.now().toString(36) + idCounter.toString(36) +
+      Math.random().toString(36).slice(2, 6);
+  }
+
+  function emptyProject() {
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      name: 'Yeni Proje',
+      catalog: { munitions: [], racks: [], subracks: [] },
+      aircraft: [],
+    };
+  }
+
+  function newStore(kind) {
+    const base = { id: newId(kind), code: '', name: '', notes: '' };
+    if (kind === 'munition') return Object.assign(base, { category: '' });
+    return Object.assign(base, { positions: 1 });
+  }
+
+  function newAircraft() {
+    return { id: newId('ac'), code: '', name: '', silhouette: 'single', notes: '', stations: [], constraints: [] };
+  }
+
+  function newStation() {
+    // x, y: uçak çizimindeki konum (null ise otomatik yerleştirilir).
+    return { id: newId('st'), code: '', name: '', location: 'CENTER', x: null, y: null, loads: [] };
+  }
+
+  function newLoadNode(kind, refId) {
+    return { id: newId('ld'), kind: kind, refId: refId || '', qty: 1, children: [] };
+  }
+
+  function newConstraint() {
+    return { id: newId('cn'), type: 'SYMMETRIC', stationIds: [], munitionId: '', value: 0, description: '' };
+  }
+
+  function findStore(project, kind, id) {
+    const list = project.catalog[CATALOG_KEY[kind]] || [];
+    return list.find(function (s) { return s.id === id; }) || null;
+  }
+
+  function storeLabel(store) {
+    if (!store) return '(tanımsız)';
+    return store.code ? store.code + (store.name ? ' — ' + store.name : '') : (store.name || '(adsız)');
+  }
+
+  // Önceki sürümlerden kalan, artık kullanılmayan alanlar.
+  const OBSOLETE_FIELDS = ['weightKg', 'maxLoadKg'];
+  function stripObsolete(obj) {
+    OBSOLETE_FIELDS.forEach(function (k) { delete obj[k]; });
+    return obj;
+  }
+
+  /* Eski veya eksik projeleri güncel şemaya tamamlar. */
+  function normalizeProject(p) {
+    const out = Object.assign(emptyProject(), p || {});
+    out.catalog = Object.assign({ munitions: [], racks: [], subracks: [] }, out.catalog || {});
+    KINDS.forEach(function (kind) {
+      out.catalog[CATALOG_KEY[kind]] = out.catalog[CATALOG_KEY[kind]].map(function (s) {
+        return stripObsolete(Object.assign(newStore(kind), s));
+      });
+    });
+    out.aircraft = (out.aircraft || []).map(function (a) {
+      const ac = Object.assign(newAircraft(), a);
+      ac.stations = (ac.stations || []).map(function (s) {
+        const st = stripObsolete(Object.assign(newStation(), s));
+        st.loads = (st.loads || []).map(normalizeNode);
+        return st;
+      });
+      ac.constraints = (ac.constraints || []).map(function (c) {
+        return Object.assign(newConstraint(), c);
+      });
+      return ac;
+    });
+    out.schemaVersion = SCHEMA_VERSION;
+    return out;
+  }
+
+  function normalizeNode(n) {
+    const node = Object.assign(newLoadNode(n.kind, n.refId), n);
+    node.children = (node.children || []).map(normalizeNode);
+    return node;
+  }
+
+  /* ---------------------------------------------------------------- doğrulama */
+
+  function validate(project) {
+    const issues = [];
+    const add = function (level, where, message) { issues.push({ level: level, where: where, message: message }); };
+
+    KINDS.forEach(function (kind) {
+      const list = project.catalog[CATALOG_KEY[kind]] || [];
+      const seen = {};
+      list.forEach(function (s) {
+        const where = KIND_LABELS[kind] + ' ' + storeLabel(s);
+        if (!s.code) add('error', where, 'Kod boş olamaz.');
+        else if (seen[s.code]) add('error', where, 'Kod tekrar ediyor: ' + s.code);
+        seen[s.code] = true;
+        if (kind !== 'munition' && !(Number(s.positions) >= 1)) add('error', where, 'Pozisyon sayısı en az 1 olmalı.');
+      });
+    });
+
+    const acSeen = {};
+    project.aircraft.forEach(function (ac) {
+      const acWhere = 'Uçak ' + (ac.code || '(kodsuz)');
+      if (!ac.code) add('error', acWhere, 'Uçak kodu boş olamaz.');
+      else if (acSeen[ac.code]) add('error', acWhere, 'Uçak kodu tekrar ediyor.');
+      acSeen[ac.code] = true;
+      if (!ac.stations.length) add('warning', acWhere, 'Hiç istasyon tanımlı değil.');
+
+      const stSeen = {};
+      ac.stations.forEach(function (st) {
+        const stWhere = acWhere + ' / İstasyon ' + (st.code || '(kodsuz)');
+        if (!st.code) add('error', stWhere, 'İstasyon kodu boş olamaz.');
+        else if (stSeen[st.code]) add('error', stWhere, 'İstasyon kodu tekrar ediyor.');
+        stSeen[st.code] = true;
+        if (!st.loads.length) add('warning', stWhere, 'İstasyona hiçbir yük izni tanımlı değil.');
+
+        st.loads.forEach(function (n) { validateNode(project, n, 'station', null, stWhere, add); });
+      });
+
+      const stationIds = {};
+      ac.stations.forEach(function (s) { stationIds[s.id] = true; });
+      ac.constraints.forEach(function (c, i) {
+        const cWhere = acWhere + ' / Kural #' + (i + 1);
+        if (!CONSTRAINT_TYPES[c.type]) add('error', cWhere, 'Bilinmeyen kural tipi: ' + c.type);
+        const valid = c.stationIds.filter(function (id) { return stationIds[id]; });
+        if (valid.length !== c.stationIds.length) add('error', cWhere, 'Silinmiş istasyona referans var.');
+        if (valid.length < 2) add('error', cWhere, 'En az 2 istasyon seçilmeli.');
+        if (c.type === 'MAX_TOTAL') {
+          if (!findStore(project, 'munition', c.munitionId)) add('error', cWhere, 'Mühimmat seçilmeli.');
+          if (!(Number(c.value) >= 0)) add('error', cWhere, 'Üst sınır negatif olamaz.');
+        }
+      });
+    });
+
+    return issues;
+  }
+
+  function validateNode(project, node, parentKind, parentStore, where, add) {
+    const store = findStore(project, node.kind, node.refId);
+    const label = KIND_LABELS[node.kind] + ' ' + storeLabel(store);
+    const here = where + ' / ' + label;
+    if (ALLOWED_CHILDREN[parentKind].indexOf(node.kind) < 0) {
+      add('error', here, KIND_LABELS[node.kind] + ', ' + (KIND_LABELS[parentKind] || 'istasyon') + ' altına takılamaz.');
+    }
+    if (!store) add('error', here, 'Katalogda bulunmayan öğeye referans.');
+    if (!(Number(node.qty) >= 1)) add('error', here, 'Adet en az 1 olmalı.');
+    if (parentStore && Number(node.qty) > Number(parentStore.positions)) {
+      add('error', here, 'Adet (' + node.qty + '), ' + storeLabel(parentStore) +
+        ' pozisyon sayısını (' + parentStore.positions + ') aşıyor.');
+    }
+    if (store && node.kind !== 'munition') {
+      if (!(node.children || []).length) add('warning', here, 'Altına hiçbir yük izni tanımlı değil.');
+    }
+    (node.children || []).forEach(function (c) { validateNode(project, c, node.kind, store, where, add); });
+  }
+
+  /* ---------------------------------------------------------------- örnek veri */
+
+  function sampleProject() {
+    const p = emptyProject();
+    p.name = 'Örnek Proje';
+    const m = function (code, name, category) { return Object.assign(newStore('munition'), { code: code, name: name, category: category }); };
+    const r = function (kind, code, name, pos) { return Object.assign(newStore(kind), { code: code, name: name, positions: pos }); };
+
+    const bomb = m('BMB-250', 'Genel maksat bombası 250', 'Bomba');
+    const bomb500 = m('BMB-500', 'Genel maksat bombası 500', 'Bomba');
+    const aam = m('AAM-S', 'Kısa menzil hava-hava füzesi', 'Füze');
+    const tank = m('FT-1', 'Harici yakıt tankı', 'Yakıt tankı');
+    const pod = m('POD-T', 'Hedefleme podu', 'Pod');
+    p.catalog.munitions.push(bomb, bomb500, aam, tank, pod);
+
+    const pylon = r('rack', 'PYL-W', 'Kanat pilonu', 1);
+    const launcher = r('rack', 'LCH-1', 'Füze lançeri', 1);
+    p.catalog.racks.push(pylon, launcher);
+
+    const ter = r('subrack', 'TER', 'Üçlü ejektör rack', 3);
+    p.catalog.subracks.push(ter);
+
+    const node = function (kind, store, qty, children) {
+      const n = newLoadNode(kind, store.id); n.qty = qty || 1; n.children = children || []; return n;
+    };
+    const st = function (code, name, loc) { return Object.assign(newStation(), { code: code, name: name, location: loc }); };
+    const rule = function (type, stations, extra) {
+      return Object.assign(newConstraint(), { type: type, stationIds: stations.map(function (s) { return s.id; }) }, extra || {});
+    };
+
+    // Uçak A: 9 istasyon, tek motorlu avcı çizimi.
+    const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A', silhouette: 'single' });
+    const a1 = st('STA1', 'Sol kanat ucu', 'LEFT');
+    const a2 = st('STA2', 'Sol dış kanat', 'LEFT');
+    const a3 = st('STA3', 'Sol orta kanat', 'LEFT');
+    const a4 = st('STA4', 'Sol iç kanat', 'LEFT');
+    const a5 = st('STA5', 'Gövde altı', 'CENTER');
+    const a6 = st('STA6', 'Sağ iç kanat', 'RIGHT');
+    const a7 = st('STA7', 'Sağ orta kanat', 'RIGHT');
+    const a8 = st('STA8', 'Sağ dış kanat', 'RIGHT');
+    const a9 = st('STA9', 'Sağ kanat ucu', 'RIGHT');
+    [a1, a9].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
+    [a2, a8].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
+    [a3, a7].forEach(function (s) {
+      s.loads.push(node('rack', pylon, 1, [
+        node('munition', bomb500, 1),
+        node('subrack', ter, 1, [node('munition', bomb, 3)]),
+      ]));
+    });
+    [a4, a6].forEach(function (s) {
+      s.loads.push(node('rack', pylon, 1, [node('munition', tank, 1), node('munition', bomb500, 1)]));
+    });
+    a5.loads.push(node('munition', tank, 1), node('munition', pod, 1));
+    a.stations.push(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    a.constraints.push(
+      rule('SYMMETRIC', [a1, a9], { description: 'Kanat ucu füzeleri simetrik.' }),
+      rule('SYMMETRIC', [a3, a7], { description: 'Orta kanat yükleri simetrik olmalı.' }),
+      rule('SYMMETRIC', [a4, a6], { description: 'İç kanat yükleri simetrik olmalı.' }),
+      rule('MAX_TOTAL', [a4, a5, a6], { munitionId: tank.id, value: 2, description: 'En fazla 2 harici tank.' })
+    );
+
+    // Uçak B: 5 istasyon, delta kanat çizimi.
+    const b = Object.assign(newAircraft(), { code: 'UCAK-B', name: 'Örnek Uçak B', silhouette: 'delta' });
+    const b1 = st('STA1', 'Sol dış kanat', 'LEFT');
+    const b2 = st('STA2', 'Sol iç kanat', 'LEFT');
+    const b3 = st('STA3', 'Gövde altı', 'CENTER');
+    const b4 = st('STA4', 'Sağ iç kanat', 'RIGHT');
+    const b5 = st('STA5', 'Sağ dış kanat', 'RIGHT');
+    [b1, b5].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
+    [b2, b4].forEach(function (s) { s.loads.push(node('rack', pylon, 1, [node('munition', bomb500, 1), node('munition', tank, 1)])); });
+    b3.loads.push(node('munition', tank, 1));
+    b.stations.push(b1, b2, b3, b4, b5);
+    b.constraints.push(
+      rule('SYMMETRIC', [b2, b4], { description: 'İç kanat yükleri simetrik.' }),
+      rule('EXCLUSIVE', [b2, b3], { description: 'Gövde altı ve sol iç kanat aynı anda yüklenemez.' })
+    );
+
+    p.aircraft.push(a, b);
+    return p;
+  }
+
+  return {
+    SCHEMA_VERSION: SCHEMA_VERSION,
+    KINDS: KINDS,
+    KIND_LABELS: KIND_LABELS,
+    CATALOG_KEY: CATALOG_KEY,
+    ALLOWED_CHILDREN: ALLOWED_CHILDREN,
+    LOCATIONS: LOCATIONS,
+    CONSTRAINT_TYPES: CONSTRAINT_TYPES,
+    newId: newId,
+    emptyProject: emptyProject,
+    sampleProject: sampleProject,
+    normalizeProject: normalizeProject,
+    newStore: newStore,
+    newAircraft: newAircraft,
+    newStation: newStation,
+    newLoadNode: newLoadNode,
+    newConstraint: newConstraint,
+    findStore: findStore,
+    storeLabel: storeLabel,
+    validate: validate,
+  };
+});
+</script>
+  <script>
+/*
+ * XML dışa aktarım katmanı.
+ *
+ * Her exporter { label, fileExtension, exportProject(project, model) -> string } biçimindedir.
+ * Hedef yazılımın XML formatı netleştiğinde EXPORTERS içine yeni bir giriş eklenir;
+ * kural tanımlama arayüzü ve veri modeli değişmeden kalır.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LoadoutXml = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  function escapeXml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  /* Basit XML düğüm kurucu: el(tag, attrs, children). Boş/undefined özellikler atlanır. */
+  function el(tag, attrs, children) {
+    return { tag: tag, attrs: attrs || {}, children: (children || []).filter(Boolean) };
+  }
+
+  function serialize(node, indent) {
+    indent = indent || '';
+    const attrs = Object.keys(node.attrs)
+      .filter(function (k) { return node.attrs[k] !== undefined && node.attrs[k] !== null && node.attrs[k] !== ''; })
+      .map(function (k) { return ' ' + k + '="' + escapeXml(node.attrs[k]) + '"'; })
+      .join('');
+    if (!node.children.length) return indent + '<' + node.tag + attrs + '/>';
+    if (node.children.length === 1 && typeof node.children[0] === 'string') {
+      return indent + '<' + node.tag + attrs + '>' + escapeXml(node.children[0]) + '</' + node.tag + '>';
+    }
+    const inner = node.children.map(function (c) {
+      return typeof c === 'string' ? indent + '  ' + escapeXml(c) : serialize(c, indent + '  ');
+    }).join('\n');
+    return indent + '<' + node.tag + attrs + '>\n' + inner + '\n' + indent + '</' + node.tag + '>';
+  }
+
+  function toDocument(rootNode) {
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + serialize(rootNode) + '\n';
+  }
+
+  /* ------------------------------------------------------------ genel format */
+
+  const TAG_BY_KIND = { munition: 'Munition', rack: 'Rack', subrack: 'Subrack' };
+
+  function genericExport(project, model) {
+    const codeOf = function (kind, id) {
+      const s = model.findStore(project, kind, id);
+      return s ? s.code : '';
+    };
+
+    const storeEl = function (kind, s) {
+      return el(TAG_BY_KIND[kind], {
+        code: s.code,
+        name: s.name,
+        category: kind === 'munition' ? s.category : undefined,
+        positions: kind !== 'munition' ? s.positions : undefined,
+      }, s.notes ? [el('Notes', {}, [s.notes])] : []);
+    };
+
+    const loadEl = function (node) {
+      return el('Allow', {
+        type: node.kind.toUpperCase(),
+        ref: codeOf(node.kind, node.refId),
+        maxQty: node.qty,
+      }, (node.children || []).map(loadEl));
+    };
+
+    const aircraftEl = function (ac) {
+      const stationCode = {};
+      ac.stations.forEach(function (s) { stationCode[s.id] = s.code; });
+      return el('Aircraft', { code: ac.code, name: ac.name }, [
+        ac.notes ? el('Notes', {}, [ac.notes]) : null,
+        el('Stations', {}, ac.stations.map(function (st) {
+          return el('Station', {
+            code: st.code,
+            name: st.name,
+            location: st.location,
+          }, st.loads.map(loadEl));
+        })),
+        ac.constraints.length ? el('Constraints', {}, ac.constraints.map(function (c) {
+          return el('Constraint', {
+            type: c.type,
+            munition: c.type === 'MAX_TOTAL' ? codeOf('munition', c.munitionId) : undefined,
+            value: c.type === 'MAX_TOTAL' ? c.value : undefined,
+          }, [
+            c.description ? el('Description', {}, [c.description]) : null,
+          ].concat(c.stationIds.map(function (id) { return el('StationRef', { code: stationCode[id] }); })));
+        })) : null,
+      ]);
+    };
+
+    return toDocument(el('LoadingRules', { project: project.name, schemaVersion: project.schemaVersion }, [
+      el('Catalog', {}, [
+        el('Munitions', {}, project.catalog.munitions.map(function (s) { return storeEl('munition', s); })),
+        el('Racks', {}, project.catalog.racks.map(function (s) { return storeEl('rack', s); })),
+        el('Subracks', {}, project.catalog.subracks.map(function (s) { return storeEl('subrack', s); })),
+      ]),
+      el('AircraftList', {}, project.aircraft.map(aircraftEl)),
+    ]));
+  }
+
+  const EXPORTERS = {
+    generic: {
+      label: 'Genel XML (geçici format)',
+      fileExtension: 'xml',
+      exportProject: genericExport,
+    },
+    // target: { label: 'Hedef yazılım formatı', fileExtension: 'xml', exportProject: function (project, model) { ... } },
+  };
+
+  return {
+    EXPORTERS: EXPORTERS,
+    escapeXml: escapeXml,
+    el: el,
+    serialize: serialize,
+    toDocument: toDocument,
+  };
+});
+</script>
+  <script>
+/*
+ * Uçak üstten görünüm çizimleri ve istasyon yerleşimi.
+ * Çizimler şematiktir: burun yukarıda, koordinat sistemi VIEW (400 x 500), merkez hattı x = 200.
+ * Her şekil sağ yarının dış hat noktalarıyla tanımlanır; sol yarı ayna ile üretilir.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.AircraftShapes = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const VIEW = { width: 400, height: 500, cx: 200 };
+
+  const SHAPES = {
+    single: {
+      label: 'Tek motorlu avcı (F-16 tipi)',
+      half: [[0, 14], [7, 40], [13, 80], [17, 130], [21, 165], [34, 212], [160, 312], [168, 314], [168, 342],
+        [40, 350], [30, 392], [92, 438], [94, 458], [28, 462], [17, 486], [0, 486]],
+      canopy: { y: 92, rx: 9, ry: 28 },
+      fins: [{ x: 0, y1: 400, y2: 482 }],
+      // İstasyonların kanat üzerinde dizileceği hat (sağ yarı, kökten uca) ve gövde hattı.
+      wing: { root: [36, 288], tip: [166, 328] },
+      body: { y1: 250, y2: 340 },
+    },
+    twin: {
+      label: 'Çift motorlu avcı (F-15 / F-4 tipi)',
+      half: [[0, 14], [9, 48], [17, 96], [22, 138], [44, 150], [48, 205], [172, 300], [176, 304], [176, 334],
+        [50, 346], [50, 392], [116, 438], [116, 462], [44, 466], [38, 490], [0, 490]],
+      canopy: { y: 100, rx: 10, ry: 30 },
+      fins: [{ x: 36, y1: 395, y2: 478 }, { x: -36, y1: 395, y2: 478 }],
+      wing: { root: [52, 282], tip: [168, 318] },
+      body: { y1: 240, y2: 360 },
+    },
+    delta: {
+      label: 'Delta kanat',
+      half: [[0, 14], [9, 56], [17, 112], [22, 162], [150, 418], [152, 438], [26, 442], [19, 470], [0, 470]],
+      canopy: { y: 104, rx: 9, ry: 30 },
+      fins: [{ x: 0, y1: 360, y2: 466 }],
+      wing: { root: [30, 360], tip: [130, 412] },
+      body: { y1: 300, y2: 420 },
+    },
+    none: {
+      label: 'Çizimsiz (serbest yerleşim)',
+      half: [],
+      fins: [],
+      wing: { root: [30, 250], tip: [170, 250] },
+      body: { y1: 150, y2: 400 },
+    },
+  };
+
+  function shapeOf(id) { return SHAPES[id] || SHAPES.single; }
+
+  function outlinePath(id) {
+    const half = shapeOf(id).half;
+    if (!half.length) return '';
+    const right = half.map(function (p) { return [VIEW.cx + p[0], p[1]]; });
+    const left = half.slice().reverse().map(function (p) { return [VIEW.cx - p[0], p[1]]; });
+    return 'M' + right.concat(left).map(function (p) { return p[0] + ',' + p[1]; }).join(' L') + ' Z';
+  }
+
+  /*
+   * Varsayılan yerleşim: sol istasyonlar kanat ucundan köke, merkez istasyonlar gövde boyunca,
+   * sağ istasyonlar kökten kanat ucuna. Liste sırası korunur (ör. STA1 sol uç ... STA9 sağ uç).
+   */
+  function autoLayout(aircraft) {
+    const shape = shapeOf(aircraft.silhouette);
+    const groups = { LEFT: [], CENTER: [], RIGHT: [] };
+    aircraft.stations.forEach(function (s) { (groups[s.location] || groups.CENTER).push(s); });
+    const along = function (t) {
+      const r = shape.wing.root, tip = shape.wing.tip;
+      return [r[0] + (tip[0] - r[0]) * t, r[1] + (tip[1] - r[1]) * t];
+    };
+    const spread = function (n, i) { return n === 1 ? 0.6 : 1 - i * 0.85 / (n - 1); };
+    const out = {};
+    groups.LEFT.forEach(function (s, i) {
+      const p = along(spread(groups.LEFT.length, i));
+      out[s.id] = { x: round(VIEW.cx - p[0]), y: round(p[1]) };
+    });
+    groups.RIGHT.forEach(function (s, i) {
+      const n = groups.RIGHT.length;
+      const p = along(spread(n, n - 1 - i));
+      out[s.id] = { x: round(VIEW.cx + p[0]), y: round(p[1]) };
+    });
+    groups.CENTER.forEach(function (s, i) {
+      const n = groups.CENTER.length;
+      const y = n === 1 ? (shape.body.y1 + shape.body.y2) / 2 : shape.body.y1 + (shape.body.y2 - shape.body.y1) * i / (n - 1);
+      out[s.id] = { x: VIEW.cx, y: round(y) };
+    });
+    return out;
+  }
+
+  /* Konumu olmayan istasyonlara varsayılan konum atar; true dönerse değişiklik yapılmıştır. */
+  function ensurePositions(aircraft) {
+    const missing = aircraft.stations.filter(function (s) { return typeof s.x !== 'number' || typeof s.y !== 'number'; });
+    if (!missing.length) return false;
+    const layout = autoLayout(aircraft);
+    missing.forEach(function (s) { s.x = layout[s.id].x; s.y = layout[s.id].y; });
+    return true;
+  }
+
+  function applyAutoLayout(aircraft) {
+    const layout = autoLayout(aircraft);
+    aircraft.stations.forEach(function (s) { s.x = layout[s.id].x; s.y = layout[s.id].y; });
+  }
+
+  function round(v) { return Math.round(v * 10) / 10; }
+
+  return {
+    VIEW: VIEW,
+    SHAPES: SHAPES,
+    shapeOf: shapeOf,
+    outlinePath: outlinePath,
+    autoLayout: autoLayout,
+    ensurePositions: ensurePositions,
+    applyAutoLayout: applyAutoLayout,
+  };
+});
+</script>
+  <script>
+/*
+ * Arayüz. Bağımlılıksız; dosyayı doğrudan tarayıcıda açarak (file://) çalışır.
+ * Metin alanları durumu yerinde günceller (yeniden çizim yok, odak kaybolmaz);
+ * yapısal değişiklikler (ekle/sil/seç) görünümü yeniden çizer.
+ */
+(function () {
+  'use strict';
+
+  const M = window.LoadoutModel;
+  const X = window.LoadoutXml;
+  const SH = window.AircraftShapes;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const STORAGE_KEY = 'loadout-rules.project.v1';
+
+  const state = {
+    project: loadFromStorage() || M.sampleProject(),
+    view: 'aircraft',
+    catalogKind: 'munition',
+    aircraftId: null,
+    stationId: null,
+    exporter: 'generic',
+  };
+
+  /* ------------------------------------------------------------ yardımcılar */
+
+  function h(tag, attrs, children) {
+    const node = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      const v = attrs[k];
+      if (v === undefined || v === null || v === false) return;
+      if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), v);
+      else if (k === 'class') node.className = v;
+      else if (k === 'value') node.value = v;
+      else if (k === 'checked' || k === 'selected') node[k] = !!v;
+      else node.setAttribute(k, v === true ? '' : v);
+    });
+    [].concat(children == null ? [] : children).forEach(function (c) {
+      if (c == null || c === false) return;
+      node.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+    });
+    return node;
+  }
+
+  let saveTimer = null;
+  function saveNow() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.project)); } catch (e) { /* depolama kapalı olabilir */ }
+  }
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 250);
+  }
+  window.addEventListener('pagehide', function () { if (saveTimer) saveNow(); });
+
+  function loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? M.normalizeProject(JSON.parse(raw)) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function changed() { persist(); renderTabs(); }
+  function rerender() { persist(); render(); }
+
+  /* Metin/sayı alanı: değişikliği nesneye yazar, yeniden çizmez. */
+  function field(label, obj, key, opts) {
+    opts = opts || {};
+    const isNum = opts.type === 'number';
+    const input = opts.multiline
+      ? h('textarea', { rows: 2, value: obj[key] || '' })
+      : h('input', { type: opts.type || 'text', value: obj[key] == null ? '' : obj[key], min: isNum ? 0 : undefined, step: opts.step });
+    input.addEventListener('input', function () {
+      obj[key] = isNum ? (input.value === '' ? 0 : Number(input.value)) : input.value;
+      changed();
+      if (opts.onInput) opts.onInput();
+    });
+    return label ? h('label', { class: 'field' }, [h('span', {}, label), input]) : input;
+  }
+
+  function select(obj, key, options, onChange) {
+    const sel = h('select', {}, options.map(function (o) {
+      return h('option', { value: o.value, selected: obj[key] === o.value }, o.label);
+    }));
+    sel.addEventListener('change', function () {
+      obj[key] = sel.value;
+      if (onChange) onChange(); else changed();
+    });
+    return sel;
+  }
+
+  function removeFrom(list, item) {
+    const i = list.indexOf(item);
+    if (i >= 0) list.splice(i, 1);
+  }
+
+  function confirmDelete(what) {
+    return window.confirm(what + ' silinsin mi?');
+  }
+
+  function download(filename, text, mime) {
+    const blob = new Blob([text], { type: mime });
+    const a = h('a', { href: URL.createObjectURL(blob), download: filename });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  function safeFileName(name) {
+    return (name || 'proje').replace(/[^\w\-ğüşıöçĞÜŞİÖÇ]+/g, '_');
+  }
+
+  /* Bir mağazanın yükleme ağaçlarında kullanılıp kullanılmadığını sayar. */
+  function usageCount(storeId) {
+    let count = 0;
+    const walk = function (n) { if (n.refId === storeId) count++; n.children.forEach(walk); };
+    state.project.aircraft.forEach(function (ac) {
+      ac.stations.forEach(function (st) { st.loads.forEach(walk); });
+      ac.constraints.forEach(function (c) { if (c.munitionId === storeId) count++; });
+    });
+    return count;
+  }
+
+  /* ------------------------------------------------------------ sekmeler */
+
+  const TABS = [
+    { id: 'aircraft', label: 'Uçaklar' },
+    { id: 'catalog', label: 'Katalog' },
+    { id: 'validation', label: 'Doğrulama' },
+    { id: 'xml', label: 'XML Çıktısı' },
+  ];
+
+  function renderTabs() {
+    const issues = M.validate(state.project);
+    const errors = issues.filter(function (i) { return i.level === 'error'; }).length;
+    const warnings = issues.length - errors;
+    const tabs = document.getElementById('tabs');
+    tabs.replaceChildren.apply(tabs, TABS.map(function (t) {
+      return h('button', {
+        class: state.view === t.id ? 'active' : '',
+        onclick: function () { state.view = t.id; render(); },
+      }, [
+        t.label,
+        t.id === 'validation' && errors ? h('span', { class: 'badge' }, errors) : null,
+        t.id === 'validation' && warnings ? h('span', { class: 'badge warn' }, warnings) : null,
+      ]);
+    }));
+  }
+
+  /* ------------------------------------------------------------ katalog */
+
+  function renderCatalog() {
+    const kind = state.catalogKind;
+    const list = state.project.catalog[M.CATALOG_KEY[kind]];
+    const isMunition = kind === 'munition';
+
+    const nav = h('div', { class: 'panel' }, [
+      h('h3', {}, 'Katalog'),
+      h('ul', { class: 'list' }, M.KINDS.map(function (k) {
+        return h('li', {
+          class: k === kind ? 'selected' : '',
+          onclick: function () { state.catalogKind = k; render(); },
+        }, [M.KIND_LABELS[k], h('span', { class: 'sub' }, state.project.catalog[M.CATALOG_KEY[k]].length)]);
+      })),
+    ]);
+
+    const headers = ['Kod', 'Ad', isMunition ? 'Kategori' : 'Pozisyon', 'Not', ''];
+
+    const rows = list.map(function (s) {
+      return h('tr', {}, [
+        h('td', {}, field(null, s, 'code')),
+        h('td', {}, field(null, s, 'name')),
+        isMunition ? h('td', {}, field(null, s, 'category')) : h('td', { class: 'num' }, field(null, s, 'positions', { type: 'number' })),
+        h('td', {}, field(null, s, 'notes')),
+        h('td', {}, h('button', {
+          class: 'small danger',
+          onclick: function () {
+            const used = usageCount(s.id);
+            const msg = M.KIND_LABELS[kind] + ' ' + M.storeLabel(s) + (used ? ' (' + used + ' yerde kullanılıyor)' : '');
+            if (confirmDelete(msg)) { removeFrom(list, s); rerender(); }
+          },
+        }, 'Sil')),
+      ]);
+    });
+
+    const body = h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, M.KIND_LABELS[kind] + ' tanımları'),
+        h('button', { class: 'primary', onclick: function () { list.push(M.newStore(kind)); rerender(); } }, '+ ' + M.KIND_LABELS[kind] + ' ekle'),
+      ]),
+      h('p', { class: 'hint' }, isMunition
+        ? 'Uçaklara takılabilecek mühimmat, tank, pod vb. yükler.'
+        : 'Pozisyon: bu ' + M.KIND_LABELS[kind].toLowerCase() + ' üzerine aynı anda takılabilecek en fazla öğe sayısı.'),
+      list.length
+        ? h('div', { class: 'table-wrap' }, h('table', {}, [
+          h('thead', {}, h('tr', {}, headers.map(function (x) { return h('th', {}, x); }))),
+          h('tbody', {}, rows),
+        ]))
+        : h('div', { class: 'empty' }, 'Henüz kayıt yok.'),
+    ]);
+
+    return h('div', { class: 'layout' }, [nav, body]);
+  }
+
+  /* ------------------------------------------------------------ uçaklar */
+
+  function currentAircraft() {
+    const list = state.project.aircraft;
+    let ac = list.find(function (a) { return a.id === state.aircraftId; });
+    if (!ac && list.length) { ac = list[0]; state.aircraftId = ac.id; }
+    return ac || null;
+  }
+
+  function currentStation(ac) {
+    if (!ac) return null;
+    let st = ac.stations.find(function (s) { return s.id === state.stationId; });
+    if (!st && ac.stations.length) { st = ac.stations[0]; state.stationId = st.id; }
+    return st || null;
+  }
+
+  function renderAircraft() {
+    const ac = currentAircraft();
+    const nav = h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h3', {}, 'Uçaklar'),
+        h('button', {
+          class: 'small primary',
+          onclick: function () {
+            const a = M.newAircraft();
+            a.code = 'UCAK-' + (state.project.aircraft.length + 1);
+            state.project.aircraft.push(a);
+            state.aircraftId = a.id; state.stationId = null;
+            rerender();
+          },
+        }, '+ Ekle'),
+      ]),
+      state.project.aircraft.length
+        ? h('ul', { class: 'list' }, state.project.aircraft.map(function (a) {
+          return h('li', {
+            class: ac && a.id === ac.id ? 'selected' : '',
+            onclick: function () { state.aircraftId = a.id; state.stationId = null; render(); },
+          }, [a.code || '(kodsuz)', h('span', { class: 'sub' }, a.stations.length + ' ist.')]);
+        }))
+        : h('div', { class: 'empty' }, 'Henüz uçak yok.'),
+    ]);
+
+    if (!ac) return h('div', { class: 'layout' }, [nav, h('div', { class: 'panel empty' }, 'Başlamak için soldan bir uçak ekleyin.')]);
+
+    if (SH.ensurePositions(ac)) persist();
+    const st = currentStation(ac);
+    return h('div', { class: 'layout' }, [nav, h('div', {}, [
+      renderAircraftInfo(ac),
+      h('div', { class: 'stage' }, [
+        renderDrawing(ac, st),
+        st ? renderStationPanel(ac, st) : h('div', { class: 'panel empty' }, 'İstasyon eklemek için çizimin altındaki düğmeleri kullanın.'),
+      ]),
+      renderStations(ac, st),
+      renderConstraints(ac),
+    ])]);
+  }
+
+  function renderAircraftInfo(ac) {
+    const shapeOptions = Object.keys(SH.SHAPES).map(function (k) { return { value: k, label: SH.SHAPES[k].label }; });
+    return h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, 'Uçak bilgisi'),
+        h('button', {
+          class: 'small danger',
+          onclick: function () {
+            if (confirmDelete('Uçak ' + (ac.code || '(kodsuz)'))) {
+              removeFrom(state.project.aircraft, ac); state.aircraftId = null; rerender();
+            }
+          },
+        }, 'Uçağı sil'),
+      ]),
+      h('div', { class: 'grid3' }, [
+        field('Kod', ac, 'code', { onInput: renderNavLater }),
+        field('Ad', ac, 'name'),
+        h('label', { class: 'field' }, [
+          h('span', {}, 'Çizim'),
+          select(ac, 'silhouette', shapeOptions, function () { SH.applyAutoLayout(ac); rerender(); }),
+        ]),
+      ]),
+      field('Not', ac, 'notes', { multiline: true }),
+    ]);
+  }
+
+  // Uçak kodu yazılırken sol listedeki adı güncellemek için, odak kaybetmeden.
+  function renderNavLater() {
+    const ac = currentAircraft();
+    const li = document.querySelector('.layout .list li.selected');
+    if (li && ac) li.firstChild.textContent = ac.code || '(kodsuz)';
+  }
+
+  /* ---- uçak çizimi */
+
+  function svg(tag, attrs, children) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (attrs[k] === undefined || attrs[k] === null) return;
+      if (k.slice(0, 2) === 'on') node.addEventListener(k.slice(2), attrs[k]);
+      else node.setAttribute(k, attrs[k]);
+    });
+    [].concat(children || []).forEach(function (c) {
+      if (c == null) return;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+
+  function loadSummary(st) {
+    if (!st.loads.length) return 'Yük izni tanımlı değil';
+    const lines = [];
+    const walk = function (n, depth) {
+      const store = M.findStore(state.project, n.kind, n.refId);
+      lines.push(new Array(depth + 1).join('  ') + (store ? store.code : '?') + (n.qty > 1 ? ' ×' + n.qty : ''));
+      n.children.forEach(function (c) { walk(c, depth + 1); });
+    };
+    st.loads.forEach(function (n) { walk(n, 0); });
+    return lines.join('\n');
+  }
+
+  function renderDrawing(ac, selected) {
+    const V = SH.VIEW;
+    const shape = SH.shapeOf(ac.silhouette);
+    const root = svg('svg', { viewBox: '0 0 ' + V.width + ' ' + V.height, class: 'aircraft-svg', role: 'img', 'aria-label': (ac.code || 'Uçak') + ' istasyon yerleşimi' });
+
+    root.appendChild(svg('line', { x1: V.cx, y1: 4, x2: V.cx, y2: V.height - 4, class: 'centerline' }));
+    const outline = SH.outlinePath(ac.silhouette);
+    if (outline) root.appendChild(svg('path', { d: outline, class: 'airframe' }));
+    shape.fins.forEach(function (f) {
+      root.appendChild(svg('line', { x1: V.cx + f.x, y1: f.y1, x2: V.cx + f.x, y2: f.y2, class: 'fin' }));
+    });
+    if (shape.canopy) root.appendChild(svg('ellipse', { cx: V.cx, cy: shape.canopy.y, rx: shape.canopy.rx, ry: shape.canopy.ry, class: 'canopy' }));
+
+    ac.stations.forEach(function (st) {
+      const isSel = selected && st.id === selected.id;
+      const cls = 'station' + (st.loads.length ? ' loaded' : ' empty') + (isSel ? ' selected' : '');
+      const labelBelow = st.location === 'CENTER' || st.y < 60;
+      const g = svg('g', { class: cls, transform: 'translate(' + st.x + ',' + st.y + ')', tabindex: 0 }, [
+        svg('title', {}, (st.code || '(kodsuz)') + (st.name ? ' — ' + st.name : '') + '\n' + loadSummary(st)),
+        svg('circle', { r: isSel ? 13 : 10 }),
+        svg('text', { y: labelBelow ? 26 : -17, 'text-anchor': 'middle' }, st.code || '?'),
+      ]);
+      g.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); state.stationId = st.id; render(); }
+      });
+      makeDraggable(root, g, st);
+      root.appendChild(g);
+    });
+
+    const addButton = function (loc, label) {
+      return h('button', { class: 'small', onclick: function () { addStation(ac, loc); } }, label);
+    };
+
+    return h('div', { class: 'panel drawing' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, (ac.code || 'Uçak') + ' — ' + ac.stations.length + ' istasyon'),
+        h('button', {
+          class: 'small',
+          title: 'İstasyonları sol uçtan sağ uca listedeki sıraya göre yeniden diz',
+          onclick: function () { SH.applyAutoLayout(ac); rerender(); },
+        }, 'Otomatik yerleştir'),
+      ]),
+      root,
+      h('div', { class: 'legend' }, [
+        h('span', {}, [h('i', { class: 'dot loaded' }), 'Yük izni var']),
+        h('span', {}, [h('i', { class: 'dot empty' }), 'Tanımsız']),
+        h('span', { class: 'hint' }, 'Tıkla: seç · Sürükle: taşı'),
+      ]),
+      h('div', { class: 'add-row' }, [
+        addButton('LEFT', '+ Sol kanat'),
+        addButton('CENTER', '+ Gövde'),
+        addButton('RIGHT', '+ Sağ kanat'),
+      ]),
+    ]);
+  }
+
+  /* İstasyon işaretini sürükleyerek konumunu değiştirir; hareketsiz tıklama seçim yapar. */
+  function makeDraggable(svgRoot, g, st) {
+    g.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      const ctm = svgRoot.getScreenCTM();
+      if (!ctm) return;
+      const inv = ctm.inverse();
+      const toSvg = function (ev) {
+        const p = svgRoot.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+        return p.matrixTransform(inv);
+      };
+      const start = toSvg(e);
+      const origin = { x: st.x, y: st.y };
+      let moved = false;
+      g.setPointerCapture(e.pointerId);
+      g.classList.add('dragging');
+
+      const onMove = function (ev) {
+        const p = toSvg(ev);
+        const dx = p.x - start.x, dy = p.y - start.y;
+        if (!moved && Math.hypot(dx, dy) < 3) return;
+        moved = true;
+        st.x = clamp(Math.round(origin.x + dx), 12, SH.VIEW.width - 12);
+        st.y = clamp(Math.round(origin.y + dy), 12, SH.VIEW.height - 12);
+        g.setAttribute('transform', 'translate(' + st.x + ',' + st.y + ')');
+      };
+      const onUp = function () {
+        g.removeEventListener('pointermove', onMove);
+        g.removeEventListener('pointerup', onUp);
+        g.removeEventListener('pointercancel', onUp);
+        state.stationId = st.id;
+        rerender();
+      };
+      g.addEventListener('pointermove', onMove);
+      g.addEventListener('pointerup', onUp);
+      g.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function nextStationCode(ac) {
+    let max = 0;
+    ac.stations.forEach(function (s) {
+      const m = /(\d+)$/.exec(s.code || '');
+      if (m) max = Math.max(max, Number(m[1]));
+    });
+    return 'STA' + (max + 1);
+  }
+
+  /* Yeni istasyonu kendi konum grubunun sonuna ekler (sol → merkez → sağ sırası korunur). */
+  function addStation(ac, location) {
+    const s = M.newStation();
+    s.code = nextStationCode(ac);
+    s.location = location;
+    const rank = { LEFT: 0, CENTER: 1, RIGHT: 2 };
+    let at = ac.stations.length;
+    for (let i = 0; i < ac.stations.length; i++) {
+      if (rank[ac.stations[i].location] > rank[location]) { at = i; break; }
+    }
+    ac.stations.splice(at, 0, s);
+    SH.ensurePositions(ac);
+    state.stationId = s.id;
+    rerender();
+  }
+
+  /* ---- seçili istasyon */
+
+  function renderStationPanel(ac, st) {
+    const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
+    const related = ac.constraints.filter(function (c) { return c.stationIds.indexOf(st.id) >= 0; });
+    const codeOf = function (id) { const s = ac.stations.find(function (x) { return x.id === id; }); return s ? s.code : '?'; };
+    return h('div', { class: 'panel station-panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, 'İstasyon ' + (st.code || '(kodsuz)')),
+      ]),
+      h('div', { class: 'grid3' }, [
+        field('Kod', st, 'code', { onInput: refreshDrawingLabel(st) }),
+        field('Ad', st, 'name'),
+        h('label', { class: 'field' }, [h('span', {}, 'Konum'), select(st, 'location', locOptions, rerender)]),
+      ]),
+      h('h3', { style: 'margin-top:6px' }, 'İzin verilen yükler'),
+      h('p', { class: 'hint' },
+        'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin bir üst seviyeye en fazla kaç adet takılabileceğidir.'),
+      renderNodeList(st.loads, 'station'),
+      addButtons(st.loads, 'station'),
+      related.length ? h('div', { class: 'related' }, [
+        h('h3', {}, 'Bu istasyonu içeren kurallar'),
+        h('ul', {}, related.map(function (c) {
+          const def = M.CONSTRAINT_TYPES[c.type] || { label: c.type };
+          return h('li', {}, [h('b', {}, def.label), ': ', c.stationIds.map(codeOf).join(', '), c.description ? ' — ' + c.description : '']);
+        })),
+      ]) : null,
+    ]);
+  }
+
+  // Kod yazılırken çizimdeki etiketi odak kaybetmeden günceller.
+  function refreshDrawingLabel(st) {
+    return function () {
+      const sel = document.querySelector('.aircraft-svg .station.selected text');
+      if (sel) sel.textContent = st.code || '?';
+    };
+  }
+
+  function renderStations(ac, selected) {
+    const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
+    const rows = ac.stations.map(function (st, i) {
+      return h('tr', { class: selected && st.id === selected.id ? 'selected' : '' }, [
+        h('td', {}, field(null, st, 'code')),
+        h('td', {}, field(null, st, 'name')),
+        h('td', {}, select(st, 'location', locOptions, rerender)),
+        h('td', {}, st.loads.length ? st.loads.length + ' seçenek' : h('span', { class: 'muted' }, 'yok')),
+        h('td', { style: 'white-space:nowrap' }, [
+          h('button', { class: 'small', onclick: function () { state.stationId = st.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, 'Seç'),
+          ' ',
+          h('button', { class: 'small', title: 'Yukarı', disabled: i === 0, onclick: function () { move(ac.stations, i, -1); } }, '↑'),
+          h('button', { class: 'small', title: 'Aşağı', disabled: i === ac.stations.length - 1, onclick: function () { move(ac.stations, i, 1); } }, '↓'),
+          ' ',
+          h('button', {
+            class: 'small danger',
+            onclick: function () {
+              if (!confirmDelete('İstasyon ' + (st.code || '(kodsuz)'))) return;
+              removeFrom(ac.stations, st);
+              ac.constraints.forEach(function (c) { c.stationIds = c.stationIds.filter(function (id) { return id !== st.id; }); });
+              rerender();
+            },
+          }, 'Sil'),
+        ]),
+      ]);
+    });
+
+    return h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [h('h2', {}, 'İstasyon listesi')]),
+      h('p', { class: 'hint' }, 'Sıra, XML çıktısındaki ve "Otomatik yerleştir" düzenindeki sırayı belirler.'),
+      ac.stations.length
+        ? h('div', { class: 'table-wrap' }, h('table', {}, [
+          h('thead', {}, h('tr', {}, ['Kod', 'Ad', 'Konum', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
+          h('tbody', {}, rows),
+        ]))
+        : h('div', { class: 'empty' }, 'Henüz istasyon yok.'),
+    ]);
+  }
+
+  function move(list, i, delta) {
+    const j = i + delta;
+    if (j < 0 || j >= list.length) return;
+    const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    rerender();
+  }
+
+  /* ---- yükleme ağacı */
+
+  function renderNodeList(nodes, parentKind) {
+    if (!nodes.length) return h('div', { class: 'empty' }, parentKind === 'station' ? 'Bu istasyona henüz yük izni tanımlanmadı.' : null);
+    return h('ul', { class: 'tree' }, nodes.map(function (n) {
+      return h('li', {}, [
+        renderNode(nodes, n),
+        n.kind !== 'munition' ? h('ul', { class: 'tree' }, [
+          n.children.length ? h('li', {}, renderNodeList(n.children, n.kind)) : null,
+          h('li', {}, addButtons(n.children, n.kind)),
+        ]) : null,
+      ]);
+    }));
+  }
+
+  function renderNode(siblings, n) {
+    const list = state.project.catalog[M.CATALOG_KEY[n.kind]];
+    const options = [{ value: '', label: '— seçin —' }].concat(list.map(function (s) { return { value: s.id, label: M.storeLabel(s) }; }));
+    if (n.refId && !M.findStore(state.project, n.kind, n.refId)) options.push({ value: n.refId, label: '(silinmiş öğe)' });
+    return h('div', { class: 'tree-node' }, [
+      h('span', { class: 'kind ' + n.kind }, M.KIND_LABELS[n.kind]),
+      select(n, 'refId', options, function () { rerender(); }),
+      h('span', {}, 'Maks. adet'),
+      (function () { const f = field(null, n, 'qty', { type: 'number' }); f.classList.add('qty'); f.min = 1; return f; })(),
+      h('button', {
+        class: 'small danger',
+        onclick: function () {
+          const extra = n.children.length ? ' (alt öğeleriyle birlikte)' : '';
+          if (confirmDelete(M.KIND_LABELS[n.kind] + extra)) { removeFrom(siblings, n); rerender(); }
+        },
+      }, 'Sil'),
+    ]);
+  }
+
+  function addButtons(list, parentKind) {
+    const kinds = M.ALLOWED_CHILDREN[parentKind];
+    return h('div', { class: 'tree-node' }, kinds.map(function (k) {
+      return h('button', {
+        class: 'small',
+        onclick: function () { list.push(M.newLoadNode(k)); rerender(); },
+      }, '+ ' + M.KIND_LABELS[k]);
+    }));
+  }
+
+  /* ---- istasyonlar arası kurallar */
+
+  function renderConstraints(ac) {
+    const typeOptions = Object.keys(M.CONSTRAINT_TYPES).map(function (k) { return { value: k, label: M.CONSTRAINT_TYPES[k].label }; });
+    const munOptions = [{ value: '', label: '— mühimmat seçin —' }].concat(state.project.catalog.munitions.map(function (s) { return { value: s.id, label: M.storeLabel(s) }; }));
+
+    const items = ac.constraints.map(function (c, i) {
+      const def = M.CONSTRAINT_TYPES[c.type] || { help: '' };
+      return h('div', { class: 'panel', style: 'margin-bottom:10px;background:var(--bg)' }, [
+        h('div', { class: 'panel-head' }, [
+          h('h3', {}, 'Kural #' + (i + 1)),
+          h('button', { class: 'small danger', onclick: function () { removeFrom(ac.constraints, c); rerender(); } }, 'Sil'),
+        ]),
+        h('div', { class: 'grid2' }, [
+          h('label', { class: 'field' }, [h('span', {}, 'Tip'), select(c, 'type', typeOptions, rerender)]),
+          c.type === 'MAX_TOTAL' ? h('label', { class: 'field' }, [h('span', {}, 'Mühimmat'), select(c, 'munitionId', munOptions)]) : null,
+          c.type === 'MAX_TOTAL' ? field('En fazla adet', c, 'value', { type: 'number' }) : null,
+        ]),
+        h('p', { class: 'hint' }, def.help + (c.type === 'REQUIRES' ? ' Sıra: işaretleme sırası değil, istasyon listesindeki sıra geçerlidir.' : '')),
+        h('div', { class: 'chips' }, ac.stations.map(function (st) {
+          const on = c.stationIds.indexOf(st.id) >= 0;
+          return h('label', { class: 'chip' + (on ? ' on' : '') }, [
+            h('input', {
+              type: 'checkbox', checked: on,
+              onchange: function () {
+                if (on) c.stationIds = c.stationIds.filter(function (id) { return id !== st.id; });
+                else {
+                  c.stationIds.push(st.id);
+                  const order = ac.stations.map(function (s) { return s.id; });
+                  c.stationIds.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
+                }
+                rerender();
+              },
+            }),
+            st.code || '(kodsuz)',
+          ]);
+        })),
+        h('div', { style: 'margin-top:8px' }, field('Açıklama', c, 'description')),
+      ]);
+    });
+
+    return h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, 'İstasyonlar arası kurallar'),
+        h('button', { class: 'primary', onclick: function () { ac.constraints.push(M.newConstraint()); rerender(); } }, '+ Kural ekle'),
+      ]),
+      items.length ? h('div', {}, items) : h('div', { class: 'empty' }, 'Henüz kural yok.'),
+    ]);
+  }
+
+  /* ------------------------------------------------------------ doğrulama */
+
+  function renderValidation() {
+    const issues = M.validate(state.project);
+    issues.sort(function (a, b) { return (a.level === 'error' ? 0 : 1) - (b.level === 'error' ? 0 : 1); });
+    return h('div', { class: 'panel' }, [
+      h('h2', {}, 'Doğrulama'),
+      issues.length
+        ? h('div', {}, issues.map(function (i) {
+          return h('div', { class: 'issue ' + i.level }, [
+            h('div', { class: 'lvl' }, i.level === 'error' ? 'HATA' : 'UYARI'),
+            h('div', {}, [h('div', { class: 'where' }, i.where), h('div', {}, i.message)]),
+          ]);
+        }))
+        : h('div', { class: 'ok' }, 'Sorun bulunamadı.'),
+    ]);
+  }
+
+  /* ------------------------------------------------------------ XML */
+
+  function renderXml() {
+    const exporter = X.EXPORTERS[state.exporter];
+    const errors = M.validate(state.project).filter(function (i) { return i.level === 'error'; });
+    const xml = exporter.exportProject(state.project, M);
+    const options = Object.keys(X.EXPORTERS).map(function (k) { return { value: k, label: X.EXPORTERS[k].label }; });
+    return h('div', { class: 'panel' }, [
+      h('div', { class: 'panel-head' }, [
+        h('h2', {}, 'XML çıktısı'),
+        h('label', {}, select(state, 'exporter', options, render)),
+        h('button', { onclick: function () { navigator.clipboard && navigator.clipboard.writeText(xml); } }, 'Kopyala'),
+        h('button', {
+          class: 'primary',
+          onclick: function () {
+            if (errors.length && !window.confirm(errors.length + ' doğrulama hatası var. Yine de indirilsin mi?')) return;
+            download(safeFileName(state.project.name) + '.' + exporter.fileExtension, xml, 'application/xml');
+          },
+        }, 'XML indir'),
+      ]),
+      errors.length ? h('p', { class: 'hint', style: 'color:var(--danger)' }, errors.length + ' doğrulama hatası var; Doğrulama sekmesine bakın.') : null,
+      h('pre', { class: 'xml' }, xml),
+    ]);
+  }
+
+  /* ------------------------------------------------------------ ana çizim */
+
+  function render() {
+    const nameInput = document.getElementById('project-name');
+    if (document.activeElement !== nameInput) nameInput.value = state.project.name;
+    renderTabs();
+    const views = { catalog: renderCatalog, aircraft: renderAircraft, validation: renderValidation, xml: renderXml };
+    const main = document.getElementById('main');
+    main.replaceChildren(views[state.view]());
+  }
+
+  function setProject(p) {
+    state.project = M.normalizeProject(p);
+    state.aircraftId = null;
+    state.stationId = null;
+    rerender();
+  }
+
+  document.getElementById('project-name').addEventListener('input', function (e) {
+    state.project.name = e.target.value;
+    persist();
+  });
+
+  const fileInput = document.getElementById('file-input');
+  fileInput.addEventListener('change', function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+    file.text().then(function (text) {
+      try { setProject(JSON.parse(text)); } catch (e) { window.alert('Dosya okunamadı: ' + e.message); }
+      fileInput.value = '';
+    });
+  });
+
+  document.querySelector('.actions').addEventListener('click', function (e) {
+    const action = e.target.getAttribute('data-action');
+    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(M.emptyProject());
+    if (action === 'sample' && window.confirm('Mevcut proje örnek veriyle değiştirilsin mi?')) setProject(M.sampleProject());
+    if (action === 'open') fileInput.click();
+    if (action === 'save') download(safeFileName(state.project.name) + '.json', JSON.stringify(state.project, null, 2), 'application/json');
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
