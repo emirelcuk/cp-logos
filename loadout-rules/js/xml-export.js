@@ -87,7 +87,7 @@
             parent: st.parentId ? stationCode[st.parentId] : undefined,
             name: st.name,
             location: st.location,
-          }, st.loads.map(loadEl));
+          }, model.expandLoads(project, st.loads).map(loadEl));
         })),
         ac.constraints.length ? el('Constraints', {}, ac.constraints.map(function (c) {
           return el('Constraint', {

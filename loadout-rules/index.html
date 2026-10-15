@@ -17,10 +17,15 @@
         </div>
       </div>
       <input id="project-name" class="project-name" aria-label="Proje adı" placeholder="Proje adı">
+      <span id="file-status" class="file-status hidden"></span>
       <div class="actions">
+        <button data-action="undo" title="Geri al (Ctrl+Z)" aria-label="Geri al" disabled></button>
+        <button data-action="redo" title="Yinele (Ctrl+Y)" aria-label="Yinele" disabled></button>
+        <span class="sep"></span>
         <button data-action="new"><span>Yeni</span></button>
-        <button data-action="open"><span>Aç</span></button>
-        <button data-action="save"><span>Kaydet</span></button>
+        <button data-action="open" title="JSON proje dosyası aç"><span>Aç</span></button>
+        <button data-action="save" title="Dosyaya kaydet (Ctrl+S)"><span>Kaydet</span></button>
+        <button data-action="saveas" title="Farklı kaydet (Ctrl+Shift+S)"><span>Farklı kaydet</span></button>
         <button data-action="sample"><span>Örnek</span></button>
         <input type="file" id="file-input" accept=".json,application/json" hidden>
       </div>

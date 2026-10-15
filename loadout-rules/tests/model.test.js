@@ -203,3 +203,73 @@ test('standart katalogda tekrar eden kod yok ve her top için uygun çapta mühi
     assert.ok(c.ammo.some(function (a) { return a.caliber === g.caliber; }), g.code + ' için mühimmat yok');
   });
 });
+
+test('paketler: XML ve matriste açılır, eksik paket referansı hata verir', function () {
+  const p = M.sampleProject();
+  const ac = p.aircraft[0];
+  SH.arrangeStations(ac);
+  const one = ac.stations[0];
+  assert.strictEqual(one.loads[0].kind, 'package');
+  const xml = X.EXPORTERS.generic.exportProject(p, M);
+  assert.ok(!/type="PACKAGE"/.test(xml));
+  assert.ok(/<Station code="1"[^>]*>\s*<Allow type="RACK" ref="LAU-129"/.test(xml));
+  const mx = M.compatibility(p, ac, ['munition']);
+  const aim9x = mx.rows.find(function (r) { return r.store.code === 'AIM-9X'; });
+  assert.ok(aim9x.cells[one.id]);
+  assert.strictEqual(aim9x.cells[one.id].paths[0], 'LAU-129 › AIM-9X');
+  one.loads.push(M.newLoadNode('package', 'yok'));
+  assert.ok(M.validate(p).some(function (i) { return /bulunmayan/.test(i.message); }));
+  assert.strictEqual(M.packageUsage(p, p.packages[0].id).length, 8); // A: 1,2,3,7,8,9 · B: 1,5
+});
+
+test('matris: iç içe adetler çarpılır, alternatiflerde en büyük alınır', function () {
+  const p = M.sampleProject();
+  const ac = p.aircraft[0];
+  SH.arrangeStations(ac);
+  const three = ac.stations.find(function (s) { return s.code === '3'; });
+  const mx = M.compatibility(p, ac, ['munition', 'subrack']);
+  const mk82 = mx.rows.find(function (r) { return r.store.code === 'MK-82'; });
+  assert.strictEqual(mk82.cells[three.id].qty, 3); // MAU-12 → MK-82 (1) | MAU-12 → TER-9 → 3×MK-82
+  assert.strictEqual(mk82.cells[three.id].paths.length, 2);
+  assert.ok(mx.rows.some(function (r) { return r.kind === 'subrack' && r.store.code === 'TER-9'; }));
+  assert.ok(!mx.rows.some(function (r) { return r.kind === 'rack'; }));
+});
+
+test('uçak çoğaltma: yeni kimlikler, ek nokta ve kural referansları yeni istasyonlara bağlanır', function () {
+  const p = M.sampleProject();
+  const ac = p.aircraft[0];
+  const copy = M.duplicateAircraft(ac);
+  assert.notStrictEqual(copy.id, ac.id);
+  assert.strictEqual(copy.code, 'UCAK-A-KOPYA');
+  const oldIds = ac.stations.map(function (s) { return s.id; });
+  const newIds = copy.stations.map(function (s) { return s.id; });
+  assert.ok(newIds.every(function (id) { return oldIds.indexOf(id) < 0; }));
+  copy.stations.filter(function (s) { return s.parentId; }).forEach(function (s) { assert.ok(newIds.indexOf(s.parentId) >= 0); });
+  copy.constraints.forEach(function (c) { c.stationIds.forEach(function (id) { assert.ok(newIds.indexOf(id) >= 0); }); });
+  copy.stations[2].loads[0].qty = 99;
+  assert.notStrictEqual(ac.stations[2].loads[0].qty, 99);
+  p.aircraft.push(copy);
+  assert.deepStrictEqual(M.validate(p).filter(function (i) { return i.level === 'error'; }), []);
+});
+
+test('ayna istasyon: 3 ↔ 7, 5L ↔ 5R, merkez ve top için yok', function () {
+  const ac = M.sampleProject().aircraft[0];
+  SH.arrangeStations(ac);
+  const by = {};
+  ac.stations.forEach(function (s) { by[s.code] = s; });
+  assert.strictEqual(SH.mirrorOf(ac, by['3']), by['7']);
+  assert.strictEqual(SH.mirrorOf(ac, by['9']), by['1']);
+  assert.strictEqual(SH.mirrorOf(ac, by['5L']), by['5R']);
+  assert.strictEqual(SH.mirrorOf(ac, by['5']), null);
+  assert.strictEqual(SH.mirrorOf(ac, by['GUN']), null);
+});
+
+test('cloneLoads derin kopya ve yeni kimlik üretir', function () {
+  const p = M.sampleProject();
+  const src = p.aircraft[0].stations[2].loads;
+  const copy = M.cloneLoads(src);
+  assert.strictEqual(JSON.stringify(copy.map(function (n) { return n.refId; })), JSON.stringify(src.map(function (n) { return n.refId; })));
+  assert.notStrictEqual(copy[0].id, src[0].id);
+  copy[0].children.pop();
+  assert.notStrictEqual(copy[0].children.length, src[0].children.length);
+});

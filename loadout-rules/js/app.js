@@ -18,6 +18,9 @@
     catalogKind: 'munition',
     catalogFilter: '',
     catalogGroup: '',
+    packageId: null,
+    matrixKinds: ['munition', 'ammo', 'gun'],
+    matrixFilter: '',
     aircraftId: null,
     stationId: null,
     exporter: 'generic',
@@ -79,6 +82,14 @@
     search: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 1 0 0-13M20 20l-4.8-4.8',
     link: 'M10 14l4-4M8.5 15.5l-2 2a3.2 3.2 0 0 1-4.5-4.5l3.5-3.5a3.2 3.2 0 0 1 4.5 0M15.5 8.5l2-2a3.2 3.2 0 0 1 4.5 4.5l-3.5 3.5a3.2 3.2 0 0 1-4.5 0',
     info: 'M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18M12 11v6M12 7.5v.3',
+    undo: 'M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
+    redo: 'M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13',
+    layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5',
+    table: 'M3.5 4.5h17v15h-17zM3.5 9.5h17M3.5 14.5h17M9.5 4.5v15',
+    print: 'M7 9V3.5h10V9M7 17H4.5V9.5h15V17H17M7 14h10v6.5H7z',
+    mirror: 'M12 3v18M8 7l-5 5 5 5V7zM16 7l5 5-5 5V7z',
+    close: 'M6 6l12 12M18 6L6 18',
+    duplicate: 'M8 8h12v12H8zM4 16V4h12M14 11v6M11 14h6',
   };
 
   function icon(name, cls) {
@@ -94,11 +105,111 @@
       [opts.icon ? icon(opts.icon) : null, label ? h('span', {}, label) : null]);
   }
 
+  /*
+   * Geri al / yinele: her kayıtta (250 ms'lik değişiklik grubu) önceki anlık görüntü yığına atılır.
+   * Dosya: File System Access API varsa aynı dosyanın üzerine kaydedilir; yoksa indirme yapılır.
+   */
+  const history = { undo: [], redo: [], last: null, limit: 150 };
+  const fileState = { handle: null, name: '', saved: null };
+
+  function commitHistory(cur) {
+    if (history.last !== null && cur !== history.last) {
+      history.undo.push(history.last);
+      if (history.undo.length > history.limit) history.undo.shift();
+      history.redo = [];
+    }
+    history.last = cur;
+    updateTopbar();
+  }
+
   let saveTimer = null;
   function saveNow() {
     clearTimeout(saveTimer);
     saveTimer = null;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.project)); } catch (e) { /* depolama kapalı olabilir */ }
+    const cur = JSON.stringify(state.project);
+    commitHistory(cur);
+    try { localStorage.setItem(STORAGE_KEY, cur); } catch (e) { /* depolama kapalı olabilir */ }
+  }
+
+  function restore(json) {
+    history.last = json;
+    state.project = JSON.parse(json);
+    try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { /* depolama kapalı olabilir */ }
+    render();
+    updateTopbar();
+  }
+
+  function undo() {
+    if (saveTimer) saveNow();
+    if (!history.undo.length) return;
+    history.redo.push(history.last);
+    restore(history.undo.pop());
+    toast('Geri alındı.');
+  }
+
+  function redo() {
+    if (saveTimer) saveNow();
+    if (!history.redo.length) return;
+    history.undo.push(history.last);
+    restore(history.redo.pop());
+    toast('Yinelendi.');
+  }
+
+  function updateTopbar() {
+    const u = document.querySelector('[data-action=undo]');
+    const r = document.querySelector('[data-action=redo]');
+    if (u) u.disabled = !history.undo.length;
+    if (r) r.disabled = !history.redo.length;
+    const fileEl = document.getElementById('file-status');
+    if (!fileEl || !state.project) return;
+    const dirty = fileState.saved !== null && fileState.saved !== (history.last || JSON.stringify(state.project));
+    fileEl.textContent = fileState.name ? fileState.name + (dirty ? ' •' : '') : '';
+    fileEl.title = fileState.name ? (dirty ? 'Dosyaya kaydedilmemiş değişiklikler var' : 'Dosya güncel') : '';
+    fileEl.className = 'file-status' + (dirty ? ' dirty' : '') + (fileState.name ? '' : ' hidden');
+  }
+
+  const FILE_TYPES = [{ description: 'Yükleme kuralları projesi (JSON)', accept: { 'application/json': ['.json'] } }];
+
+  function markSaved(name) {
+    if (saveTimer) saveNow();
+    fileState.name = name;
+    fileState.saved = JSON.stringify(state.project);
+    updateTopbar();
+  }
+
+  async function saveToFile(saveAs) {
+    const text = JSON.stringify(state.project, null, 2);
+    const suggested = safeFileName(state.project.name) + '.json';
+    if (!window.showSaveFilePicker) {
+      download(suggested, text, 'application/json');
+      markSaved(suggested);
+      toast('Proje indirildi (' + suggested + ').', 'ok');
+      return;
+    }
+    try {
+      if (!fileState.handle || saveAs) fileState.handle = await window.showSaveFilePicker({ suggestedName: suggested, types: FILE_TYPES });
+      const w = await fileState.handle.createWritable();
+      await w.write(text);
+      await w.close();
+      markSaved(fileState.handle.name);
+      toast(fileState.handle.name + ' kaydedildi.', 'ok');
+    } catch (e) {
+      if (e && e.name !== 'AbortError') toast('Kaydedilemedi: ' + e.message, 'error');
+    }
+  }
+
+  async function openFromFile() {
+    if (!window.showOpenFilePicker) { document.getElementById('file-input').click(); return; }
+    try {
+      const handles = await window.showOpenFilePicker({ types: FILE_TYPES });
+      const f = await handles[0].getFile();
+      setProject(JSON.parse(await f.text()));
+      fileState.handle = handles[0];
+      markSaved(f.name);
+      toast(f.name + ' açıldı.', 'ok');
+    } catch (e) {
+      if (e && e.name !== 'AbortError') toast('Dosya okunamadı: ' + e.message, 'error');
+    }
   }
   function persist() {
     clearTimeout(saveTimer);
@@ -192,6 +303,7 @@
   function usageCount(storeId) {
     let count = 0;
     const walk = function (n) { if (n.refId === storeId) count++; n.children.forEach(walk); };
+    (state.project.packages || []).forEach(function (pkg) { pkg.loads.forEach(walk); });
     state.project.aircraft.forEach(function (ac) {
       ac.stations.forEach(function (st) { st.loads.forEach(walk); });
       ac.constraints.forEach(function (c) { if (c.munitionId === storeId) count++; });
@@ -210,6 +322,8 @@
 
   const TABS = [
     { id: 'aircraft', label: 'Uçaklar', icon: 'plane' },
+    { id: 'matrix', label: 'Matris', icon: 'table' },
+    { id: 'packages', label: 'Paketler', icon: 'layers' },
     { id: 'catalog', label: 'Katalog', icon: 'box' },
     { id: 'validation', label: 'Doğrulama', icon: 'check' },
     { id: 'xml', label: 'XML Çıktısı', icon: 'code' },
@@ -421,7 +535,18 @@
       extra: h('div', { class: 'stats' }, [
         stat(c.main, 'istasyon'), stat(c.side, 'ek nokta'), stat(c.gun, 'top'), stat(ac.constraints.length, 'kural'),
       ]),
-      actions: [btn('', {
+      actions: [btn('Çoğalt', {
+        icon: 'duplicate', class: 'small',
+        title: 'Uçağı tüm istasyon, yük ve kurallarıyla kopyala (ör. varyant oluşturmak için)',
+        onclick: function () {
+          const copy = M.duplicateAircraft(ac);
+          const i = state.project.aircraft.indexOf(ac);
+          state.project.aircraft.splice(i + 1, 0, copy);
+          state.aircraftId = copy.id; state.stationId = null;
+          rerender();
+          toast(copy.code + ' oluşturuldu.', 'ok');
+        },
+      }), btn('', {
         icon: 'trash', class: 'ghost danger', aria: 'Uçağı sil',
         onclick: function () {
           if (confirmDelete('Uçak ' + (ac.code || '(kodsuz)'))) {
@@ -455,6 +580,11 @@
     const lines = [];
     const walk = function (n, depth) {
       const store = M.findStore(state.project, n.kind, n.refId);
+      if (n.kind === 'package') {
+        lines.push({ depth: depth, kind: 'package', text: 'Paket ' + (store ? store.code : '?') });
+        if (store) store.loads.forEach(function (c) { walk(c, depth + 1); });
+        return;
+      }
       lines.push({ depth: depth, kind: n.kind, text: (store ? store.code : '?') + (n.qty > 1 ? ' ×' + n.qty : '') });
       n.children.forEach(function (c) { walk(c, depth + 1); });
     };
@@ -701,6 +831,7 @@
     const pick = function (s) { return function () { state.stationId = s.id; render(); }; };
     const parentKind = gun ? 'gunStation' : 'station';
     const tag = gun ? 'Top istasyonu' : parent ? 'Ek takma noktası' : M.LOCATIONS[st.location];
+    const mirror = SH.mirrorOf(ac, st);
 
     return h('section', { class: 'panel station-panel' }, [
       h('div', { class: 'station-head' }, [
@@ -731,7 +862,19 @@
             },
           }),
         ]),
-      h('div', { class: 'section-title' }, [h('h3', {}, 'İzin verilen yükler'), h('span', { class: 'muted small-text' }, st.loads.length + ' seçenek')]),
+      h('div', { class: 'section-title' }, [
+        h('h3', {}, 'İzin verilen yükler'), h('span', { class: 'muted small-text' }, st.loads.length + ' seçenek'),
+        h('span', { class: 'grow' }),
+        mirror ? btn('→ ' + mirror.code, {
+          icon: 'mirror', class: 'small', title: 'Bu kuralları simetrik istasyon ' + mirror.code + "'e kopyala",
+          disabled: !st.loads.length, onclick: function () { copyToMirror(ac, st); },
+        }) : null,
+        btn('Kopyala…', { icon: 'copy', class: 'small', title: 'Kuralları başka istasyonlara kopyala', disabled: !st.loads.length, onclick: function () { openCopyDialog(ac, st); } }),
+        gun ? null : btn('Paket yap', {
+          icon: 'layers', class: 'small', title: 'Bu yükleri tekrar kullanılabilir bir pakete dönüştür',
+          disabled: !st.loads.some(function (n) { return n.kind !== 'package'; }), onclick: function () { makePackageFrom(ac, st); },
+        }),
+      ]),
       h('p', { class: 'hint' }, gun
         ? 'Topu seçin, altına kullanılabilecek mühimmatı ve en fazla mermi adedini ekleyin.'
         : 'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin üst seviyeye en fazla kaç adet takılabileceğidir.'),
@@ -779,8 +922,8 @@
 
   function renderNodeList(nodes, parentKind) {
     if (!nodes.length) {
-      return parentKind === 'station' || parentKind === 'gunStation'
-        ? h('div', { class: 'tree-empty' }, 'Henüz yük izni tanımlanmadı.')
+      return parentKind === 'station' || parentKind === 'gunStation' || parentKind === 'packageRoot'
+        ? h('div', { class: 'tree-empty' }, parentKind === 'packageRoot' ? 'Paket boş; aşağıdan öğe ekleyin.' : 'Henüz yük izni tanımlanmadı.')
         : null;
     }
     return h('ul', { class: 'tree' }, nodes.map(function (n) {
@@ -795,7 +938,36 @@
     }));
   }
 
+  function renderPackageNode(siblings, n) {
+    const pkg = M.findStore(state.project, 'package', n.refId);
+    const options = [{ value: '', label: state.project.packages.length ? '— paket seçin —' : '— önce Paketler sekmesinde paket oluşturun —' }]
+      .concat(state.project.packages.map(function (p) { return { value: p.id, label: M.storeLabel(p) }; }));
+    if (n.refId && !pkg) options.push({ value: n.refId, label: '(silinmiş paket)' });
+    const summary = [];
+    const walk = function (nodes, depth) {
+      nodes.forEach(function (c) {
+        const s = M.findStore(state.project, c.kind, c.refId);
+        summary.push(h('span', { class: 'pkg-item d' + Math.min(depth, 3) }, [h('i', { class: 'kind-dot ' + c.kind }), (s ? s.code : '?') + (c.qty > 1 ? ' ×' + c.qty : '')]));
+        walk(c.children || [], depth + 1);
+      });
+    };
+    if (pkg) walk(pkg.loads, 0);
+    return h('div', {}, [
+      h('div', { class: 'tree-node' }, [
+        h('span', { class: 'kind package' }, 'Paket'),
+        select(n, 'refId', options, function () { rerender(); }),
+        pkg ? btn('Düzenle', { icon: 'layers', class: 'small ghost', onclick: function () { state.view = 'packages'; state.packageId = pkg.id; render(); } }) : null,
+        btn('', {
+          icon: 'trash', class: 'ghost danger small', aria: 'Paketi istasyondan kaldır',
+          onclick: function () { removeFrom(siblings, n); rerender(); },
+        }),
+      ]),
+      summary.length ? h('div', { class: 'pkg-summary' }, summary) : null,
+    ]);
+  }
+
   function renderNode(siblings, n) {
+    if (n.kind === 'package') return renderPackageNode(siblings, n);
     const list = state.project.catalog[M.CATALOG_KEY[n.kind]];
     const extra = function (s) { return n.kind === 'ammo' || n.kind === 'gun' ? (s.caliber ? ' [' + s.caliber + ']' : '') : ''; };
     const options = [{ value: '', label: '— seçin —' }].concat(list.map(function (s) { return { value: s.id, label: M.storeLabel(s) + extra(s) }; }));
@@ -935,6 +1107,265 @@
     ]);
   }
 
+  /* ------------------------------------------------------------ pencere (modal) */
+
+  function openModal(title, body, actions) {
+    closeModal();
+    const overlay = h('div', { class: 'modal-overlay', id: 'modal', onclick: function (e) { if (e.target === overlay) closeModal(); } }, [
+      h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }, [
+        h('div', { class: 'modal-head' }, [h('h2', {}, title), btn('', { icon: 'close', class: 'ghost small', aria: 'Kapat', onclick: closeModal })]),
+        h('div', { class: 'modal-body' }, body),
+        h('div', { class: 'modal-actions' }, actions),
+      ]),
+    ]);
+    document.body.appendChild(overlay);
+    const first = overlay.querySelector('input, button.primary');
+    if (first) first.focus();
+  }
+
+  function closeModal() {
+    const m = document.getElementById('modal');
+    if (m) m.remove();
+  }
+
+  /* ------------------------------------------------------------ kural kopyalama */
+
+  function copyLoadsTo(ac, src, targets, mode) {
+    targets.forEach(function (t) {
+      const copy = M.cloneLoads(src.loads);
+      t.loads = mode === 'append' ? t.loads.concat(copy) : copy;
+    });
+    rerender();
+    toast(src.code + ' kuralları ' + targets.map(function (t) { return t.code; }).join(', ') + ' istasyonuna kopyalandı.', 'ok');
+  }
+
+  function copyToMirror(ac, st) {
+    const m = SH.mirrorOf(ac, st);
+    if (!m) return;
+    if (m.loads.length && !window.confirm(m.code + ' istasyonundaki ' + m.loads.length + ' seçenek, ' + st.code + ' kurallarıyla değiştirilsin mi?')) return;
+    copyLoadsTo(ac, st, [m], 'replace');
+  }
+
+  function openCopyDialog(ac, st) {
+    const chosen = {};
+    const opts = { mode: 'replace' };
+    const targets = ac.stations.filter(function (s) { return s !== st && isGun(s) === isGun(st); });
+    const mirror = SH.mirrorOf(ac, st);
+    const chips = h('div', { class: 'chips' }, targets.map(function (s) {
+      const cb = h('input', { type: 'checkbox', onchange: function () { chosen[s.id] = cb.checked; lab.classList.toggle('on', cb.checked); } });
+      const lab = h('label', { class: 'chip' + (s === mirror ? ' mirror' : '') }, [cb, s.code, s.loads.length ? h('span', { class: 'muted' }, ' (' + s.loads.length + ')') : null]);
+      return lab;
+    }));
+    const modeSel = select(opts, 'mode', [
+      { value: 'replace', label: 'Hedefteki mevcut kuralların yerine koy' },
+      { value: 'append', label: 'Hedefteki kurallara ekle' },
+    ], function () {});
+    openModal(st.code + ' kurallarını kopyala', [
+      h('p', { class: 'hint' }, st.loads.length + ' seçenek, seçilen istasyonlara bağımsız kopya olarak aktarılır. Ortak yönetmek isterseniz "Paket yap" kullanın.' + (mirror ? ' Simetriği: ' + mirror.code + '.' : '')),
+      h('div', { class: 'section-label' }, 'Hedef istasyonlar'),
+      chips,
+      h('label', { class: 'field', style: 'margin-top:14px' }, [h('span', {}, 'Yöntem'), modeSel]),
+    ], [
+      btn('Vazgeç', { onclick: closeModal }),
+      btn('Kopyala', {
+        icon: 'copy', class: 'primary',
+        onclick: function () {
+          const sel = targets.filter(function (s) { return chosen[s.id]; });
+          if (!sel.length) { toast('En az bir hedef istasyon seçin.', 'error'); return; }
+          closeModal();
+          copyLoadsTo(ac, st, sel, opts.mode);
+        },
+      }),
+    ]);
+  }
+
+  /* İstasyonun yüklerini yeni bir pakete taşır ve istasyonda pakete referans bırakır. */
+  function makePackageFrom(ac, st) {
+    const code = window.prompt('Paket kodu (ör. AAM-RAY, BOMBA-STD):', '');
+    if (code == null) return;
+    if (!code.trim()) { toast('Paket kodu boş olamaz.', 'error'); return; }
+    if (state.project.packages.some(function (p) { return p.code === code.trim(); })) { toast(code.trim() + ' kodlu paket zaten var.', 'error'); return; }
+    const pkg = Object.assign(M.newPackage(), {
+      code: code.trim(),
+      name: (ac.code || '') + ' ' + st.code + ' istasyonundan',
+      loads: M.cloneLoads(st.loads.filter(function (n) { return n.kind !== 'package'; })),
+    });
+    state.project.packages.push(pkg);
+    st.loads = st.loads.filter(function (n) { return n.kind === 'package'; }).concat([M.newLoadNode('package', pkg.id)]);
+    rerender();
+    toast(pkg.code + ' paketi oluşturuldu. Diğer istasyonlara "+ Paket" ile ekleyebilirsiniz.', 'ok');
+  }
+
+  /* ------------------------------------------------------------ paketler */
+
+  function goToStation(ac, st) {
+    state.view = 'aircraft'; state.aircraftId = ac.id; state.stationId = st.id; render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderPackages() {
+    const list = state.project.packages;
+    let pkg = list.find(function (p) { return p.id === state.packageId; }) || list[0] || null;
+    if (pkg) state.packageId = pkg.id;
+
+    const nav = panel('Paketler', {
+      icon: 'layers', class: 'nav-panel',
+      actions: [btn('', {
+        icon: 'plus', class: 'primary small', aria: 'Paket ekle',
+        onclick: function () {
+          const p = Object.assign(M.newPackage(), { code: 'PAKET-' + (list.length + 1) });
+          list.push(p); state.packageId = p.id; rerender();
+        },
+      })],
+    }, list.length
+      ? h('ul', { class: 'list' }, list.map(function (p) {
+        return h('li', { class: pkg && p.id === pkg.id ? 'selected' : '', onclick: function () { state.packageId = p.id; render(); } }, [
+          h('i', { class: 'kind-dot package' }),
+          h('span', { class: 'grow' }, p.code || '(kodsuz)'),
+          h('span', { class: 'count', title: 'Kullanıldığı istasyon sayısı' }, M.packageUsage(state.project, p.id).length),
+        ]);
+      }))
+      : emptyState('layers', 'Henüz paket yok', '+ ile oluşturun veya bir istasyonda "Paket yap" deyin.'));
+
+    if (!pkg) {
+      return h('div', { class: 'layout' }, [nav, panel('Yükleme paketleri', { icon: 'layers' }, [
+        h('p', { class: 'hint' }, 'Paket, birden fazla istasyonda aynen kullanılan bir yük ağacıdır (ör. "LAU-129 → AIM-9X / AIM-120C"). Paketi değiştirdiğinizde, kullanıldığı tüm istasyonlar güncellenir. XML çıktısında paketler açılarak yazılır.'),
+        emptyState('layers', 'Paket seçilmedi'),
+      ])]);
+    }
+
+    const usage = M.packageUsage(state.project, pkg.id);
+    const body = h('div', { class: 'content' }, [
+      panel(pkg.code || 'Paket', {
+        icon: 'layers',
+        extra: h('span', { class: 'kind-pill' }, usage.length + ' istasyonda kullanılıyor'),
+        actions: [btn('', {
+          icon: 'trash', class: 'ghost danger', aria: 'Paketi sil',
+          onclick: function () {
+            const msg = 'Paket ' + (pkg.code || '') + (usage.length ? ' (' + usage.length + ' istasyondaki referanslarıyla birlikte)' : '');
+            if (!confirmDelete(msg)) return;
+            state.project.aircraft.forEach(function (ac) {
+              ac.stations.forEach(function (st) { st.loads = st.loads.filter(function (n) { return !(n.kind === 'package' && n.refId === pkg.id); }); });
+            });
+            removeFrom(list, pkg); state.packageId = null; rerender();
+          },
+        })],
+      }, [
+        h('div', { class: 'grid4' }, [
+          field('Kod', pkg, 'code', { onInput: function () { const li = document.querySelector('.nav-panel .list li.selected .grow'); if (li) li.textContent = pkg.code || '(kodsuz)'; } }),
+          field('Ad', pkg, 'name'),
+          field('Not', pkg, 'notes', { placeholder: 'İsteğe bağlı' }),
+        ]),
+        h('div', { class: 'section-title' }, [h('h3', {}, 'Paket içeriği'), h('span', { class: 'muted small-text' }, pkg.loads.length + ' seçenek')]),
+        h('p', { class: 'hint' }, 'Aynı seviyedeki öğeler birbirinin alternatifidir. Değişiklikler, paketi kullanan tüm istasyonlara yansır.'),
+        renderNodeList(pkg.loads, 'packageRoot'),
+        addButtons(pkg.loads, 'packageRoot'),
+      ]),
+      panel('Kullanıldığı istasyonlar', { icon: 'link' }, usage.length
+        ? h('div', { class: 'chips' }, usage.map(function (u) {
+          return h('button', { class: 'small chip-btn', onclick: function () { goToStation(u.aircraft, u.station); } }, (u.aircraft.code || '?') + ' / ' + u.station.code);
+        }))
+        : emptyState('link', 'Henüz kullanılmıyor', 'Bir istasyonda "+ Paket" ile ekleyin.')),
+    ]);
+    return h('div', { class: 'layout' }, [nav, body]);
+  }
+
+  /* ------------------------------------------------------------ uyumluluk matrisi */
+
+  const MATRIX_KINDS = [
+    ['munition', 'Mühimmat'], ['ammo', 'Top mühimmatı'], ['gun', 'Top'], ['subrack', 'Subrack'], ['rack', 'Rack'],
+  ];
+
+  function matrixData(ac) {
+    const mx = M.compatibility(state.project, ac, state.matrixKinds);
+    const q = state.matrixFilter.trim().toLocaleLowerCase('tr');
+    if (q) mx.rows = mx.rows.filter(function (r) { return (r.store.code + ' ' + r.store.name + ' ' + (r.store.category || '')).toLocaleLowerCase('tr').indexOf(q) >= 0; });
+    return mx;
+  }
+
+  function matrixCsv(ac, mx) {
+    const esc = function (v) { v = String(v == null ? '' : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    const lines = [['Kod', 'Ad', 'Tür', 'Kategori / çap'].concat(mx.stations.map(function (s) { return s.code; })).map(esc).join(';')];
+    mx.rows.forEach(function (r) {
+      lines.push([r.store.code, r.store.name, M.KIND_LABELS[r.kind], r.store.category || r.store.caliber || '']
+        .concat(mx.stations.map(function (s) { return r.cells[s.id] ? r.cells[s.id].qty : ''; })).map(esc).join(';'));
+    });
+    // Excel'in Türkçe karakterleri doğru açması için BOM; ayırıcı ";" (Türkçe bölge ayarı).
+    return '﻿' + lines.join('\r\n');
+  }
+
+  function renderMatrix() {
+    const ac = currentAircraft();
+    if (!ac) return panel('Uyumluluk matrisi', { icon: 'table' }, emptyState('plane', 'Uçak yok', 'Önce bir uçak ekleyin.'));
+    SH.arrangeStations(ac);
+    const mx = matrixData(ac);
+    const kindChips = h('div', { class: 'chips no-print' }, MATRIX_KINDS.map(function (k) {
+      const on = state.matrixKinds.indexOf(k[0]) >= 0;
+      return h('label', { class: 'chip' + (on ? ' on' : '') }, [
+        h('input', {
+          type: 'checkbox', checked: on,
+          onchange: function () {
+            state.matrixKinds = on ? state.matrixKinds.filter(function (x) { return x !== k[0]; }) : state.matrixKinds.concat([k[0]]);
+            render();
+          },
+        }),
+        h('i', { class: 'kind-dot ' + k[0] }), k[1],
+      ]);
+    }));
+
+    const acTabs = h('div', { class: 'seg no-print' }, state.project.aircraft.map(function (a) {
+      return h('button', { class: 'small' + (a.id === ac.id ? ' on' : ''), onclick: function () { state.aircraftId = a.id; state.stationId = null; render(); } }, a.code || '(kodsuz)');
+    }));
+
+    let lastGroup = null;
+    const body = [];
+    mx.rows.forEach(function (r) {
+      const group = M.KIND_LABELS[r.kind] + (r.kind === 'munition' && r.store.category ? ' · ' + r.store.category : '') + (r.store.caliber ? ' · ' + r.store.caliber : '');
+      if (group !== lastGroup) {
+        body.push(h('tr', { class: 'group-row' }, h('td', { colspan: mx.stations.length + 1 }, [h('i', { class: 'kind-dot ' + r.kind }), group])));
+        lastGroup = group;
+      }
+      body.push(h('tr', {}, [
+        h('th', { class: 'row-head', scope: 'row', title: r.store.name }, [h('b', {}, r.store.code), h('span', {}, r.store.name)]),
+        mx.stations.map(function (s) {
+          const c = r.cells[s.id];
+          return c
+            ? h('td', { class: 'cell on', title: s.code + ' — ' + r.store.code + '\n' + c.paths.join('\n') }, c.qty > 1 ? '×' + c.qty : '✓')
+            : h('td', { class: 'cell' }, '');
+        }),
+      ]));
+    });
+
+    const table = h('table', { class: 'matrix' }, [
+      h('thead', {}, h('tr', {}, [h('th', { class: 'corner' }, 'Öğe \\ İstasyon')].concat(mx.stations.map(function (s) {
+        return h('th', { class: 'col-head' + (isGun(s) ? ' gun' : '') + (s.parentId ? ' side' : ''), title: (s.name || '') + ' — düzenlemek için tıklayın', onclick: function () { goToStation(ac, s); } }, s.code);
+      })))),
+      h('tbody', {}, body),
+    ]);
+
+    return panel('Uyumluluk matrisi', {
+      icon: 'table',
+      extra: acTabs,
+      actions: [
+        h('label', { class: 'search no-print' }, [icon('search'), h('input', {
+          type: 'search', placeholder: 'Ara…', value: state.matrixFilter,
+          onchange: function (e) { state.matrixFilter = e.target.value; render(); },
+          onkeydown: function (e) { if (e.key === 'Enter') { state.matrixFilter = e.target.value; render(); } },
+        })]),
+        btn('Excel (CSV)', { icon: 'download', class: 'small no-print', onclick: function () { download(safeFileName((state.project.name || '') + '_' + (ac.code || '') + '_matris') + '.csv', matrixCsv(ac, mx), 'text/csv'); } }),
+        btn('Yazdır / PDF', { icon: 'print', class: 'small no-print', onclick: function () { window.print(); } }),
+      ],
+    }, [
+      h('p', { class: 'hint' }, 'Hangi öğenin hangi istasyona takılabildiğini gösterir. ✓ takılabilir, ×N en fazla N adet (iç içe adetler çarpılır). Hücrenin üzerine gelince takma yolu (ör. MAU-12 › TER-9 › MK-82 ×3), istasyon başlığına tıklayınca istasyon düzenleyicisi açılır.'),
+      kindChips,
+      h('div', { class: 'print-title' }, (state.project.name || '') + ' — ' + (ac.code || '') + ' ' + (ac.name || '') + ' uyumluluk matrisi'),
+      mx.rows.length
+        ? h('div', { class: 'matrix-wrap' }, table)
+        : emptyState('table', 'Gösterilecek öğe yok', 'İstasyonlara yük izni ekleyin veya tür filtresini değiştirin.'),
+      h('div', { class: 'muted small-text', style: 'margin-top:8px' }, mx.rows.length + ' öğe × ' + mx.stations.length + ' istasyon'),
+    ]);
+  }
+
   /* ------------------------------------------------------------ ana çizim */
 
   function render() {
@@ -942,7 +1373,7 @@
     if (document.activeElement !== nameInput) nameInput.value = state.project.name;
     hideTooltip();
     renderTabs();
-    const views = { catalog: renderCatalog, aircraft: renderAircraft, validation: renderValidation, xml: renderXml };
+    const views = { catalog: renderCatalog, aircraft: renderAircraft, matrix: renderMatrix, packages: renderPackages, validation: renderValidation, xml: renderXml };
     const main = document.getElementById('main');
     main.replaceChildren(views[state.view]());
   }
@@ -959,6 +1390,8 @@
   }
 
   function setProject(p) {
+    closeModal();
+    fileState.handle = null; fileState.name = ''; fileState.saved = null;
     state.project = arrangeAll(M.normalizeProject(p));
     const added = upgradeCatalog(state.project);
     state.aircraftId = null;
@@ -983,13 +1416,13 @@
     const file = fileInput.files[0];
     if (!file) return;
     file.text().then(function (text) {
-      try { setProject(JSON.parse(text)); toast('Proje açıldı.', 'ok'); } catch (e) { toast('Dosya okunamadı: ' + e.message, 'error'); }
+      try { setProject(JSON.parse(text)); fileState.handle = null; markSaved(file.name); toast(file.name + ' açıldı.', 'ok'); } catch (e) { toast('Dosya okunamadı: ' + e.message, 'error'); }
       fileInput.value = '';
     });
   });
 
   // Üst çubuk düğmelerine ikon ekle.
-  const ACTION_ICONS = { new: 'file', open: 'open', save: 'save', sample: 'spark' };
+  const ACTION_ICONS = { new: 'file', open: 'open', save: 'save', saveas: 'download', sample: 'spark', undo: 'undo', redo: 'redo' };
   document.querySelectorAll('.actions button[data-action]').forEach(function (b) {
     b.insertBefore(icon(ACTION_ICONS[b.getAttribute('data-action')]), b.firstChild);
   });
@@ -1002,16 +1435,30 @@
     const action = b.getAttribute('data-action');
     if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(newProject());
     if (action === 'sample' && window.confirm('Mevcut proje örnek veriyle değiştirilsin mi?')) setProject(M.sampleProject());
-    if (action === 'open') fileInput.click();
-    if (action === 'save') {
-      download(safeFileName(state.project.name) + '.json', JSON.stringify(state.project, null, 2), 'application/json');
-      toast('Proje JSON olarak kaydedildi.', 'ok');
-    }
+    if (action === 'open') openFromFile();
+    if (action === 'save') saveToFile(false);
+    if (action === 'saveas') saveToFile(true);
+    if (action === 'undo') undo();
+    if (action === 'redo') redo();
+  });
+
+  // Kısayollar: Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z), Ctrl+S. Metin alanlarında tarayıcının kendi geri alması çalışır.
+  document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey)) { if (e.key === 'Escape') closeModal(); return; }
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); saveToFile(e.shiftKey); return; }
+    const t = e.target;
+    const typing = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type !== 'checkbox'));
+    if (typing) return;
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
   });
 
   state.project = arrangeAll(loadFromStorage() || M.sampleProject());
   const upgraded = upgradeCatalog(state.project);
+  history.last = JSON.stringify(state.project);
   if (upgraded) persist();
   render();
+  updateTopbar();
   if (upgraded) toast('Standart katalog güncellendi: ' + upgraded + ' yeni öğe eklendi (top ve top mühimmatı dahil).', 'ok');
 })();

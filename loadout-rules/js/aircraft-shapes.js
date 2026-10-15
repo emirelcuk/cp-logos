@@ -219,6 +219,22 @@
     return before !== after;
   }
 
+  /*
+   * Merkez hattına göre aynadaki istasyon (ör. 3 ↔ 7, 5L ↔ 5R). Aynı türden (ana / ek nokta),
+   * aynalanmış konuma en yakın ve en fazla 40 birim uzaktaki istasyon; yoksa null.
+   */
+  function mirrorOf(aircraft, st) {
+    if (isGun(st) || !hasPosition(st) || Math.abs(st.x - VIEW.cx) <= CENTER_TOLERANCE / 2) return null;
+    const tx = 2 * VIEW.cx - st.x;
+    let best = null, bestD = 40;
+    aircraft.stations.forEach(function (s) {
+      if (s === st || isGun(s) || !!s.parentId !== !!st.parentId || !hasPosition(s)) return;
+      const d = Math.hypot(s.x - tx, s.y - st.y);
+      if (d <= bestD) { best = s; bestD = d; }
+    });
+    return best;
+  }
+
   function round(v) { return Math.round(v * 10) / 10; }
 
   return {
@@ -233,6 +249,7 @@
     placeSides: placeSides,
     sidesOf: sidesOf,
     isMain: isMain,
+    mirrorOf: mirrorOf,
     isGun: isGun,
     locationOf: locationOf,
   };

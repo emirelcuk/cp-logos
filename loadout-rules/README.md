@@ -11,7 +11,10 @@ Tek dosyalık sürüm: `dist/yukleme-kurallari.html` (USB ile taşınabilir). Ka
 `npm run build` ile yeniden üretilir.
 
 - Çalışma tarayıcıda otomatik saklanır (localStorage).
-- **Kaydet (JSON)** / **Aç (JSON)** ile projeyi dosya olarak saklayıp paylaşabilirsiniz.
+- **Kaydet** (Ctrl+S) Chrome/Edge'de aynı JSON dosyasının üzerine yazar; **Farklı kaydet** yeni dosya
+  seçtirir. Diğer tarayıcılarda dosya indirilir. Üst çubukta açık dosya adı ve kaydedilmemiş
+  değişiklik işareti (•) görünür.
+- **Geri al / Yinele** (Ctrl+Z / Ctrl+Y): son 150 değişiklik.
 - Testler: `npm test` (Node 18+).
 
 ## Kavramlar
@@ -19,6 +22,8 @@ Tek dosyalık sürüm: `dist/yukleme-kurallari.html` (USB ile taşınabilir). Ka
 | Sekme | İçerik |
 |---|---|
 | Uçaklar (ana sayfa) | Uçağın üstten çizimi üzerinde istasyonlar; istasyona tıklayıp izin verilen yükleme ağacını düzenleme, istasyonlar arası kurallar |
+| Matris | Öğe × istasyon uyumluluk tablosu (✓ / ×N, takma yolu ipucunda); Excel (CSV) ve yazdır / PDF |
+| Paketler | Birden fazla istasyonda ortak kullanılan yük ağaçları |
 | Katalog | Mühimmat, rack, subrack, top ve top mühimmatı tanımları (arama destekli) |
 | Doğrulama | Hatalar (tekrarlanan kod, geçersiz yerleşim, pozisyon aşımı…) ve uyarılar (yük izni tanımsız istasyon…) |
 | XML Çıktısı | Seçilen formatta XML önizleme ve indirme |
@@ -53,6 +58,14 @@ projelere açılışta eksik öğeler otomatik eklenir (mevcut kayıtlara dokunu
 ekle" düğmesi de aynı işi elle yapar. Katalogda kategori/çap filtresi ve arama vardır.
 Top kapasiteleri uçağa göre değişir; kendi verinizle doğrulayın.
 Örnek projedeki uyumluluklar gösterim amaçlıdır; gerçek teknik verilerle doğrulanmalıdır.
+
+**Kopyalama:** İstasyon panelinde "→ 7" simetrik istasyona tek tıkla kopyalar; "Kopyala…" seçilen
+istasyonlara (yerine koy / ekle) kopyalar. Uçak bilgisinde "Çoğalt", uçağı tüm istasyon, yük ve
+kurallarıyla kopyalar (varyant türetmek için).
+
+**Yükleme paketleri:** Ortak bir yük ağacı (ör. AAM-RAY: LAU-129 → AIM-9X / AIM-9M / AIM-120C) bir kez
+tanımlanır, istasyonlara "+ Paket" ile eklenir; paket değişince tüm istasyonlar güncellenir.
+"Paket yap" bir istasyonun yüklerini pakete dönüştürür. XML ve matriste paketler açılarak yazılır.
 
 **İstasyonlar arası kurallar:** Simetrik, Birbirini dışlar, Gerektirir, Toplam üst sınır.
 

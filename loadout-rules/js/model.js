@@ -23,22 +23,25 @@
   const SCHEMA_VERSION = 1;
 
   const KINDS = ['munition', 'rack', 'subrack', 'gun', 'ammo'];
-  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack', gun: 'Top', ammo: 'Top mühimmatı' };
+  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack', gun: 'Top', ammo: 'Top mühimmatı', package: 'Paket' };
   const CATALOG_KEY = { munition: 'munitions', rack: 'racks', subrack: 'subracks', gun: 'guns', ammo: 'ammo' };
   // Pozisyon alanının anlamı: rack/subrack için takma yeri sayısı, top için mermi kapasitesi.
   const HAS_POSITIONS = { rack: true, subrack: true, gun: true };
 
   // Hangi düğümün altına ne takılabilir. Top podları rack altına takılabilir.
   const ALLOWED_CHILDREN = {
-    station: ['rack', 'subrack', 'munition', 'gun'],
+    station: ['rack', 'subrack', 'munition', 'gun', 'package'],
     gunStation: ['gun'],
+    // Yükleme paketi içeriği: istasyonla aynı, ancak paket içinde paket yok.
+    packageRoot: ['rack', 'subrack', 'munition', 'gun'],
+    package: [],
     rack: ['subrack', 'munition', 'gun'],
     subrack: ['munition'],
     gun: ['ammo'],
     munition: [],
     ammo: [],
   };
-  const PARENT_LABELS = { station: 'istasyon', gunStation: 'top istasyonu' };
+  const PARENT_LABELS = { station: 'istasyon', gunStation: 'top istasyonu', packageRoot: 'paket' };
 
   const STATION_TYPES = { STATION: 'İstasyon', GUN: 'Top (GUN)' };
 
@@ -64,6 +67,8 @@
       name: 'Yeni Proje',
       catalogVersion: 0,
       catalog: emptyCatalog(),
+      // Yükleme paketleri: birden fazla istasyonda kullanılan ortak yük ağaçları.
+      packages: [],
       aircraft: [],
     };
   }
@@ -101,8 +106,12 @@
     return { id: newId('cn'), type: 'SYMMETRIC', stationIds: [], munitionId: '', value: 0, description: '' };
   }
 
+  function newPackage() {
+    return { id: newId('pk'), code: '', name: '', notes: '', loads: [] };
+  }
+
   function findStore(project, kind, id) {
-    const list = project.catalog[CATALOG_KEY[kind]] || [];
+    const list = kind === 'package' ? (project.packages || []) : (project.catalog[CATALOG_KEY[kind]] || []);
     return list.find(function (s) { return s.id === id; }) || null;
   }
 
@@ -139,8 +148,105 @@
       });
       return ac;
     });
+    out.packages = (out.packages || []).map(function (pk) {
+      const pkg = Object.assign(newPackage(), pk);
+      pkg.loads = (pkg.loads || []).map(normalizeNode);
+      return pkg;
+    });
     out.schemaVersion = SCHEMA_VERSION;
     return out;
+  }
+
+  /* ---------------------------------------------------------------- kopyalama, paketler */
+
+  /* Yük ağacının yeni kimliklerle derin kopyası. */
+  function cloneLoads(loads) {
+    return (loads || []).map(function (n) {
+      return { id: newId('ld'), kind: n.kind, refId: n.refId, qty: n.qty, children: cloneLoads(n.children) };
+    });
+  }
+
+  /* Paket referanslarını paket içeriğiyle değiştirir (XML, matris vb. için düz kural ağacı). */
+  function expandLoads(project, loads) {
+    const out = [];
+    (loads || []).forEach(function (n) {
+      if (n.kind === 'package') {
+        const pkg = findStore(project, 'package', n.refId);
+        if (pkg) cloneLoads(pkg.loads).forEach(function (c) { out.push(c); });
+        return;
+      }
+      out.push({ id: n.id, kind: n.kind, refId: n.refId, qty: n.qty, children: expandLoads(project, n.children) });
+    });
+    return out;
+  }
+
+  /* Paketin kullanıldığı istasyonlar: [{ aircraft, station }]. */
+  function packageUsage(project, pkgId) {
+    const out = [];
+    project.aircraft.forEach(function (ac) {
+      ac.stations.forEach(function (st) {
+        if (st.loads.some(function (n) { return n.kind === 'package' && n.refId === pkgId; })) out.push({ aircraft: ac, station: st });
+      });
+    });
+    return out;
+  }
+
+  /* Uçağı tüm istasyon, yük ve kurallarıyla yeni kimliklerle çoğaltır. */
+  function duplicateAircraft(ac) {
+    const idMap = {};
+    const copy = Object.assign(newAircraft(), JSON.parse(JSON.stringify(ac)));
+    copy.id = newId('ac');
+    copy.code = (ac.code || 'UCAK') + '-KOPYA';
+    copy.stations = ac.stations.map(function (st) {
+      const s = Object.assign({}, JSON.parse(JSON.stringify(st)), { id: newId('st') });
+      idMap[st.id] = s.id;
+      s.loads = cloneLoads(st.loads);
+      return s;
+    });
+    copy.stations.forEach(function (s) { if (s.parentId) s.parentId = idMap[s.parentId] || null; });
+    copy.constraints = ac.constraints.map(function (c) {
+      return Object.assign({}, c, {
+        id: newId('cn'),
+        stationIds: c.stationIds.map(function (id) { return idMap[id]; }).filter(Boolean),
+      });
+    });
+    return copy;
+  }
+
+  /*
+   * Uyumluluk matrisi: hangi öğe hangi istasyona, hangi yolla ve en fazla kaç adet takılabilir.
+   * kinds: satırlarda gösterilecek türler. Dönüş: { stations, rows: [{ kind, store, cells: { stationId: { qty, paths } } }] }
+   */
+  function compatibility(project, ac, kinds) {
+    const rows = {};
+    ac.stations.forEach(function (st) {
+      const walk = function (nodes, path, mult) {
+        nodes.forEach(function (n) {
+          const store = findStore(project, n.kind, n.refId);
+          if (!store) return;
+          const qty = mult * (Number(n.qty) || 1);
+          const label = store.code + (n.qty > 1 ? ' ×' + n.qty : '');
+          const here = path.concat([label]);
+          if (kinds.indexOf(n.kind) >= 0) {
+            const key = n.kind + ':' + store.id;
+            const row = rows[key] || (rows[key] = { kind: n.kind, store: store, cells: {} });
+            const cell = row.cells[st.id] || (row.cells[st.id] = { qty: 0, paths: [] });
+            cell.qty = Math.max(cell.qty, qty);
+            cell.paths.push(here.join(' › '));
+          }
+          walk(n.children || [], here, qty);
+        });
+      };
+      walk(expandLoads(project, st.loads), [], 1);
+    });
+    const order = function (r) {
+      const list = project.catalog[CATALOG_KEY[r.kind]] || [];
+      return KINDS.indexOf(r.kind) * 100000 + list.indexOf(r.store);
+    };
+    return {
+      stations: ac.stations,
+      rows: Object.keys(rows).map(function (k) { return rows[k]; }).sort(function (a, b) { return order(a) - order(b); }),
+    };
   }
 
   function normalizeNode(n) {
@@ -167,6 +273,16 @@
           add('error', where, kind === 'gun' ? 'Mermi kapasitesi en az 1 olmalı.' : 'Pozisyon sayısı en az 1 olmalı.');
         }
       });
+    });
+
+    const pkSeen = {};
+    (project.packages || []).forEach(function (pkg) {
+      const where = 'Paket ' + storeLabel(pkg);
+      if (!pkg.code) add('error', where, 'Kod boş olamaz.');
+      else if (pkSeen[pkg.code]) add('error', where, 'Kod tekrar ediyor: ' + pkg.code);
+      pkSeen[pkg.code] = true;
+      if (!pkg.loads.length) add('warning', where, 'Paket boş.');
+      pkg.loads.forEach(function (n) { validateNode(project, n, 'packageRoot', null, where, add); });
     });
 
     const acSeen = {};
@@ -497,7 +613,13 @@
     const rule = function (type, stations, extra) {
       return Object.assign(newConstraint(), { type: type, stationIds: stations.map(function (s) { return s.id; }) }, extra || {});
     };
-    const aamRail = function () { return n('LAU-129', [n('AIM-9X'), n('AIM-9M'), n('AIM-120C')]); };
+    // Ortak füze rayı paketi: birçok istasyonda aynı kural, tek yerden yönetilir.
+    const railPkg = Object.assign(newPackage(), {
+      code: 'AAM-RAY', name: 'LAU-129 füze rayı (AIM-9 / AIM-120)',
+      loads: [n('LAU-129', [n('AIM-9X'), n('AIM-9M'), n('AIM-120C')])],
+    });
+    p.packages.push(railPkg);
+    const aamRail = function () { return newLoadNode('package', railPkg.id); };
 
     // Uçak A: tek motorlu avcı, 9 istasyon + 5L / 5R.
     const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A (tek motorlu)', silhouette: 'single' });
@@ -575,6 +697,12 @@
     standardCatalog: standardCatalog,
     STANDARD_CATALOG_VERSION: STANDARD_CATALOG_VERSION,
     mergeStandardCatalog: mergeStandardCatalog,
+    newPackage: newPackage,
+    cloneLoads: cloneLoads,
+    expandLoads: expandLoads,
+    packageUsage: packageUsage,
+    duplicateAircraft: duplicateAircraft,
+    compatibility: compatibility,
     normalizeProject: normalizeProject,
     newStore: newStore,
     newAircraft: newAircraft,
