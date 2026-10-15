@@ -68,8 +68,10 @@
   }
 
   function newStation() {
+    // code ve location soldan sağa sıralamayla otomatik verilir (AircraftShapes.arrangeStations).
+    // parentId/suffix: ek takma noktası ise bağlı olduğu ana istasyon ve son eki (ör. 5 + 'L' = 5L).
     // x, y: uçak çizimindeki konum (null ise otomatik yerleştirilir).
-    return { id: newId('st'), code: '', name: '', location: 'CENTER', x: null, y: null, loads: [] };
+    return { id: newId('st'), code: '', name: '', parentId: null, suffix: '', location: 'CENTER', x: null, y: null, loads: [] };
   }
 
   function newLoadNode(kind, refId) {
@@ -153,6 +155,8 @@
       else if (acSeen[ac.code]) add('error', acWhere, 'Uçak kodu tekrar ediyor.');
       acSeen[ac.code] = true;
       if (!ac.stations.length) add('warning', acWhere, 'Hiç istasyon tanımlı değil.');
+      const stById = {};
+      ac.stations.forEach(function (s) { stById[s.id] = s; });
 
       const stSeen = {};
       ac.stations.forEach(function (st) {
@@ -160,6 +164,10 @@
         if (!st.code) add('error', stWhere, 'İstasyon kodu boş olamaz.');
         else if (stSeen[st.code]) add('error', stWhere, 'İstasyon kodu tekrar ediyor.');
         stSeen[st.code] = true;
+        if (st.parentId) {
+          if (!stById[st.parentId]) add('error', stWhere, 'Bağlı olduğu ana istasyon bulunamadı.');
+          if (!st.suffix) add('error', stWhere, 'Ek takma noktasının son eki boş olamaz.');
+        }
         if (!st.loads.length) add('warning', stWhere, 'İstasyona hiçbir yük izni tanımlı değil.');
 
         st.loads.forEach(function (n) { validateNode(project, n, 'station', null, stWhere, add); });
@@ -204,79 +212,157 @@
 
   /* ---------------------------------------------------------------- örnek veri */
 
+  /*
+   * Kamuya açık yaygın tanımlamalarla standart katalog. Pozisyon: rack/subrack üzerine
+   * aynı anda takılabilecek en fazla öğe sayısı. Kendi envanterinize göre düzenleyin.
+   */
+  const STANDARD_CATALOG = {
+    munition: [
+      ['AIM-9', 'Sidewinder kısa menzil hava-hava füzesi', 'Hava-hava füzesi'],
+      ['AIM-120', 'AMRAAM orta menzil hava-hava füzesi', 'Hava-hava füzesi'],
+      ['AIM-7', 'Sparrow orta menzil hava-hava füzesi', 'Hava-hava füzesi'],
+      ['AGM-65', 'Maverick hava-yer füzesi', 'Hava-yer füzesi'],
+      ['AGM-88', 'HARM radar karşıtı füze', 'Hava-yer füzesi'],
+      ['MK-82', '500 lb genel maksat bombası', 'Genel maksat bombası'],
+      ['MK-83', '1000 lb genel maksat bombası', 'Genel maksat bombası'],
+      ['MK-84', '2000 lb genel maksat bombası', 'Genel maksat bombası'],
+      ['GBU-10', 'Lazer güdümlü bomba (MK-84 tabanlı)', 'Güdümlü bomba'],
+      ['GBU-12', 'Lazer güdümlü bomba (MK-82 tabanlı)', 'Güdümlü bomba'],
+      ['GBU-31', 'JDAM (MK-84 tabanlı)', 'Güdümlü bomba'],
+      ['GBU-38', 'JDAM (MK-82 tabanlı)', 'Güdümlü bomba'],
+      ['GBU-39', 'SDB küçük çaplı bomba', 'Güdümlü bomba'],
+      ['CBU-105', 'Rüzgâr düzeltmeli misket bombası', 'Misket bombası'],
+      ['HGK-84', 'Hassas güdüm kiti (MK-84)', 'Güdümlü bomba'],
+      ['KGK-82', 'Kanatlı güdüm kiti (MK-82)', 'Güdümlü bomba'],
+      ['TEBER-82', 'Lazer/GPS güdüm kiti (MK-82)', 'Güdümlü bomba'],
+      ['FT-370', '370 galon harici yakıt tankı', 'Yakıt tankı'],
+      ['FT-300', '300 galon harici yakıt tankı', 'Yakıt tankı'],
+      ['AN/AAQ-33', 'Sniper hedefleme podu', 'Pod'],
+      ['AN/AAQ-28', 'LITENING hedefleme podu', 'Pod'],
+      ['AN/AAQ-13', 'LANTIRN navigasyon podu', 'Pod'],
+      ['AN/ALQ-131', 'Elektronik harp podu', 'Pod'],
+    ],
+    rack: [
+      ['MAU-12', 'Bomba askı rafı (pilon içi)', 1],
+      ['LAU-129', 'Füze lançeri (AIM-9 / AIM-120)', 1],
+      ['LAU-117', 'Tekli AGM-65 lançeri', 1],
+      ['LAU-118', 'AGM-88 lançeri', 1],
+      ['LAU-88', 'Üçlü AGM-65 lançeri', 3],
+    ],
+    subrack: [
+      ['TER-9', 'Üçlü ejektör rack', 3],
+      ['MER-10', 'Çoklu ejektör rack', 6],
+      ['BRU-57', 'Akıllı çift ejektör rack', 2],
+      ['BRU-61', 'GBU-39 dörtlü taşıyıcı', 4],
+    ],
+  };
+
+  function standardCatalog() {
+    const out = { munitions: [], racks: [], subracks: [] };
+    STANDARD_CATALOG.munition.forEach(function (r) {
+      out.munitions.push(Object.assign(newStore('munition'), { code: r[0], name: r[1], category: r[2] }));
+    });
+    ['rack', 'subrack'].forEach(function (kind) {
+      STANDARD_CATALOG[kind].forEach(function (r) {
+        out[CATALOG_KEY[kind]].push(Object.assign(newStore(kind), { code: r[0], name: r[1], positions: r[2] }));
+      });
+    });
+    return out;
+  }
+
+  /* Standart katalogdan projede kodu bulunmayan öğeleri ekler; eklenen öğe sayısını döner. */
+  function mergeStandardCatalog(project) {
+    const std = standardCatalog();
+    let added = 0;
+    KINDS.forEach(function (kind) {
+      const key = CATALOG_KEY[kind];
+      const have = {};
+      project.catalog[key].forEach(function (s) { have[s.code] = true; });
+      std[key].forEach(function (s) { if (!have[s.code]) { project.catalog[key].push(s); added++; } });
+    });
+    return added;
+  }
+
+  /* Gösterim amaçlı örnek: uyumluluklar gerçek teknik verilerle doğrulanmalıdır. */
   function sampleProject() {
     const p = emptyProject();
     p.name = 'Örnek Proje';
-    const m = function (code, name, category) { return Object.assign(newStore('munition'), { code: code, name: name, category: category }); };
-    const r = function (kind, code, name, pos) { return Object.assign(newStore(kind), { code: code, name: name, positions: pos }); };
-
-    const bomb = m('BMB-250', 'Genel maksat bombası 250', 'Bomba');
-    const bomb500 = m('BMB-500', 'Genel maksat bombası 500', 'Bomba');
-    const aam = m('AAM-S', 'Kısa menzil hava-hava füzesi', 'Füze');
-    const tank = m('FT-1', 'Harici yakıt tankı', 'Yakıt tankı');
-    const pod = m('POD-T', 'Hedefleme podu', 'Pod');
-    p.catalog.munitions.push(bomb, bomb500, aam, tank, pod);
-
-    const pylon = r('rack', 'PYL-W', 'Kanat pilonu', 1);
-    const launcher = r('rack', 'LCH-1', 'Füze lançeri', 1);
-    p.catalog.racks.push(pylon, launcher);
-
-    const ter = r('subrack', 'TER', 'Üçlü ejektör rack', 3);
-    p.catalog.subracks.push(ter);
-
-    const node = function (kind, store, qty, children) {
-      const n = newLoadNode(kind, store.id); n.qty = qty || 1; n.children = children || []; return n;
+    p.catalog = standardCatalog();
+    const S = function (code) {
+      const all = p.catalog.munitions.concat(p.catalog.racks, p.catalog.subracks);
+      return all.find(function (x) { return x.code === code; });
+    };
+    const kindOf = function (code) {
+      if (p.catalog.racks.indexOf(S(code)) >= 0) return 'rack';
+      if (p.catalog.subracks.indexOf(S(code)) >= 0) return 'subrack';
+      return 'munition';
+    };
+    // n('MAU-12', [n('MK-82'), n('TER-9', [n('MK-82', [], 3)])])
+    const n = function (code, children, qty) {
+      const node = newLoadNode(kindOf(code), S(code).id);
+      node.qty = qty || 1; node.children = children || []; return node;
     };
     const st = function (code, name, loc) { return Object.assign(newStation(), { code: code, name: name, location: loc }); };
+    const side = function (parent, suffix, name) {
+      return Object.assign(newStation(), { code: parent.code + suffix, name: name, parentId: parent.id, suffix: suffix, location: 'CENTER' });
+    };
     const rule = function (type, stations, extra) {
       return Object.assign(newConstraint(), { type: type, stationIds: stations.map(function (s) { return s.id; }) }, extra || {});
     };
+    const aamRail = function () { return n('LAU-129', [n('AIM-9'), n('AIM-120')]); };
 
-    // Uçak A: 9 istasyon, tek motorlu avcı çizimi.
-    const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A', silhouette: 'single' });
-    const a1 = st('STA1', 'Sol kanat ucu', 'LEFT');
-    const a2 = st('STA2', 'Sol dış kanat', 'LEFT');
-    const a3 = st('STA3', 'Sol orta kanat', 'LEFT');
-    const a4 = st('STA4', 'Sol iç kanat', 'LEFT');
-    const a5 = st('STA5', 'Gövde altı', 'CENTER');
-    const a6 = st('STA6', 'Sağ iç kanat', 'RIGHT');
-    const a7 = st('STA7', 'Sağ orta kanat', 'RIGHT');
-    const a8 = st('STA8', 'Sağ dış kanat', 'RIGHT');
-    const a9 = st('STA9', 'Sağ kanat ucu', 'RIGHT');
-    [a1, a9].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
-    [a2, a8].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
+    // Uçak A: tek motorlu avcı, 9 istasyon + 5L / 5R.
+    const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A (tek motorlu)', silhouette: 'single' });
+    const a1 = st('1', 'Sol kanat ucu', 'LEFT');
+    const a2 = st('2', 'Sol dış kanat', 'LEFT');
+    const a3 = st('3', 'Sol orta kanat', 'LEFT');
+    const a4 = st('4', 'Sol iç kanat', 'LEFT');
+    const a5 = st('5', 'Gövde altı', 'CENTER');
+    const a6 = st('6', 'Sağ iç kanat', 'RIGHT');
+    const a7 = st('7', 'Sağ orta kanat', 'RIGHT');
+    const a8 = st('8', 'Sağ dış kanat', 'RIGHT');
+    const a9 = st('9', 'Sağ kanat ucu', 'RIGHT');
+    const a5l = side(a5, 'L', 'Sol hava alığı yanı');
+    const a5r = side(a5, 'R', 'Sağ hava alığı yanı');
+    [a1, a2, a8, a9].forEach(function (s) { s.loads.push(aamRail()); });
     [a3, a7].forEach(function (s) {
-      s.loads.push(node('rack', pylon, 1, [
-        node('munition', bomb500, 1),
-        node('subrack', ter, 1, [node('munition', bomb, 3)]),
-      ]));
+      s.loads.push(
+        n('MAU-12', [n('MK-82'), n('MK-84'), n('GBU-12'), n('GBU-31'), n('GBU-38'),
+          n('TER-9', [n('MK-82', [], 3), n('GBU-12', [], 2)]),
+          n('BRU-61', [n('GBU-39', [], 4)])]),
+        n('LAU-117', [n('AGM-65')]),
+        n('LAU-118', [n('AGM-88')]),
+        aamRail()
+      );
     });
     [a4, a6].forEach(function (s) {
-      s.loads.push(node('rack', pylon, 1, [node('munition', tank, 1), node('munition', bomb500, 1)]));
+      s.loads.push(n('MAU-12', [n('MK-82'), n('MK-84'), n('GBU-12'), n('GBU-31'), n('FT-370')]));
     });
-    a5.loads.push(node('munition', tank, 1), node('munition', pod, 1));
-    a.stations.push(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    a5.loads.push(n('FT-300'), n('AN/ALQ-131'));
+    a5l.loads.push(n('AN/AAQ-13'));
+    a5r.loads.push(n('AN/AAQ-33'), n('AN/AAQ-28'));
+    a.stations.push(a1, a2, a3, a4, a5, a5l, a5r, a6, a7, a8, a9);
     a.constraints.push(
       rule('SYMMETRIC', [a1, a9], { description: 'Kanat ucu füzeleri simetrik.' }),
       rule('SYMMETRIC', [a3, a7], { description: 'Orta kanat yükleri simetrik olmalı.' }),
       rule('SYMMETRIC', [a4, a6], { description: 'İç kanat yükleri simetrik olmalı.' }),
-      rule('MAX_TOTAL', [a4, a5, a6], { munitionId: tank.id, value: 2, description: 'En fazla 2 harici tank.' })
+      rule('EXCLUSIVE', [a5l, a5r], { description: 'Aynı anda tek pod.' }),
+      rule('MAX_TOTAL', [a3, a4, a6, a7], { munitionId: S('MK-84').id, value: 2, description: 'En fazla 2 adet MK-84.' })
     );
 
-    // Uçak B: 5 istasyon, delta kanat çizimi.
-    const b = Object.assign(newAircraft(), { code: 'UCAK-B', name: 'Örnek Uçak B', silhouette: 'delta' });
-    const b1 = st('STA1', 'Sol dış kanat', 'LEFT');
-    const b2 = st('STA2', 'Sol iç kanat', 'LEFT');
-    const b3 = st('STA3', 'Gövde altı', 'CENTER');
-    const b4 = st('STA4', 'Sağ iç kanat', 'RIGHT');
-    const b5 = st('STA5', 'Sağ dış kanat', 'RIGHT');
-    [b1, b5].forEach(function (s) { s.loads.push(node('rack', launcher, 1, [node('munition', aam, 1)])); });
-    [b2, b4].forEach(function (s) { s.loads.push(node('rack', pylon, 1, [node('munition', bomb500, 1), node('munition', tank, 1)])); });
-    b3.loads.push(node('munition', tank, 1));
+    // Uçak B: delta kanat, 5 istasyon.
+    const b = Object.assign(newAircraft(), { code: 'UCAK-B', name: 'Örnek Uçak B (delta kanat)', silhouette: 'delta' });
+    const b1 = st('1', 'Sol dış kanat', 'LEFT');
+    const b2 = st('2', 'Sol iç kanat', 'LEFT');
+    const b3 = st('3', 'Gövde altı', 'CENTER');
+    const b4 = st('4', 'Sağ iç kanat', 'RIGHT');
+    const b5 = st('5', 'Sağ dış kanat', 'RIGHT');
+    [b1, b5].forEach(function (s) { s.loads.push(aamRail()); });
+    [b2, b4].forEach(function (s) { s.loads.push(n('MAU-12', [n('MK-82'), n('GBU-12'), n('FT-370')])); });
+    b3.loads.push(n('FT-300'), n('MAU-12', [n('MK-84'), n('GBU-31')]));
     b.stations.push(b1, b2, b3, b4, b5);
     b.constraints.push(
-      rule('SYMMETRIC', [b2, b4], { description: 'İç kanat yükleri simetrik.' }),
-      rule('EXCLUSIVE', [b2, b3], { description: 'Gövde altı ve sol iç kanat aynı anda yüklenemez.' })
+      rule('SYMMETRIC', [b2, b4], { description: 'İç kanat yükleri simetrik.' })
     );
 
     p.aircraft.push(a, b);
@@ -294,6 +380,8 @@
     newId: newId,
     emptyProject: emptyProject,
     sampleProject: sampleProject,
+    standardCatalog: standardCatalog,
+    mergeStandardCatalog: mergeStandardCatalog,
     normalizeProject: normalizeProject,
     newStore: newStore,
     newAircraft: newAircraft,

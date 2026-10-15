@@ -80,6 +80,7 @@
         el('Stations', {}, ac.stations.map(function (st) {
           return el('Station', {
             code: st.code,
+            parent: st.parentId ? stationCode[st.parentId] : undefined,
             name: st.name,
             location: st.location,
           }, st.loads.map(loadEl));

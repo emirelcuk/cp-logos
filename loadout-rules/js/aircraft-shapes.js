@@ -58,14 +58,45 @@
     return 'M' + right.concat(left).map(function (p) { return p[0] + ',' + p[1]; }).join(' L') + ' Z';
   }
 
+  // Merkez hattına bu kadar yakın istasyonlar gövde (CENTER) sayılır.
+  const CENTER_TOLERANCE = 12;
+
+  function isMain(s) { return !s.parentId; }
+
+  function locationOf(x) {
+    if (Math.abs(x - VIEW.cx) <= CENTER_TOLERANCE) return 'CENTER';
+    return x < VIEW.cx ? 'LEFT' : 'RIGHT';
+  }
+
+  /* Ek takma noktasının (ör. 5L, 5R) ana istasyona göre konumu. */
+  function sideOffset(side, siblings) {
+    if (side.suffix === 'L') return [-24, 6];
+    if (side.suffix === 'R') return [24, 6];
+    const others = siblings.filter(function (x) { return x.suffix !== 'L' && x.suffix !== 'R'; });
+    return [0, 26 + 20 * Math.max(0, others.indexOf(side))];
+  }
+
+  function sidesOf(aircraft, parent) {
+    return aircraft.stations.filter(function (s) { return s.parentId === parent.id; });
+  }
+
+  function placeSides(aircraft, parent) {
+    const sides = sidesOf(aircraft, parent);
+    sides.forEach(function (side) {
+      const o = sideOffset(side, sides);
+      side.x = round(parent.x + o[0]);
+      side.y = round(parent.y + o[1]);
+    });
+  }
+
   /*
-   * Varsayılan yerleşim: sol istasyonlar kanat ucundan köke, merkez istasyonlar gövde boyunca,
-   * sağ istasyonlar kökten kanat ucuna. Liste sırası korunur (ör. STA1 sol uç ... STA9 sağ uç).
+   * Varsayılan yerleşim (yalnızca ana istasyonlar): sol istasyonlar kanat ucundan köke, merkez
+   * istasyonlar gövde boyunca, sağ istasyonlar kökten kanat ucuna. Grup içi sıra liste sırasıdır.
    */
   function autoLayout(aircraft) {
     const shape = shapeOf(aircraft.silhouette);
     const groups = { LEFT: [], CENTER: [], RIGHT: [] };
-    aircraft.stations.forEach(function (s) { (groups[s.location] || groups.CENTER).push(s); });
+    aircraft.stations.filter(isMain).forEach(function (s) { (groups[s.location] || groups.CENTER).push(s); });
     const along = function (t) {
       const r = shape.wing.root, tip = shape.wing.tip;
       return [r[0] + (tip[0] - r[0]) * t, r[1] + (tip[1] - r[1]) * t];
@@ -89,18 +120,77 @@
     return out;
   }
 
+  function hasPosition(s) { return typeof s.x === 'number' && typeof s.y === 'number'; }
+
   /* Konumu olmayan istasyonlara varsayılan konum atar; true dönerse değişiklik yapılmıştır. */
   function ensurePositions(aircraft) {
-    const missing = aircraft.stations.filter(function (s) { return typeof s.x !== 'number' || typeof s.y !== 'number'; });
-    if (!missing.length) return false;
-    const layout = autoLayout(aircraft);
-    missing.forEach(function (s) { s.x = layout[s.id].x; s.y = layout[s.id].y; });
-    return true;
+    let changed = false;
+    const mains = aircraft.stations.filter(isMain);
+    if (mains.some(function (s) { return !hasPosition(s); })) {
+      const layout = autoLayout(aircraft);
+      mains.forEach(function (s) {
+        if (!hasPosition(s)) { s.x = layout[s.id].x; s.y = layout[s.id].y; changed = true; }
+      });
+    }
+    mains.forEach(function (m) {
+      if (sidesOf(aircraft, m).some(function (s) { return !hasPosition(s); })) {
+        const keep = sidesOf(aircraft, m).filter(hasPosition).map(function (s) { return [s, s.x, s.y]; });
+        placeSides(aircraft, m);
+        keep.forEach(function (k) { k[0].x = k[1]; k[0].y = k[2]; });
+        changed = true;
+      }
+    });
+    return changed;
   }
 
-  function applyAutoLayout(aircraft) {
+  /* Otomatik yerleşim; locations verilirse yalnızca o gruplardaki (LEFT/CENTER/RIGHT) istasyonlar taşınır. */
+  function applyAutoLayout(aircraft, locations) {
     const layout = autoLayout(aircraft);
-    aircraft.stations.forEach(function (s) { s.x = layout[s.id].x; s.y = layout[s.id].y; });
+    aircraft.stations.filter(isMain).forEach(function (s) {
+      if (locations && locations.indexOf(s.location) < 0) return;
+      s.x = layout[s.id].x; s.y = layout[s.id].y;
+      placeSides(aircraft, s);
+    });
+    arrangeStations(aircraft);
+  }
+
+  const SUFFIX_ORDER = { L: 0, R: 1 };
+  function suffixCompare(a, b) {
+    const ra = a.suffix in SUFFIX_ORDER ? SUFFIX_ORDER[a.suffix] : 2;
+    const rb = b.suffix in SUFFIX_ORDER ? SUFFIX_ORDER[b.suffix] : 2;
+    return ra - rb || String(a.suffix).localeCompare(String(b.suffix));
+  }
+
+  /*
+   * İstasyonları soldan sağa sıralar ve numaralar: ana istasyonlar 1..N (x, eşitlikte y sırası),
+   * ek takma noktaları ana istasyon numarası + son ek (5L, 5R). Konum (sol/merkez/sağ) x'ten türetilir.
+   * Liste sırası da buna göre güncellenir (her ana istasyonun ardından kendi ek noktaları).
+   * true dönerse sıra veya kodlar değişmiştir.
+   */
+  function arrangeStations(aircraft) {
+    ensurePositions(aircraft);
+    const before = aircraft.stations.map(function (s) { return s.id + ':' + s.code + ':' + s.location; }).join('|');
+    const byId = {};
+    aircraft.stations.forEach(function (s) { byId[s.id] = s; });
+    // Ana istasyonu silinmiş ek noktalar bağımsız istasyon olur.
+    aircraft.stations.forEach(function (s) {
+      if (s.parentId && (!byId[s.parentId] || byId[s.parentId].parentId)) { s.parentId = null; s.suffix = ''; }
+    });
+    const mains = aircraft.stations.filter(isMain).sort(function (a, b) { return a.x - b.x || a.y - b.y; });
+    const ordered = [];
+    mains.forEach(function (m, i) {
+      m.code = String(i + 1);
+      m.location = locationOf(m.x);
+      ordered.push(m);
+      sidesOf(aircraft, m).sort(suffixCompare).forEach(function (side) {
+        side.code = m.code + side.suffix;
+        side.location = locationOf(side.x);
+        ordered.push(side);
+      });
+    });
+    aircraft.stations.splice.apply(aircraft.stations, [0, aircraft.stations.length].concat(ordered));
+    const after = aircraft.stations.map(function (s) { return s.id + ':' + s.code + ':' + s.location; }).join('|');
+    return before !== after;
   }
 
   function round(v) { return Math.round(v * 10) / 10; }
@@ -113,5 +203,9 @@
     autoLayout: autoLayout,
     ensurePositions: ensurePositions,
     applyAutoLayout: applyAutoLayout,
+    arrangeStations: arrangeStations,
+    placeSides: placeSides,
+    sidesOf: sidesOf,
+    locationOf: locationOf,
   };
 });

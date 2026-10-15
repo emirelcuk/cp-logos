@@ -30,8 +30,18 @@ sayısını aşamaz.
 
 **Uçak çizimi:** Her uçak için bir çizim tipi seçilir (tek motorlu, çift motorlu, delta kanat,
 çizimsiz). İstasyon sayısı ve yeri uçağa göre serbesttir: "+ Sol kanat / + Gövde / + Sağ kanat"
-ile istasyon eklenir, işaret sürüklenerek taşınır, "Otomatik yerleştir" listedeki sıraya göre dizer.
+ile istasyon eklenir, işaret sürüklenerek taşınır, "Otomatik yerleştir" eşit aralıklarla dizer.
 Çizimler şematiktir, gerçek ölçü içermez.
+
+**Numaralandırma:** Ana istasyonlar çizimdeki konuma göre soldan sağa 1'den başlayarak otomatik
+numaralanır (taşıma, ekleme ve silmede yenilenir). Konum (sol / merkez / sağ) da çizimden çıkarılır.
+
+**Ek takma noktaları:** Bir istasyona 5L, 5R veya özel son ekli (ör. 5A) ek noktalar eklenebilir.
+Ek noktaların kendi yük kuralları vardır; XML'de `parent` özelliğiyle ana istasyona bağlanır.
+
+**Standart katalog:** Katalog sekmesindeki "Standart katalogu ekle" düğmesi MK-82, GBU-12, AIM-9,
+AIM-120, MAU-12, LAU-129, TER-9, BRU-57 gibi kamuya açık tanımlamalardan eksik olanları ekler.
+Örnek projedeki uyumluluklar gösterim amaçlıdır; gerçek teknik verilerle doğrulanmalıdır.
 
 **İstasyonlar arası kurallar:** Simetrik, Birbirini dışlar, Gerektirir, Toplam üst sınır.
 

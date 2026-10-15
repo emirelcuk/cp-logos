@@ -12,12 +12,13 @@ test('örnek proje hatasız doğrulanır', function () {
 
 test('geçersiz yerleşim ve pozisyon aşımı yakalanır', function () {
   const p = M.sampleProject();
-  const st = p.aircraft[0].stations[2]; // STA3: pilon → (BMB-500 | TER → 3×BMB-250)
-  const pylon = st.loads[0];
+  const st = p.aircraft[0].stations[2]; // 3: MAU-12 → (MK-82 | … | TER-9 → 3×MK-82 | …)
+  const mau = st.loads[0];
+  const ter = mau.children.find(function (c) { return M.findStore(p, c.kind, c.refId).code === 'TER-9'; });
   // Mühimmatın altına rack takılamaz.
-  pylon.children[0].children.push(M.newLoadNode('rack', p.catalog.racks[0].id));
-  // TER 3 pozisyonlu; 4 bomba takılamaz.
-  pylon.children[1].children[0].qty = 4;
+  mau.children[0].children.push(M.newLoadNode('rack', p.catalog.racks[0].id));
+  // TER-9 3 pozisyonlu; 4 bomba takılamaz.
+  ter.children[0].qty = 4;
   const messages = M.validate(p).map(function (i) { return i.message; });
   assert.ok(messages.some(function (m) { return /altına takılamaz/.test(m); }));
   assert.ok(messages.some(function (m) { return /pozisyon sayısını \(3\) aşıyor/.test(m); }));
@@ -38,11 +39,12 @@ test('genel XML çıktısı referansları kodla yazar ve özel karakterleri kaç
   const xml = X.EXPORTERS.generic.exportProject(p, M);
   assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
   assert.ok(xml.includes('project="A &amp; B &lt;test&gt;"'));
-  assert.ok(xml.includes('<Allow type="SUBRACK" ref="TER" maxQty="1">'));
-  assert.ok(xml.includes('<Allow type="MUNITION" ref="BMB-250" maxQty="3"/>'));
-  assert.ok(xml.includes('<Constraint type="MAX_TOTAL" munition="FT-1" value="2">'));
+  assert.ok(xml.includes('<Allow type="SUBRACK" ref="TER-9" maxQty="1">'));
+  assert.ok(xml.includes('<Allow type="MUNITION" ref="MK-82" maxQty="3"/>'));
+  assert.ok(xml.includes('<Constraint type="MAX_TOTAL" munition="MK-84" value="2">'));
+  assert.ok(xml.includes('<Station code="5L" parent="5"'));
   assert.ok(!/weight|maxLoad/i.test(xml));
-  assert.ok(xml.includes('<StationRef code="STA3"/>'));
+  assert.ok(xml.includes('<StationRef code="3"/>'));
 });
 
 test('normalizeProject eksik alanları tamamlar', function () {
@@ -67,13 +69,14 @@ test('otomatik yerleşim: sol uçtan sağ uca, merkez hatta gövde', function ()
   const p = M.sampleProject();
   const ac = p.aircraft[0];
   SH.applyAutoLayout(ac);
-  const xs = ac.stations.map(function (s) { return s.x; });
+  const mains = ac.stations.filter(function (s) { return !s.parentId; });
+  const xs = mains.map(function (s) { return s.x; });
   for (let i = 1; i < xs.length; i++) assert.ok(xs[i] > xs[i - 1], 'x sırası artmalı: ' + xs.join(','));
-  const center = ac.stations.find(function (s) { return s.location === 'CENTER'; });
+  const center = mains.find(function (s) { return s.location === 'CENTER'; });
   assert.strictEqual(center.x, SH.VIEW.cx);
   // Simetrik istasyonlar aynada.
-  assert.strictEqual(ac.stations[0].x + ac.stations[8].x, 2 * SH.VIEW.cx);
-  assert.strictEqual(ac.stations[0].y, ac.stations[8].y);
+  assert.strictEqual(mains[0].x + mains[8].x, 2 * SH.VIEW.cx);
+  assert.strictEqual(mains[0].y, mains[8].y);
 });
 
 test('ensurePositions sadece konumu olmayan istasyonlara dokunur', function () {
@@ -92,4 +95,60 @@ test('her çizim tipinin dış hattı üretilebilir', function () {
     const d = SH.outlinePath(k);
     if (SH.SHAPES[k].half.length) assert.ok(/^M[\d.,\s L]+Z$/.test(d), k);
   });
+});
+
+function codes(ac) { return ac.stations.map(function (s) { return s.code; }).join(' '); }
+
+test('istasyonlar soldan sağa 1den numaralanır, ek noktalar ana istasyonun ardından gelir', function () {
+  const ac = M.sampleProject().aircraft[0];
+  SH.arrangeStations(ac);
+  assert.strictEqual(codes(ac), '1 2 3 4 5 5L 5R 6 7 8 9');
+  // 5L çizimde solda, 5R sağda.
+  const byCode = {};
+  ac.stations.forEach(function (s) { byCode[s.code] = s; });
+  assert.ok(byCode['5L'].x < byCode['5'].x && byCode['5R'].x > byCode['5'].x);
+});
+
+test('istasyon sürüklenip yer değiştirince numaralar yenilenir', function () {
+  const ac = M.sampleProject().aircraft[1];
+  SH.arrangeStations(ac);
+  const first = ac.stations[0];
+  first.x = 390; // en sağa taşı
+  assert.strictEqual(SH.arrangeStations(ac), true);
+  assert.strictEqual(first.code, '5');
+  assert.strictEqual(first.location, 'RIGHT');
+  assert.strictEqual(codes(ac), '1 2 3 4 5');
+});
+
+test('sol kanada yeni istasyon eklenince 1 numara olur, diğerleri kayar', function () {
+  const ac = M.sampleProject().aircraft[1];
+  SH.arrangeStations(ac);
+  const oldFirst = ac.stations[0];
+  const s = M.newStation();
+  s.location = 'LEFT';
+  ac.stations.unshift(s);
+  SH.applyAutoLayout(ac, ['LEFT']);
+  assert.strictEqual(s.code, '1');
+  assert.strictEqual(oldFirst.code, '2');
+  assert.strictEqual(ac.stations.length, 6);
+});
+
+test('ana istasyonu silinen ek nokta bağımsız istasyona dönüşür', function () {
+  const ac = M.sampleProject().aircraft[0];
+  SH.arrangeStations(ac);
+  const five = ac.stations.find(function (s) { return s.code === '5'; });
+  ac.stations.splice(ac.stations.indexOf(five), 1);
+  SH.arrangeStations(ac);
+  assert.ok(ac.stations.every(function (s) { return !s.parentId; }));
+  assert.strictEqual(ac.stations.length, 10);
+});
+
+test('standart katalog gerçek isimleri içerir ve tekrar eklemez', function () {
+  const p = M.emptyProject();
+  const added = M.mergeStandardCatalog(p);
+  const all = p.catalog.munitions.concat(p.catalog.racks, p.catalog.subracks).map(function (s) { return s.code; });
+  ['MK-82', 'GBU-12', 'AIM-9', 'AIM-120', 'MAU-12', 'TER-9', 'LAU-129'].forEach(function (c) { assert.ok(all.indexOf(c) >= 0, c); });
+  assert.ok(added > 20);
+  assert.strictEqual(M.mergeStandardCatalog(p), 0);
+  assert.deepStrictEqual(M.validate(p).filter(function (i) { return i.level === 'error'; }), []);
 });

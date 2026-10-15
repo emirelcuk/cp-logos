@@ -13,7 +13,7 @@
   const STORAGE_KEY = 'loadout-rules.project.v1';
 
   const state = {
-    project: loadFromStorage() || M.sampleProject(),
+    project: null,
     view: 'aircraft',
     catalogKind: 'munition',
     aircraftId: null,
@@ -34,10 +34,12 @@
       else if (k === 'checked' || k === 'selected') node[k] = !!v;
       else node.setAttribute(k, v === true ? '' : v);
     });
-    [].concat(children == null ? [] : children).forEach(function (c) {
+    const append = function (c) {
       if (c == null || c === false) return;
+      if (Array.isArray(c)) { c.forEach(append); return; }
       node.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
-    });
+    };
+    append(children);
     return node;
   }
 
@@ -188,6 +190,14 @@
     const body = h('div', { class: 'panel' }, [
       h('div', { class: 'panel-head' }, [
         h('h2', {}, M.KIND_LABELS[kind] + ' tanımları'),
+        h('button', {
+          title: 'MK-82, GBU-12, AIM-9, AIM-120, MAU-12, TER-9 vb. hazır tanımlardan eksik olanları ekler',
+          onclick: function () {
+            const added = M.mergeStandardCatalog(state.project);
+            window.alert(added ? added + ' öğe eklendi.' : 'Standart katalogdaki tüm öğeler zaten mevcut.');
+            rerender();
+          },
+        }, 'Standart katalogu ekle'),
         h('button', { class: 'primary', onclick: function () { list.push(M.newStore(kind)); rerender(); } }, '+ ' + M.KIND_LABELS[kind] + ' ekle'),
       ]),
       h('p', { class: 'hint' }, isMunition
@@ -248,7 +258,7 @@
 
     if (!ac) return h('div', { class: 'layout' }, [nav, h('div', { class: 'panel empty' }, 'Başlamak için soldan bir uçak ekleyin.')]);
 
-    if (SH.ensurePositions(ac)) persist();
+    if (SH.arrangeStations(ac)) persist();
     const st = currentStation(ac);
     return h('div', { class: 'layout' }, [nav, h('div', {}, [
       renderAircraftInfo(ac),
@@ -335,19 +345,24 @@
     });
     if (shape.canopy) root.appendChild(svg('ellipse', { cx: V.cx, cy: shape.canopy.y, rx: shape.canopy.rx, ry: shape.canopy.ry, class: 'canopy' }));
 
-    ac.stations.forEach(function (st) {
+    // Ana istasyonlar ek noktalarının üstünde çizilsin diye önce ek noktalar.
+    const ordered = ac.stations.filter(function (s) { return s.parentId; }).concat(ac.stations.filter(function (s) { return !s.parentId; }));
+    ordered.forEach(function (st) {
       const isSel = selected && st.id === selected.id;
-      const cls = 'station' + (st.loads.length ? ' loaded' : ' empty') + (isSel ? ' selected' : '');
-      const labelBelow = st.location === 'CENTER' || st.y < 60;
+      const isSide = !!st.parentId;
+      const cls = 'station' + (isSide ? ' side' : '') + (st.loads.length ? ' loaded' : ' empty') + (isSel ? ' selected' : '');
+      const r = isSide ? (isSel ? 9 : 7) : (isSel ? 13 : 10);
+      let label = { x: 0, y: st.location === 'CENTER' || st.y < 60 ? 26 : -17, anchor: 'middle' };
+      if (isSide) label = { x: 0, y: 20, anchor: 'middle' };
       const g = svg('g', { class: cls, transform: 'translate(' + st.x + ',' + st.y + ')', tabindex: 0 }, [
-        svg('title', {}, (st.code || '(kodsuz)') + (st.name ? ' — ' + st.name : '') + '\n' + loadSummary(st)),
-        svg('circle', { r: isSel ? 13 : 10 }),
-        svg('text', { y: labelBelow ? 26 : -17, 'text-anchor': 'middle' }, st.code || '?'),
+        svg('title', {}, 'İstasyon ' + st.code + (st.name ? ' — ' + st.name : '') + '\n' + loadSummary(st)),
+        svg('circle', { r: r }),
+        svg('text', { x: label.x, y: label.y, 'text-anchor': label.anchor }, st.code),
       ]);
       g.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); state.stationId = st.id; render(); }
       });
-      makeDraggable(root, g, st);
+      makeDraggable(root, g, st, ac);
       root.appendChild(g);
     });
 
@@ -357,18 +372,18 @@
 
     return h('div', { class: 'panel drawing' }, [
       h('div', { class: 'panel-head' }, [
-        h('h2', {}, (ac.code || 'Uçak') + ' — ' + ac.stations.length + ' istasyon'),
+        h('h2', {}, (ac.code || 'Uçak') + ' — ' + ac.stations.filter(function (s) { return !s.parentId; }).length + ' istasyon'),
         h('button', {
           class: 'small',
-          title: 'İstasyonları sol uçtan sağ uca listedeki sıraya göre yeniden diz',
+          title: 'İstasyonları çizime göre eşit aralıklarla yeniden diz',
           onclick: function () { SH.applyAutoLayout(ac); rerender(); },
         }, 'Otomatik yerleştir'),
       ]),
       root,
       h('div', { class: 'legend' }, [
         h('span', {}, [h('i', { class: 'dot loaded' }), 'Yük izni var']),
-        h('span', {}, [h('i', { class: 'dot empty' }), 'Tanımsız']),
-        h('span', { class: 'hint' }, 'Tıkla: seç · Sürükle: taşı'),
+        h('span', {}, [h('i', { class: 'dot none' }), 'Tanımsız']),
+        h('span', { class: 'hint' }, 'Tıkla: seç · Sürükle: taşı · Numaralar soldan sağa otomatik'),
       ]),
       h('div', { class: 'add-row' }, [
         addButton('LEFT', '+ Sol kanat'),
@@ -378,8 +393,11 @@
     ]);
   }
 
-  /* İstasyon işaretini sürükleyerek konumunu değiştirir; hareketsiz tıklama seçim yapar. */
-  function makeDraggable(svgRoot, g, st) {
+  /*
+   * İstasyon işaretini sürükleyerek konumunu değiştirir; hareketsiz tıklama seçim yapar.
+   * Ana istasyon taşınırken ek noktaları da birlikte taşınır. Bırakınca numaralar yenilenir.
+   */
+  function makeDraggable(svgRoot, g, st, ac) {
     g.addEventListener('pointerdown', function (e) {
       e.preventDefault();
       const ctm = svgRoot.getScreenCTM();
@@ -390,7 +408,8 @@
         return p.matrixTransform(inv);
       };
       const start = toSvg(e);
-      const origin = { x: st.x, y: st.y };
+      const followers = [st].concat(st.parentId ? [] : SH.sidesOf(ac, st));
+      const origins = followers.map(function (s) { return { x: s.x, y: s.y }; });
       let moved = false;
       g.setPointerCapture(e.pointerId);
       g.classList.add('dragging');
@@ -400,14 +419,20 @@
         const dx = p.x - start.x, dy = p.y - start.y;
         if (!moved && Math.hypot(dx, dy) < 3) return;
         moved = true;
-        st.x = clamp(Math.round(origin.x + dx), 12, SH.VIEW.width - 12);
-        st.y = clamp(Math.round(origin.y + dy), 12, SH.VIEW.height - 12);
-        g.setAttribute('transform', 'translate(' + st.x + ',' + st.y + ')');
+        followers.forEach(function (s, i) {
+          s.x = clamp(Math.round(origins[i].x + dx), 8, SH.VIEW.width - 8);
+          s.y = clamp(Math.round(origins[i].y + dy), 8, SH.VIEW.height - 8);
+        });
+        svgRoot.querySelectorAll('.station').forEach(function (node) {
+          const s = node.__station;
+          if (s && followers.indexOf(s) >= 0) node.setAttribute('transform', 'translate(' + s.x + ',' + s.y + ')');
+        });
       };
       const onUp = function () {
         g.removeEventListener('pointermove', onMove);
         g.removeEventListener('pointerup', onUp);
         g.removeEventListener('pointercancel', onUp);
+        if (moved) SH.arrangeStations(ac);
         state.stationId = st.id;
         rerender();
       };
@@ -415,51 +440,91 @@
       g.addEventListener('pointerup', onUp);
       g.addEventListener('pointercancel', onUp);
     });
+    g.__station = st;
   }
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  function nextStationCode(ac) {
-    let max = 0;
-    ac.stations.forEach(function (s) {
-      const m = /(\d+)$/.exec(s.code || '');
-      if (m) max = Math.max(max, Number(m[1]));
-    });
-    return 'STA' + (max + 1);
-  }
-
-  /* Yeni istasyonu kendi konum grubunun sonuna ekler (sol → merkez → sağ sırası korunur). */
+  /*
+   * Yeni ana istasyon ekler. Sol kanatta en dışa (yeni 1 numara), sağ kanatta en dışa, gövdede en
+   * arkaya eklenir; aynı gruptaki istasyonlar yeniden aralıklandırılır, numaralar yenilenir.
+   */
   function addStation(ac, location) {
     const s = M.newStation();
-    s.code = nextStationCode(ac);
     s.location = location;
-    const rank = { LEFT: 0, CENTER: 1, RIGHT: 2 };
-    let at = ac.stations.length;
-    for (let i = 0; i < ac.stations.length; i++) {
-      if (rank[ac.stations[i].location] > rank[location]) { at = i; break; }
-    }
-    ac.stations.splice(at, 0, s);
-    SH.ensurePositions(ac);
+    if (location === 'LEFT') ac.stations.unshift(s); else ac.stations.push(s);
+    SH.applyAutoLayout(ac, [location]);
     state.stationId = s.id;
+    rerender();
+  }
+
+  /* Ana istasyona ek takma noktası (ör. 5L, 5R) ekler. */
+  function addSideStation(ac, parent, suffix) {
+    suffix = String(suffix || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{1,3}$/.test(suffix)) { window.alert('Son ek 1-3 harf/rakam olmalı (ör. L, R, A).'); return; }
+    if (SH.sidesOf(ac, parent).some(function (x) { return x.suffix === suffix; })) {
+      window.alert(parent.code + suffix + ' zaten tanımlı.'); return;
+    }
+    const s = M.newStation();
+    s.parentId = parent.id;
+    s.suffix = suffix;
+    ac.stations.push(s);
+    SH.ensurePositions(ac);
+    SH.arrangeStations(ac);
+    state.stationId = s.id;
+    rerender();
+  }
+
+  function deleteStation(ac, st) {
+    const removed = [st].concat(st.parentId ? [] : SH.sidesOf(ac, st));
+    const extra = removed.length > 1 ? ' (ek noktalarıyla birlikte: ' + removed.slice(1).map(function (s) { return s.code; }).join(', ') + ')' : '';
+    if (!confirmDelete('İstasyon ' + st.code + extra)) return;
+    const ids = removed.map(function (s) { return s.id; });
+    ac.stations = ac.stations.filter(function (s) { return ids.indexOf(s.id) < 0; });
+    ac.constraints.forEach(function (c) { c.stationIds = c.stationIds.filter(function (id) { return ids.indexOf(id) < 0; }); });
+    SH.arrangeStations(ac);
+    state.stationId = st.parentId || null;
     rerender();
   }
 
   /* ---- seçili istasyon */
 
   function renderStationPanel(ac, st) {
-    const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
     const related = ac.constraints.filter(function (c) { return c.stationIds.indexOf(st.id) >= 0; });
-    const codeOf = function (id) { const s = ac.stations.find(function (x) { return x.id === id; }); return s ? s.code : '?'; };
+    const byId = {};
+    ac.stations.forEach(function (s) { byId[s.id] = s; });
+    const codeOf = function (id) { return byId[id] ? byId[id].code : '?'; };
+    const parent = st.parentId ? byId[st.parentId] : null;
+    const sides = parent ? [] : SH.sidesOf(ac, st);
+    const pick = function (s) { return function () { state.stationId = s.id; render(); }; };
+
     return h('div', { class: 'panel station-panel' }, [
       h('div', { class: 'panel-head' }, [
-        h('h2', {}, 'İstasyon ' + (st.code || '(kodsuz)')),
+        h('h2', {}, 'İstasyon ' + st.code),
+        h('span', { class: 'muted' }, parent ? 'Ek takma noktası' : M.LOCATIONS[st.location]),
+        h('button', { class: 'small danger', onclick: function () { deleteStation(ac, st); } }, 'Sil'),
       ]),
-      h('div', { class: 'grid3' }, [
-        field('Kod', st, 'code', { onInput: refreshDrawingLabel(st) }),
-        field('Ad', st, 'name'),
-        h('label', { class: 'field' }, [h('span', {}, 'Konum'), select(st, 'location', locOptions, rerender)]),
-      ]),
-      h('h3', { style: 'margin-top:6px' }, 'İzin verilen yükler'),
+      field('Ad / açıklama', st, 'name'),
+      parent
+        ? h('p', { class: 'hint' }, [
+          'Bağlı olduğu istasyon: ',
+          h('button', { class: 'small', onclick: pick(parent) }, 'İstasyon ' + parent.code),
+        ])
+        : h('div', { class: 'side-row' }, [
+          h('span', { class: 'muted' }, 'Ek takma noktaları:'),
+          sides.map(function (s) { return h('button', { class: 'small chip-btn', onclick: pick(s) }, s.code); }),
+          ['L', 'R'].filter(function (x) { return !sides.some(function (s) { return s.suffix === x; }); }).map(function (x) {
+            return h('button', { class: 'small', onclick: function () { addSideStation(ac, st, x); } }, '+ ' + st.code + x);
+          }),
+          h('button', {
+            class: 'small',
+            onclick: function () {
+              const sfx = window.prompt('Ek takma noktası son eki (ör. A, C, L2):', '');
+              if (sfx != null) addSideStation(ac, st, sfx);
+            },
+          }, '+ Diğer…'),
+        ]),
+      h('h3', { style: 'margin-top:10px' }, 'İzin verilen yükler'),
       h('p', { class: 'hint' },
         'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin bir üst seviyeye en fazla kaç adet takılabileceğidir.'),
       renderNodeList(st.loads, 'station'),
@@ -474,58 +539,31 @@
     ]);
   }
 
-  // Kod yazılırken çizimdeki etiketi odak kaybetmeden günceller.
-  function refreshDrawingLabel(st) {
-    return function () {
-      const sel = document.querySelector('.aircraft-svg .station.selected text');
-      if (sel) sel.textContent = st.code || '?';
-    };
-  }
-
   function renderStations(ac, selected) {
-    const locOptions = Object.keys(M.LOCATIONS).map(function (k) { return { value: k, label: M.LOCATIONS[k] }; });
-    const rows = ac.stations.map(function (st, i) {
-      return h('tr', { class: selected && st.id === selected.id ? 'selected' : '' }, [
-        h('td', {}, field(null, st, 'code')),
+    const rows = ac.stations.map(function (st) {
+      return h('tr', { class: (selected && st.id === selected.id ? 'selected' : '') + (st.parentId ? ' side-row-tr' : '') }, [
+        h('td', { class: 'code-cell' }, (st.parentId ? '↳ ' : '') + st.code),
         h('td', {}, field(null, st, 'name')),
-        h('td', {}, select(st, 'location', locOptions, rerender)),
+        h('td', {}, st.parentId ? 'Ek nokta' : M.LOCATIONS[st.location]),
         h('td', {}, st.loads.length ? st.loads.length + ' seçenek' : h('span', { class: 'muted' }, 'yok')),
         h('td', { style: 'white-space:nowrap' }, [
           h('button', { class: 'small', onclick: function () { state.stationId = st.id; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, 'Seç'),
           ' ',
-          h('button', { class: 'small', title: 'Yukarı', disabled: i === 0, onclick: function () { move(ac.stations, i, -1); } }, '↑'),
-          h('button', { class: 'small', title: 'Aşağı', disabled: i === ac.stations.length - 1, onclick: function () { move(ac.stations, i, 1); } }, '↓'),
-          ' ',
-          h('button', {
-            class: 'small danger',
-            onclick: function () {
-              if (!confirmDelete('İstasyon ' + (st.code || '(kodsuz)'))) return;
-              removeFrom(ac.stations, st);
-              ac.constraints.forEach(function (c) { c.stationIds = c.stationIds.filter(function (id) { return id !== st.id; }); });
-              rerender();
-            },
-          }, 'Sil'),
+          h('button', { class: 'small danger', onclick: function () { deleteStation(ac, st); } }, 'Sil'),
         ]),
       ]);
     });
 
     return h('div', { class: 'panel' }, [
       h('div', { class: 'panel-head' }, [h('h2', {}, 'İstasyon listesi')]),
-      h('p', { class: 'hint' }, 'Sıra, XML çıktısındaki ve "Otomatik yerleştir" düzenindeki sırayı belirler.'),
+      h('p', { class: 'hint' }, 'İstasyonlar çizimdeki konuma göre soldan sağa 1\'den başlayarak otomatik numaralanır. Sırayı değiştirmek için istasyonu çizimde sürükleyin.'),
       ac.stations.length
         ? h('div', { class: 'table-wrap' }, h('table', {}, [
-          h('thead', {}, h('tr', {}, ['Kod', 'Ad', 'Konum', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
+          h('thead', {}, h('tr', {}, ['No', 'Ad', 'Konum', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
           h('tbody', {}, rows),
         ]))
         : h('div', { class: 'empty' }, 'Henüz istasyon yok.'),
     ]);
-  }
-
-  function move(list, i, delta) {
-    const j = i + delta;
-    if (j < 0 || j >= list.length) return;
-    const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
-    rerender();
   }
 
   /* ---- yükleme ağacı */
@@ -676,8 +714,13 @@
     main.replaceChildren(views[state.view]());
   }
 
+  function arrangeAll(project) {
+    project.aircraft.forEach(function (ac) { SH.arrangeStations(ac); });
+    return project;
+  }
+
   function setProject(p) {
-    state.project = M.normalizeProject(p);
+    state.project = arrangeAll(M.normalizeProject(p));
     state.aircraftId = null;
     state.stationId = null;
     rerender();
@@ -706,5 +749,6 @@
     if (action === 'save') download(safeFileName(state.project.name) + '.json', JSON.stringify(state.project, null, 2), 'application/json');
   });
 
+  state.project = arrangeAll(loadFromStorage() || M.sampleProject());
   render();
 })();
