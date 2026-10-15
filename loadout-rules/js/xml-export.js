@@ -1,9 +1,9 @@
 /*
- * XML dışa aktarım katmanı.
+ * XML export layer.
  *
- * Her exporter { label, fileExtension, exportProject(project, model) -> string } biçimindedir.
- * Hedef yazılımın XML formatı netleştiğinde EXPORTERS içine yeni bir giriş eklenir;
- * kural tanımlama arayüzü ve veri modeli değişmeden kalır.
+ * Each exporter is { label, fileExtension, exportProject(project, model) -> string }.
+ * When the target software's XML format is known, a new entry is added to EXPORTERS;
+ * the rule editor and the data model stay unchanged.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -20,7 +20,7 @@
       .replace(/'/g, '&apos;');
   }
 
-  /* Basit XML düğüm kurucu: el(tag, attrs, children). Boş/undefined özellikler atlanır. */
+  /* Minimal XML node builder: el(tag, attrs, children). Empty/undefined attributes are skipped. */
   function el(tag, attrs, children) {
     return { tag: tag, attrs: attrs || {}, children: (children || []).filter(Boolean) };
   }
@@ -45,7 +45,7 @@
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + serialize(rootNode) + '\n';
   }
 
-  /* ------------------------------------------------------------ genel format */
+  /* ------------------------------------------------------------ generic format */
 
   const TAG_BY_KIND = { munition: 'Munition', rack: 'Rack', subrack: 'Subrack', gun: 'Gun', ammo: 'Ammo' };
 
@@ -115,11 +115,11 @@
 
   const EXPORTERS = {
     generic: {
-      label: 'Genel XML (geçici format)',
+      label: 'Generic XML (interim format)',
       fileExtension: 'xml',
       exportProject: genericExport,
     },
-    // target: { label: 'Hedef yazılım formatı', fileExtension: 'xml', exportProject: function (project, model) { ... } },
+    // target: { label: 'Target software format', fileExtension: 'xml', exportProject: function (project, model) { ... } },
   };
 
   return {

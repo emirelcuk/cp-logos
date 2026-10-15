@@ -1,89 +1,92 @@
-# Yükleme Kuralları Editörü
+# Loadout Rules Editor
 
-Savaş uçaklarının istasyonlarına hangi **rack**, **subrack** ve **mühimmatın** takılabileceğini
-tanımlamak ve bu kuralları **XML**'e çevirmek için bir uygulama.
+An application for defining which **racks**, **subracks**, **stores** and **guns** may be fitted to
+the stations of combat aircraft, and for converting those rules to **XML**.
 
-## Çalıştırma
+## Running
 
-Kurulum gerektirmez, internet bağlantısı gerektirmez. `index.html` dosyasını tarayıcıda açın.
+No installation and no internet connection required. Open `index.html` in a browser.
 
-Tek dosyalık sürüm: `dist/yukleme-kurallari.html` (USB ile taşınabilir). Kaynak değiştiğinde
-`npm run build` ile yeniden üretilir.
+Single-file version: `dist/loadout-rules.html` (can be carried on a USB stick). Rebuild it with
+`npm run build` after changing the sources.
 
-- Çalışma tarayıcıda otomatik saklanır (localStorage).
-- **Kaydet** (Ctrl+S) Chrome/Edge'de aynı JSON dosyasının üzerine yazar; **Farklı kaydet** yeni dosya
-  seçtirir. Diğer tarayıcılarda dosya indirilir. Üst çubukta açık dosya adı ve kaydedilmemiş
-  değişiklik işareti (•) görünür.
-- **Geri al / Yinele** (Ctrl+Z / Ctrl+Y): son 150 değişiklik.
-- Testler: `npm test` (Node 18+).
+- Work is saved automatically in the browser (localStorage).
+- **Save** (Ctrl+S) overwrites the same JSON file in Chrome/Edge; **Save as** picks a new file.
+  Other browsers download the file instead. The top bar shows the open file name and a • when there
+  are unsaved changes.
+- **Undo / Redo** (Ctrl+Z / Ctrl+Y): the last 150 changes.
+- Tests: `npm test` (Node 18+).
 
-## Kavramlar
+## Concepts
 
-| Sekme | İçerik |
+| Tab | Contents |
 |---|---|
-| Uçaklar (ana sayfa) | Uçağın üstten çizimi üzerinde istasyonlar; istasyona tıklayıp izin verilen yükleme ağacını düzenleme, istasyonlar arası kurallar |
-| Matris | Öğe × istasyon uyumluluk tablosu (✓ / ×N, takma yolu ipucunda); Excel (CSV) ve yazdır / PDF |
-| Paketler | Birden fazla istasyonda ortak kullanılan yük ağaçları |
-| Katalog | Mühimmat, rack, subrack, top ve top mühimmatı tanımları (arama destekli) |
-| Doğrulama | Hatalar (tekrarlanan kod, geçersiz yerleşim, pozisyon aşımı…) ve uyarılar (yük izni tanımsız istasyon…) |
-| XML Çıktısı | Seçilen formatta XML önizleme ve indirme |
+| Aircraft (home) | Stations on a top-view drawing of the aircraft; click a station to edit its allowed load tree; cross-station rules |
+| Matrix | Item × station compatibility table (✓ / ×N, mounting path in the tooltip); Excel (CSV) and print / PDF |
+| Presets | Load trees shared by several stations |
+| Catalog | Store, rack, subrack, gun and gun ammunition definitions (search and filters) |
+| Validation | Errors (duplicate codes, invalid nesting, position overflow…) and warnings (stations without loads…) |
+| XML Output | Preview and download in the selected format |
 
-**Yükleme ağacı:** İstasyon altına rack / subrack / mühimmat, rack altına subrack / mühimmat,
-subrack altına mühimmat eklenir. Aynı seviyedeki öğeler birbirinin *alternatifidir*.
-"Maks. adet", öğenin üst seviyeye en fazla kaç adet takılabileceğidir ve üst öğenin pozisyon
-sayısını aşamaz.
+**Load tree:** Racks / subracks / stores go under a station, subracks / stores under a rack, stores
+under a subrack. Items on the same level are *alternatives*. "Max qty" is the most of that item on
+its parent and may not exceed the parent's number of positions.
 
-**Uçak çizimi:** Her uçak için bir çizim tipi seçilir (tek motorlu, çift motorlu, delta kanat,
-çizimsiz). İstasyon sayısı ve yeri uçağa göre serbesttir: "+ Sol kanat / + Gövde / + Sağ kanat"
-ile istasyon eklenir, işaret sürüklenerek taşınır, "Otomatik yerleştir" eşit aralıklarla dizer.
-Çizimler şematiktir, gerçek ölçü içermez.
+**Aircraft drawing:** Each aircraft has a drawing type: single-engine fighter (F-16 type), twin-engine
+fighter (F-15 / F-4 type), Eurofighter Typhoon (canard delta), CALIDUS B-250 (turboprop light
+attack), delta wing, or no drawing. The number and position of stations are free per aircraft: add
+them with "Left wing / Fuselage / Right wing", drag markers to move them, "Auto layout" re-spaces
+them. The drawings are schematic and not to scale.
 
-**Numaralandırma:** Ana istasyonlar çizimdeki konuma göre soldan sağa 1'den başlayarak otomatik
-numaralanır (taşıma, ekleme ve silmede yenilenir). Konum (sol / merkez / sağ) da çizimden çıkarılır.
+**Numbering:** Main stations are numbered automatically from 1, left to right by their position on
+the drawing (refreshed on move, add and delete). Location (left / centre / right) is also derived
+from the drawing.
 
-**Ek takma noktaları:** Bir istasyona 5L, 5R veya özel son ekli (ör. 5A) ek noktalar eklenebilir.
-Ek noktaların kendi yük kuralları vardır; XML'de `parent` özelliğiyle ana istasyona bağlanır.
+**Side stations:** A station can have side stations such as 5L, 5R or a custom suffix (e.g. 5A).
+They have their own load rules and are linked to the parent with the `parent` attribute in XML.
 
-**Top (gun):** "Top (GUN)" düğmesiyle numarasız bir top istasyonu eklenir (birden fazlaysa GUN1,
-GUN2). Kural yapısı: Top istasyonu → Top → Top mühimmatı (Maks. mermi). Top podları (ör. GPU-5/A)
-rack altına da takılabilir. Mermi adedi topun mermi kapasitesini aşarsa hata, top ile mühimmatın
-çapı uyuşmazsa uyarı verilir. XML'de `<Station type="GUN">`, `<Gun caliber capacity>` ve
-`<Ammo caliber type>` olarak yazılır.
+**Guns:** "Gun (GUN)" adds an unnumbered gun station (GUN1, GUN2 when there are several). Rule
+structure: gun station → gun → gun ammunition (max rounds). Gun pods (e.g. GPU-5/A) may also be
+fitted under a rack. Exceeding the gun's round capacity is an error; a caliber mismatch between gun
+and ammunition is a warning. In XML: `<Station type="GUN">`, `<Gun caliber capacity>` and
+`<Ammo caliber type>`.
 
-**Standart katalog:** Kamuya açık tanımlamalarla 92 mühimmat (hava-hava / hava-yer / seyir füzeleri,
-genel maksat, lazer ve GPS güdümlü bombalar, yerli güdüm kitleri, misket, roket, eğitim bombaları,
-tanklar, podlar), 15 rack (MAU-12, LAU-129, LAU-117, LAU-88, roket lançerleri…), 8 subrack (TER-9,
-MER-10, BRU-57, BRU-61…), 13 top ve 22 top mühimmatı. Yeni projeler bu katalogla başlar; eski
-projelere açılışta eksik öğeler otomatik eklenir (mevcut kayıtlara dokunulmaz). "Standart katalogu
-ekle" düğmesi de aynı işi elle yapar. Katalogda kategori/çap filtresi ve arama vardır.
-Top kapasiteleri uçağa göre değişir; kendi verinizle doğrulayın.
-Örnek projedeki uyumluluklar gösterim amaçlıdır; gerçek teknik verilerle doğrulanmalıdır.
+**Standard catalog:** 92 stores using public designations (air-to-air / air-to-ground / cruise
+missiles, general purpose, laser- and GPS-guided bombs, Turkish guidance kits, cluster bombs,
+rockets, practice bombs, tanks, pods), 15 racks (MAU-12, LAU-129, LAU-117, LAU-88, rocket
+launchers…), 8 subracks (TER-9, MER-10, BRU-57, BRU-61…), 13 guns and 22 gun ammunition types. New
+projects start with this catalog; older projects get the missing items on open, and untouched
+entries still carrying the earlier Turkish names are translated to English (edited entries are
+left alone). "Add standard catalog" does the same by hand. Gun capacities vary by aircraft; verify
+them with your own data. The compatibilities in the sample project are for demonstration only and
+must be checked against real technical data.
 
-**Kopyalama:** İstasyon panelinde "→ 7" simetrik istasyona tek tıkla kopyalar; "Kopyala…" seçilen
-istasyonlara (yerine koy / ekle) kopyalar. Uçak bilgisinde "Çoğalt", uçağı tüm istasyon, yük ve
-kurallarıyla kopyalar (varyant türetmek için).
+**Copying:** In the station panel, "→ 7" copies the rules to the symmetric station in one click;
+"Copy…" copies them to selected stations (replace / append). "Duplicate" in the aircraft info copies
+the aircraft with all its stations, loads and rules (to create a variant).
 
-**Yükleme paketleri:** Ortak bir yük ağacı (ör. AAM-RAY: LAU-129 → AIM-9X / AIM-9M / AIM-120C) bir kez
-tanımlanır, istasyonlara "+ Paket" ile eklenir; paket değişince tüm istasyonlar güncellenir.
-"Paket yap" bir istasyonun yüklerini pakete dönüştürür. XML ve matriste paketler açılarak yazılır.
+**Presets:** A shared load tree (e.g. AAM-RAIL: LAU-129 → AIM-9X / AIM-9M / AIM-120C) is defined
+once and added to stations with "+ Preset"; changing the preset updates every station that uses it.
+"Make preset" turns a station's loads into a preset. Presets are expanded in the XML and the matrix.
+Projects saved by earlier versions (which called presets "packages") are converted automatically.
 
-**İstasyonlar arası kurallar:** Simetrik, Birbirini dışlar, Gerektirir, Toplam üst sınır.
+**Cross-station rules:** Symmetric, Mutually exclusive, Requires, Total limit.
 
-## Dosya yapısı
+## File structure
 
 ```
-index.html          arayüz iskeleti
+index.html             UI skeleton
 css/style.css
-js/model.js         veri modeli, örnek veri, doğrulama
-js/aircraft-shapes.js  uçak çizimleri ve istasyon yerleşimi
-js/xml-export.js    XML dışa aktarım formatları (exporter'lar)
-js/app.js           arayüz
-tools/build-single.js  tek dosyalık HTML üretimi
-dist/               tek dosyalık sürüm
-tests/              Node testleri
+js/model.js            data model, standard catalog, sample data, validation
+js/aircraft-shapes.js  aircraft drawings and station layout
+js/xml-export.js       XML export formats (exporters)
+js/app.js              user interface
+tools/build-single.js  single-file HTML build
+dist/                  single-file version
+tests/                 Node tests
 ```
 
-## Hedef XML formatı
+## Target XML format
 
-Şu anki "Genel XML" geçici bir formattır. Hedef yazılımın formatı için `js/xml-export.js`
-içindeki `EXPORTERS` nesnesine yeni bir exporter eklenecek; kural tanımlama arayüzü değişmeyecek.
+The current "Generic XML" is an interim format. For the target software's format a new exporter
+will be added to the `EXPORTERS` object in `js/xml-export.js`; the rule editor will not change.

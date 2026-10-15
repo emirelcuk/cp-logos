@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yükleme Kuralları</title>
+  <title>Loadout Rules</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,21 +12,21 @@
       <div class="brand">
         <span class="brand-icon"></span>
         <div class="brand-text">
-          <b>Yükleme Kuralları</b>
-          <span>İstasyon · Rack · Mühimmat</span>
+          <b>Loadout Rules</b>
+          <span>Station · Rack · Store</span>
         </div>
       </div>
-      <input id="project-name" class="project-name" aria-label="Proje adı" placeholder="Proje adı">
+      <input id="project-name" class="project-name" aria-label="Project name" placeholder="Project name">
       <span id="file-status" class="file-status hidden"></span>
       <div class="actions">
-        <button data-action="undo" title="Geri al (Ctrl+Z)" aria-label="Geri al" disabled></button>
-        <button data-action="redo" title="Yinele (Ctrl+Y)" aria-label="Yinele" disabled></button>
+        <button data-action="undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled></button>
+        <button data-action="redo" title="Redo (Ctrl+Y)" aria-label="Redo" disabled></button>
         <span class="sep"></span>
-        <button data-action="new"><span>Yeni</span></button>
-        <button data-action="open" title="JSON proje dosyası aç"><span>Aç</span></button>
-        <button data-action="save" title="Dosyaya kaydet (Ctrl+S)"><span>Kaydet</span></button>
-        <button data-action="saveas" title="Farklı kaydet (Ctrl+Shift+S)"><span>Farklı kaydet</span></button>
-        <button data-action="sample"><span>Örnek</span></button>
+        <button data-action="new"><span>New</span></button>
+        <button data-action="open" title="Open a JSON project file"><span>Open</span></button>
+        <button data-action="save" title="Save to file (Ctrl+S)"><span>Save</span></button>
+        <button data-action="saveas" title="Save as (Ctrl+Shift+S)"><span>Save as</span></button>
+        <button data-action="sample"><span>Sample</span></button>
         <input type="file" id="file-input" accept=".json,application/json" hidden>
       </div>
     </div>

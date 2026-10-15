@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yükleme Kuralları</title>
+  <title>Loadout Rules</title>
   <style>
 :root {
   --bg: #eef1f6;
@@ -27,12 +27,12 @@
   --munition: #c2410c;
   --gun: #b91c1c;
   --ammo: #a16207;
-  --package: #0f766e;
+  --preset: #0f766e;
   --header: #0b1626;
   --header-2: #13233a;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 4px 14px rgba(16, 24, 40, .05);
-  /* çizim (blueprint) */
+  /* drawing (blueprint) */
   --bp-bg: #0a1a2f;
   --bp-grid: rgba(110, 160, 230, .09);
   --bp-grid-major: rgba(110, 160, 230, .18);
@@ -50,7 +50,7 @@ body { margin: 0; font: 14px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, s
 
 .icon { width: 16px; height: 16px; flex: none; vertical-align: middle; }
 
-/* ------------------------------------------------------------ üst çubuk */
+/* ------------------------------------------------------------ top bar */
 .topbar { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg, var(--header), var(--header-2)); color: #e7eef9; box-shadow: 0 2px 10px rgba(0, 0, 0, .18); }
 .topbar-row { display: flex; align-items: center; gap: 14px; padding: 10px 20px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; }
@@ -77,7 +77,7 @@ main { padding: 18px 20px 40px; max-width: 1600px; margin: 0 auto; }
 @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
 .content { min-width: 0; }
 
-/* ------------------------------------------------------------ paneller */
+/* ------------------------------------------------------------ panels */
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px; box-shadow: var(--shadow); min-width: 0; }
 .panel h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: .1px; }
 .panel h3 { margin: 0 0 8px; font-size: 13.5px; font-weight: 650; display: flex; align-items: center; gap: 6px; }
@@ -124,7 +124,7 @@ label.field.inline select { width: auto; min-width: 150px; }
 .search .icon { position: absolute; left: 9px; color: var(--muted); }
 .search input { padding-left: 30px; width: 180px; }
 
-/* ------------------------------------------------------------ listeler */
+/* ------------------------------------------------------------ lists */
 .list, .aircraft-list { list-style: none; margin: 0; padding: 0; }
 .list li { padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 9px; }
 .list li:hover { background: var(--panel-2); }
@@ -149,7 +149,7 @@ label.field.inline select { width: auto; min-width: 150px; }
 .ac-name { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ac-counts { font-size: 11.5px; color: var(--muted); }
 
-/* ------------------------------------------------------------ tablolar */
+/* ------------------------------------------------------------ tables */
 table { width: 100%; border-collapse: separate; border-spacing: 0; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 th { font-size: 11.5px; color: var(--muted); font-weight: 650; text-transform: uppercase; letter-spacing: .4px; background: var(--panel-2); position: sticky; top: 0; }
@@ -173,7 +173,7 @@ td.code-col input { font-weight: 650; }
 .pill { display: inline-block; padding: 1px 9px; border-radius: 10px; font-size: 12px; background: var(--panel-2); color: var(--muted); border: 1px solid var(--border); white-space: nowrap; }
 .pill.ok { background: var(--ok-soft); color: var(--ok); border-color: #bfe6cb; }
 
-/* ------------------------------------------------------------ uçak bilgisi */
+/* ------------------------------------------------------------ aircraft info */
 .aircraft-info .panel-head h2 { font-size: 18px; }
 .stats { display: flex; gap: 8px; flex-wrap: wrap; }
 .stat { display: flex; align-items: baseline; gap: 5px; padding: 3px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--border); }
@@ -182,7 +182,7 @@ td.code-col input { font-weight: 650; }
 .stat.err b { color: var(--danger); }
 .stat.warn b { color: var(--warn); }
 
-/* ------------------------------------------------------------ çizim */
+/* ------------------------------------------------------------ drawing */
 .stage { display: grid; grid-template-columns: minmax(300px, 460px) minmax(0, 1fr); gap: 18px; align-items: start; }
 @media (max-width: 1150px) { .stage { grid-template-columns: 1fr; } }
 .drawing { position: sticky; top: 112px; }
@@ -193,6 +193,7 @@ td.code-col input { font-weight: 650; }
 .aircraft-svg .af-stop-1 { stop-color: rgba(127, 178, 255, .22); }
 .aircraft-svg .af-stop-2 { stop-color: rgba(127, 178, 255, .08); }
 .aircraft-svg .airframe { fill: url(#airframe-fill); stroke: var(--bp-line); stroke-width: 1.6; stroke-linejoin: round; }
+.aircraft-svg .prop { stroke: var(--bp-line); stroke-width: 3; stroke-linecap: round; opacity: .8; }
 .aircraft-svg .canopy { fill: rgba(127, 178, 255, .3); stroke: var(--bp-line); stroke-width: 1.2; }
 .aircraft-svg .fin { stroke: var(--bp-line); stroke-width: 3.5; stroke-linecap: round; opacity: .85; }
 .aircraft-svg .centerline { stroke: rgba(127, 178, 255, .35); stroke-dasharray: 6 6; }
@@ -233,7 +234,7 @@ td.code-col input { font-weight: 650; }
 .map-tooltip li { display: flex; align-items: center; gap: 6px; line-height: 1.6; }
 .map-tooltip li.more, .map-tooltip .tt-empty { color: #9fb3cf; font-style: italic; }
 
-/* ------------------------------------------------------------ istasyon paneli */
+/* ------------------------------------------------------------ station panel */
 .station-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .station-badge { display: grid; place-items: center; min-width: 46px; height: 46px; padding: 0 8px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #0ea5e9); color: #fff; font-weight: 800; font-size: 18px; box-shadow: 0 2px 8px rgba(37, 99, 235, .3); }
 .station-badge.side { background: linear-gradient(135deg, #3b82f6, #7dd3fc); font-size: 16px; }
@@ -245,7 +246,7 @@ td.code-col input { font-weight: 650; }
 .section-title { display: flex; align-items: baseline; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
 .section-title h3 { margin: 0; }
 
-/* yükleme ağacı */
+/* load tree */
 .tree { list-style: none; margin: 0; padding: 0; }
 .tree-item { position: relative; margin-bottom: 8px; border: 1px solid var(--border); border-left: 4px solid var(--border-strong); border-radius: 10px; background: var(--panel); }
 .tree-item.rack { border-left-color: var(--rack); }
@@ -277,7 +278,7 @@ input.qty { width: 74px; }
 .related ul { list-style: none; margin: 0; padding: 0; font-size: 13px; }
 .related li { padding: 4px 0; }
 
-/* kurallar */
+/* rules */
 .rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
 .rule-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--panel-2); }
 .rule-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
@@ -293,7 +294,7 @@ input.qty { width: 74px; }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); }
 .chip.gun.on { background: #fdecec; border-color: var(--gun); color: var(--gun); }
 
-/* doğrulama */
+/* validation */
 .issues { display: flex; flex-direction: column; gap: 8px; }
 .issue { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; border: 1px solid; }
 .issue .icon { width: 18px; height: 18px; margin-top: 1px; }
@@ -318,7 +319,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
 .x-val { color: #86efac; }
 .x-decl { color: #64748b; }
 
-/* bildirim */
+/* toast */
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 60; padding: 10px 16px; border-radius: 10px; background: #0b1626; color: #fff; font-size: 13.5px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); opacity: 0; transform: translateY(10px); transition: opacity .2s, transform .2s; pointer-events: none; border-left: 4px solid var(--accent); }
 .toast.show { opacity: 1; transform: none; }
 .toast.ok { border-left-color: #22c55e; }
@@ -330,7 +331,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
   .project-name { margin-left: 0; max-width: none; }
 }
 
-/* katalog grup filtresi */
+/* catalog group filter */
 .group-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
 .group-chip { border-radius: 14px; background: #fff; }
 .group-chip .count { margin-left: 2px; }
@@ -339,21 +340,21 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
 .catalog-table td:nth-child(2) { min-width: 300px; width: 38%; }
 .catalog-table td.num { width: 130px; }
 
-/* üst çubuk: geri al / dosya durumu */
+/* top bar: undo / file status */
 .sep { width: 1px; align-self: stretch; background: rgba(255, 255, 255, .15); margin: 2px 4px; }
 .topbar .actions button:disabled { opacity: .35; }
 .file-status { font-size: 12px; color: #9fb3cf; padding: 3px 9px; border-radius: 8px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); white-space: nowrap; }
 .file-status.dirty { color: #fcd34d; border-color: rgba(252, 211, 77, .35); }
 .file-status.hidden { display: none; }
 
-/* paketler */
-.kind.package { background: var(--package); }
-.kind-dot.package { background: var(--package); border-radius: 50%; }
-.tree-item.package { border-left-color: var(--package); background: #f0fdfa; }
-.pkg-summary { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 0 10px 9px 12px; font-size: 12px; color: var(--muted); }
-.pkg-item { display: inline-flex; align-items: center; gap: 4px; }
-.pkg-item.d0 { color: var(--text); font-weight: 600; }
-.add-buttons .add-package:hover { color: var(--package); border-color: var(--package); background: #ecfdf8; }
+/* presets */
+.kind.preset { background: var(--preset); }
+.kind-dot.preset { background: var(--preset); border-radius: 50%; }
+.tree-item.preset { border-left-color: var(--preset); background: #f0fdfa; }
+.preset-summary { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 0 10px 9px 12px; font-size: 12px; color: var(--muted); }
+.preset-item { display: inline-flex; align-items: center; gap: 4px; }
+.preset-item.d0 { color: var(--text); font-weight: 600; }
+.add-buttons .add-preset:hover { color: var(--preset); border-color: var(--preset); background: #ecfdf8; }
 .section-title .grow { flex: 1; }
 .section-title { flex-wrap: wrap; }
 
@@ -367,7 +368,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
 .section-label { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
 .chip.mirror { border-style: dashed; border-color: var(--accent); }
 
-/* matris */
+/* matrix */
 .seg { display: inline-flex; gap: 4px; flex-wrap: wrap; }
 .seg button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .matrix-wrap { overflow: auto; max-height: 72vh; border: 1px solid var(--border); border-radius: 10px; margin-top: 12px; }
@@ -409,21 +410,21 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       <div class="brand">
         <span class="brand-icon"></span>
         <div class="brand-text">
-          <b>Yükleme Kuralları</b>
-          <span>İstasyon · Rack · Mühimmat</span>
+          <b>Loadout Rules</b>
+          <span>Station · Rack · Store</span>
         </div>
       </div>
-      <input id="project-name" class="project-name" aria-label="Proje adı" placeholder="Proje adı">
+      <input id="project-name" class="project-name" aria-label="Project name" placeholder="Project name">
       <span id="file-status" class="file-status hidden"></span>
       <div class="actions">
-        <button data-action="undo" title="Geri al (Ctrl+Z)" aria-label="Geri al" disabled></button>
-        <button data-action="redo" title="Yinele (Ctrl+Y)" aria-label="Yinele" disabled></button>
+        <button data-action="undo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled></button>
+        <button data-action="redo" title="Redo (Ctrl+Y)" aria-label="Redo" disabled></button>
         <span class="sep"></span>
-        <button data-action="new"><span>Yeni</span></button>
-        <button data-action="open" title="JSON proje dosyası aç"><span>Aç</span></button>
-        <button data-action="save" title="Dosyaya kaydet (Ctrl+S)"><span>Kaydet</span></button>
-        <button data-action="saveas" title="Farklı kaydet (Ctrl+Shift+S)"><span>Farklı kaydet</span></button>
-        <button data-action="sample"><span>Örnek</span></button>
+        <button data-action="new"><span>New</span></button>
+        <button data-action="open" title="Open a JSON project file"><span>Open</span></button>
+        <button data-action="save" title="Save to file (Ctrl+S)"><span>Save</span></button>
+        <button data-action="saveas" title="Save as (Ctrl+Shift+S)"><span>Save as</span></button>
+        <button data-action="sample"><span>Sample</span></button>
         <input type="file" id="file-input" accept=".json,application/json" hidden>
       </div>
     </div>
@@ -433,20 +434,21 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   <script>
 /*
- * Veri modeli, örnek veri ve doğrulama.
- * Tarayıcıda window.LoadoutModel, Node'da module.exports olarak kullanılır.
+ * Data model, sample data and validation.
+ * Used as window.LoadoutModel in the browser and via module.exports in Node.
  *
- * Proje yapısı:
- *   catalog.munitions / racks / subracks / guns / ammo : tanımlı mağazalar (store)
- *   aircraft[].stations[].loads          : istasyona izin verilen yükleme ağacı
- *   aircraft[].constraints               : istasyonlar arası kurallar
+ * Project structure:
+ *   catalog.munitions / racks / subracks / guns / ammo : defined stores
+ *   presets[]                                          : reusable load trees
+ *   aircraft[].stations[].loads                        : load tree allowed on a station
+ *   aircraft[].constraints                             : cross-station rules
  *
- * Yükleme ağacı (LoadNode):
- *   { id, kind: 'rack'|'subrack'|'munition'|'gun'|'ammo', refId, qty, children: [LoadNode] }
- *   Bir düğümün çocukları birbirinin ALTERNATİFİDİR (hangisi takılabilir).
- *   qty: o öğeden ebeveyne en fazla kaç adet takılabileceği (top mühimmatında mermi adedi).
+ * Load tree (LoadNode):
+ *   { id, kind: 'rack'|'subrack'|'munition'|'gun'|'ammo'|'preset', refId, qty, children: [LoadNode] }
+ *   The children of a node are ALTERNATIVES (any one of them may be fitted).
+ *   qty: maximum number of that item on its parent (rounds for gun ammunition).
  *
- * İstasyon tipleri: STATION (numaralı istasyon / ek nokta) ve GUN (dahili top, numarasız).
+ * Station types: STATION (numbered station / side station) and GUN (internal gun, unnumbered).
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -457,35 +459,35 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   const SCHEMA_VERSION = 1;
 
   const KINDS = ['munition', 'rack', 'subrack', 'gun', 'ammo'];
-  const KIND_LABELS = { munition: 'Mühimmat', rack: 'Rack', subrack: 'Subrack', gun: 'Top', ammo: 'Top mühimmatı', package: 'Paket' };
+  const KIND_LABELS = { munition: 'Store', rack: 'Rack', subrack: 'Subrack', gun: 'Gun', ammo: 'Gun ammunition', preset: 'Preset' };
   const CATALOG_KEY = { munition: 'munitions', rack: 'racks', subrack: 'subracks', gun: 'guns', ammo: 'ammo' };
-  // Pozisyon alanının anlamı: rack/subrack için takma yeri sayısı, top için mermi kapasitesi.
+  // Meaning of "positions": mounting points for racks/subracks, round capacity for guns.
   const HAS_POSITIONS = { rack: true, subrack: true, gun: true };
 
-  // Hangi düğümün altına ne takılabilir. Top podları rack altına takılabilir.
+  // What may be fitted under what. Gun pods may hang under a rack.
   const ALLOWED_CHILDREN = {
-    station: ['rack', 'subrack', 'munition', 'gun', 'package'],
+    station: ['rack', 'subrack', 'munition', 'gun', 'preset'],
     gunStation: ['gun'],
-    // Yükleme paketi içeriği: istasyonla aynı, ancak paket içinde paket yok.
-    packageRoot: ['rack', 'subrack', 'munition', 'gun'],
-    package: [],
+    // Preset contents: same as a station, but no preset inside a preset.
+    presetRoot: ['rack', 'subrack', 'munition', 'gun'],
+    preset: [],
     rack: ['subrack', 'munition', 'gun'],
     subrack: ['munition'],
     gun: ['ammo'],
     munition: [],
     ammo: [],
   };
-  const PARENT_LABELS = { station: 'istasyon', gunStation: 'top istasyonu', packageRoot: 'paket' };
+  const PARENT_LABELS = { station: 'a station', gunStation: 'a gun station', presetRoot: 'a preset' };
 
-  const STATION_TYPES = { STATION: 'İstasyon', GUN: 'Top (GUN)' };
+  const STATION_TYPES = { STATION: 'Station', GUN: 'Gun (GUN)' };
 
-  const LOCATIONS = { LEFT: 'Sol', CENTER: 'Merkez', RIGHT: 'Sağ' };
+  const LOCATIONS = { LEFT: 'Left', CENTER: 'Centre', RIGHT: 'Right' };
 
   const CONSTRAINT_TYPES = {
-    SYMMETRIC: { label: 'Simetrik', help: 'Listelenen istasyonlar aynı yükü taşımalı.' },
-    EXCLUSIVE: { label: 'Birbirini dışlar', help: 'Listelenen istasyonlardan en fazla biri yüklenebilir.' },
-    REQUIRES: { label: 'Gerektirir', help: 'İlk istasyon yüklenirse diğerleri de yüklenmeli.' },
-    MAX_TOTAL: { label: 'Toplam üst sınır', help: 'Seçilen mühimmattan listelenen istasyonlarda toplam en fazla N adet.' },
+    SYMMETRIC: { label: 'Symmetric', help: 'The listed stations must carry the same load.' },
+    EXCLUSIVE: { label: 'Mutually exclusive', help: 'At most one of the listed stations may be loaded.' },
+    REQUIRES: { label: 'Requires', help: 'If the first station is loaded, the others must be loaded too.' },
+    MAX_TOTAL: { label: 'Total limit', help: 'At most N of the selected store in total across the listed stations.' },
   };
 
   let idCounter = 0;
@@ -498,11 +500,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   function emptyProject() {
     return {
       schemaVersion: SCHEMA_VERSION,
-      name: 'Yeni Proje',
+      name: 'New Project',
       catalogVersion: 0,
       catalog: emptyCatalog(),
-      // Yükleme paketleri: birden fazla istasyonda kullanılan ortak yük ağaçları.
-      packages: [],
+      // Presets: shared load trees used on several stations.
+      presets: [],
       aircraft: [],
     };
   }
@@ -526,9 +528,9 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   function newStation() {
-    // code ve location soldan sağa sıralamayla otomatik verilir (AircraftShapes.arrangeStations).
-    // parentId/suffix: ek takma noktası ise bağlı olduğu ana istasyon ve son eki (ör. 5 + 'L' = 5L).
-    // x, y: uçak çizimindeki konum (null ise otomatik yerleştirilir).
+    // code and location are assigned by left-to-right ordering (AircraftShapes.arrangeStations).
+    // parentId/suffix: for a side station, its parent station and suffix (e.g. 5 + 'L' = 5L).
+    // x, y: position on the aircraft drawing (null = placed automatically).
     return { id: newId('st'), type: 'STATION', code: '', name: '', parentId: null, suffix: '', location: 'CENTER', x: null, y: null, loads: [] };
   }
 
@@ -540,28 +542,28 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return { id: newId('cn'), type: 'SYMMETRIC', stationIds: [], munitionId: '', value: 0, description: '' };
   }
 
-  function newPackage() {
-    return { id: newId('pk'), code: '', name: '', notes: '', loads: [] };
+  function newPreset() {
+    return { id: newId('ps'), code: '', name: '', notes: '', loads: [] };
   }
 
   function findStore(project, kind, id) {
-    const list = kind === 'package' ? (project.packages || []) : (project.catalog[CATALOG_KEY[kind]] || []);
+    const list = kind === 'preset' ? (project.presets || []) : (project.catalog[CATALOG_KEY[kind]] || []);
     return list.find(function (s) { return s.id === id; }) || null;
   }
 
   function storeLabel(store) {
-    if (!store) return '(tanımsız)';
-    return store.code ? store.code + (store.name ? ' — ' + store.name : '') : (store.name || '(adsız)');
+    if (!store) return '(undefined)';
+    return store.code ? store.code + (store.name ? ' — ' + store.name : '') : (store.name || '(unnamed)');
   }
 
-  // Önceki sürümlerden kalan, artık kullanılmayan alanlar.
+  // Fields from earlier versions that are no longer used.
   const OBSOLETE_FIELDS = ['weightKg', 'maxLoadKg'];
   function stripObsolete(obj) {
     OBSOLETE_FIELDS.forEach(function (k) { delete obj[k]; });
     return obj;
   }
 
-  /* Eski veya eksik projeleri güncel şemaya tamamlar. */
+  /* Brings old or incomplete projects up to the current schema. */
   function normalizeProject(p) {
     const out = Object.assign(emptyProject(), p || {});
     out.catalog = Object.assign(emptyCatalog(), out.catalog || {});
@@ -569,6 +571,14 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       out.catalog[CATALOG_KEY[kind]] = out.catalog[CATALOG_KEY[kind]].map(function (s) {
         return stripObsolete(Object.assign(newStore(kind), s));
       });
+    });
+    // Earlier versions called presets "packages" (kind 'package').
+    const legacyPresets = out.packages || [];
+    delete out.packages;
+    out.presets = (out.presets || []).concat(legacyPresets).map(function (pk) {
+      const preset = Object.assign(newPreset(), pk);
+      preset.loads = (preset.loads || []).map(normalizeNode);
+      return preset;
     });
     out.aircraft = (out.aircraft || []).map(function (a) {
       const ac = Object.assign(newAircraft(), a);
@@ -582,31 +592,33 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       });
       return ac;
     });
-    out.packages = (out.packages || []).map(function (pk) {
-      const pkg = Object.assign(newPackage(), pk);
-      pkg.loads = (pkg.loads || []).map(normalizeNode);
-      return pkg;
-    });
     out.schemaVersion = SCHEMA_VERSION;
     return out;
   }
 
-  /* ---------------------------------------------------------------- kopyalama, paketler */
+  function normalizeNode(n) {
+    const node = Object.assign(newLoadNode(n.kind, n.refId), n);
+    if (node.kind === 'package') node.kind = 'preset';
+    node.children = (node.children || []).map(normalizeNode);
+    return node;
+  }
 
-  /* Yük ağacının yeni kimliklerle derin kopyası. */
+  /* ---------------------------------------------------------------- copying, presets */
+
+  /* Deep copy of a load tree with new ids. */
   function cloneLoads(loads) {
     return (loads || []).map(function (n) {
       return { id: newId('ld'), kind: n.kind, refId: n.refId, qty: n.qty, children: cloneLoads(n.children) };
     });
   }
 
-  /* Paket referanslarını paket içeriğiyle değiştirir (XML, matris vb. için düz kural ağacı). */
+  /* Replaces preset references with the preset contents (flat rule tree for XML, matrix etc.). */
   function expandLoads(project, loads) {
     const out = [];
     (loads || []).forEach(function (n) {
-      if (n.kind === 'package') {
-        const pkg = findStore(project, 'package', n.refId);
-        if (pkg) cloneLoads(pkg.loads).forEach(function (c) { out.push(c); });
+      if (n.kind === 'preset') {
+        const preset = findStore(project, 'preset', n.refId);
+        if (preset) cloneLoads(preset.loads).forEach(function (c) { out.push(c); });
         return;
       }
       out.push({ id: n.id, kind: n.kind, refId: n.refId, qty: n.qty, children: expandLoads(project, n.children) });
@@ -614,23 +626,23 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return out;
   }
 
-  /* Paketin kullanıldığı istasyonlar: [{ aircraft, station }]. */
-  function packageUsage(project, pkgId) {
+  /* Stations that use a preset: [{ aircraft, station }]. */
+  function presetUsage(project, presetId) {
     const out = [];
     project.aircraft.forEach(function (ac) {
       ac.stations.forEach(function (st) {
-        if (st.loads.some(function (n) { return n.kind === 'package' && n.refId === pkgId; })) out.push({ aircraft: ac, station: st });
+        if (st.loads.some(function (n) { return n.kind === 'preset' && n.refId === presetId; })) out.push({ aircraft: ac, station: st });
       });
     });
     return out;
   }
 
-  /* Uçağı tüm istasyon, yük ve kurallarıyla yeni kimliklerle çoğaltır. */
+  /* Duplicates an aircraft with all its stations, loads and rules under new ids. */
   function duplicateAircraft(ac) {
     const idMap = {};
     const copy = Object.assign(newAircraft(), JSON.parse(JSON.stringify(ac)));
     copy.id = newId('ac');
-    copy.code = (ac.code || 'UCAK') + '-KOPYA';
+    copy.code = (ac.code || 'AIRCRAFT') + '-COPY';
     copy.stations = ac.stations.map(function (st) {
       const s = Object.assign({}, JSON.parse(JSON.stringify(st)), { id: newId('st') });
       idMap[st.id] = s.id;
@@ -648,8 +660,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   /*
-   * Uyumluluk matrisi: hangi öğe hangi istasyona, hangi yolla ve en fazla kaç adet takılabilir.
-   * kinds: satırlarda gösterilecek türler. Dönüş: { stations, rows: [{ kind, store, cells: { stationId: { qty, paths } } }] }
+   * Compatibility matrix: which item fits which station, by which path and at most how many.
+   * kinds: kinds shown as rows. Returns { stations, rows: [{ kind, store, cells: { stationId: { qty, paths } } }] }
    */
   function compatibility(project, ac, kinds) {
     const rows = {};
@@ -683,13 +695,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     };
   }
 
-  function normalizeNode(n) {
-    const node = Object.assign(newLoadNode(n.kind, n.refId), n);
-    node.children = (node.children || []).map(normalizeNode);
-    return node;
-  }
-
-  /* ---------------------------------------------------------------- doğrulama */
+  /* ---------------------------------------------------------------- validation */
 
   function validate(project) {
     const issues = [];
@@ -700,46 +706,46 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       const seen = {};
       list.forEach(function (s) {
         const where = KIND_LABELS[kind] + ' ' + storeLabel(s);
-        if (!s.code) add('error', where, 'Kod boş olamaz.');
-        else if (seen[s.code]) add('error', where, 'Kod tekrar ediyor: ' + s.code);
+        if (!s.code) add('error', where, 'Code must not be empty.');
+        else if (seen[s.code]) add('error', where, 'Duplicate code: ' + s.code);
         seen[s.code] = true;
         if (HAS_POSITIONS[kind] && !(Number(s.positions) >= 1)) {
-          add('error', where, kind === 'gun' ? 'Mermi kapasitesi en az 1 olmalı.' : 'Pozisyon sayısı en az 1 olmalı.');
+          add('error', where, kind === 'gun' ? 'Round capacity must be at least 1.' : 'Number of positions must be at least 1.');
         }
       });
     });
 
-    const pkSeen = {};
-    (project.packages || []).forEach(function (pkg) {
-      const where = 'Paket ' + storeLabel(pkg);
-      if (!pkg.code) add('error', where, 'Kod boş olamaz.');
-      else if (pkSeen[pkg.code]) add('error', where, 'Kod tekrar ediyor: ' + pkg.code);
-      pkSeen[pkg.code] = true;
-      if (!pkg.loads.length) add('warning', where, 'Paket boş.');
-      pkg.loads.forEach(function (n) { validateNode(project, n, 'packageRoot', null, where, add); });
+    const psSeen = {};
+    (project.presets || []).forEach(function (preset) {
+      const where = 'Preset ' + storeLabel(preset);
+      if (!preset.code) add('error', where, 'Code must not be empty.');
+      else if (psSeen[preset.code]) add('error', where, 'Duplicate code: ' + preset.code);
+      psSeen[preset.code] = true;
+      if (!preset.loads.length) add('warning', where, 'Preset is empty.');
+      preset.loads.forEach(function (n) { validateNode(project, n, 'presetRoot', null, where, add); });
     });
 
     const acSeen = {};
     project.aircraft.forEach(function (ac) {
-      const acWhere = 'Uçak ' + (ac.code || '(kodsuz)');
-      if (!ac.code) add('error', acWhere, 'Uçak kodu boş olamaz.');
-      else if (acSeen[ac.code]) add('error', acWhere, 'Uçak kodu tekrar ediyor.');
+      const acWhere = 'Aircraft ' + (ac.code || '(no code)');
+      if (!ac.code) add('error', acWhere, 'Aircraft code must not be empty.');
+      else if (acSeen[ac.code]) add('error', acWhere, 'Duplicate aircraft code.');
       acSeen[ac.code] = true;
-      if (!ac.stations.length) add('warning', acWhere, 'Hiç istasyon tanımlı değil.');
+      if (!ac.stations.length) add('warning', acWhere, 'No stations defined.');
       const stById = {};
       ac.stations.forEach(function (s) { stById[s.id] = s; });
 
       const stSeen = {};
       ac.stations.forEach(function (st) {
-        const stWhere = acWhere + ' / İstasyon ' + (st.code || '(kodsuz)');
-        if (!st.code) add('error', stWhere, 'İstasyon kodu boş olamaz.');
-        else if (stSeen[st.code]) add('error', stWhere, 'İstasyon kodu tekrar ediyor.');
+        const stWhere = acWhere + ' / Station ' + (st.code || '(no code)');
+        if (!st.code) add('error', stWhere, 'Station code must not be empty.');
+        else if (stSeen[st.code]) add('error', stWhere, 'Duplicate station code.');
         stSeen[st.code] = true;
         if (st.parentId) {
-          if (!stById[st.parentId]) add('error', stWhere, 'Bağlı olduğu ana istasyon bulunamadı.');
-          if (!st.suffix) add('error', stWhere, 'Ek takma noktasının son eki boş olamaz.');
+          if (!stById[st.parentId]) add('error', stWhere, 'Parent station not found.');
+          if (!st.suffix) add('error', stWhere, 'Side station suffix must not be empty.');
         }
-        if (!st.loads.length) add('warning', stWhere, 'İstasyona hiçbir yük izni tanımlı değil.');
+        if (!st.loads.length) add('warning', stWhere, 'No loads are allowed on this station yet.');
 
         const parentKind = st.type === 'GUN' ? 'gunStation' : 'station';
         st.loads.forEach(function (n) { validateNode(project, n, parentKind, null, stWhere, add); });
@@ -748,14 +754,14 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       const stationIds = {};
       ac.stations.forEach(function (s) { stationIds[s.id] = true; });
       ac.constraints.forEach(function (c, i) {
-        const cWhere = acWhere + ' / Kural #' + (i + 1);
-        if (!CONSTRAINT_TYPES[c.type]) add('error', cWhere, 'Bilinmeyen kural tipi: ' + c.type);
+        const cWhere = acWhere + ' / Rule #' + (i + 1);
+        if (!CONSTRAINT_TYPES[c.type]) add('error', cWhere, 'Unknown rule type: ' + c.type);
         const valid = c.stationIds.filter(function (id) { return stationIds[id]; });
-        if (valid.length !== c.stationIds.length) add('error', cWhere, 'Silinmiş istasyona referans var.');
-        if (valid.length < 2) add('error', cWhere, 'En az 2 istasyon seçilmeli.');
+        if (valid.length !== c.stationIds.length) add('error', cWhere, 'References a deleted station.');
+        if (valid.length < 2) add('error', cWhere, 'Select at least 2 stations.');
         if (c.type === 'MAX_TOTAL') {
-          if (!findStore(project, 'munition', c.munitionId)) add('error', cWhere, 'Mühimmat seçilmeli.');
-          if (!(Number(c.value) >= 0)) add('error', cWhere, 'Üst sınır negatif olamaz.');
+          if (!findStore(project, 'munition', c.munitionId)) add('error', cWhere, 'Select a store.');
+          if (!(Number(c.value) >= 0)) add('error', cWhere, 'The limit must not be negative.');
         }
       });
     });
@@ -768,225 +774,225 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const label = KIND_LABELS[node.kind] + ' ' + storeLabel(store);
     const here = where + ' / ' + label;
     if (ALLOWED_CHILDREN[parentKind].indexOf(node.kind) < 0) {
-      add('error', here, KIND_LABELS[node.kind] + ', ' + (KIND_LABELS[parentKind] || PARENT_LABELS[parentKind]) + ' altına takılamaz.');
+      add('error', here, KIND_LABELS[node.kind] + ' cannot be fitted under ' + (KIND_LABELS[parentKind] ? 'a ' + KIND_LABELS[parentKind].toLowerCase() : PARENT_LABELS[parentKind]) + '.');
     }
-    if (!store) add('error', here, 'Katalogda bulunmayan öğeye referans.');
-    if (!(Number(node.qty) >= 1)) add('error', here, 'Adet en az 1 olmalı.');
+    if (!store) add('error', here, 'References an item that is not in the catalog.');
+    if (!(Number(node.qty) >= 1)) add('error', here, 'Quantity must be at least 1.');
     if (parentStore && Number(node.qty) > Number(parentStore.positions)) {
-      add('error', here, 'Adet (' + node.qty + '), ' + storeLabel(parentStore) +
-        (node.kind === 'ammo' ? ' mermi kapasitesini (' : ' pozisyon sayısını (') + parentStore.positions + ') aşıyor.');
+      add('error', here, 'Quantity (' + node.qty + ') exceeds the ' +
+        (node.kind === 'ammo' ? 'round capacity (' : 'number of positions (') + parentStore.positions + ') of ' + storeLabel(parentStore) + '.');
     }
     if (store && node.kind === 'ammo' && parentStore && parentStore.caliber && store.caliber &&
         normCaliber(parentStore.caliber) !== normCaliber(store.caliber)) {
-      add('warning', here, 'Çap uyuşmuyor: top ' + parentStore.caliber + ', mühimmat ' + store.caliber + '.');
+      add('warning', here, 'Caliber mismatch: gun ' + parentStore.caliber + ', ammunition ' + store.caliber + '.');
     }
     if (store && ALLOWED_CHILDREN[node.kind].length) {
-      if (!(node.children || []).length) add('warning', here, 'Altına hiçbir yük izni tanımlı değil.');
+      if (!(node.children || []).length) add('warning', here, 'Nothing is allowed under it yet.');
     }
     (node.children || []).forEach(function (c) { validateNode(project, c, node.kind, store, where, add); });
   }
 
   function normCaliber(c) { return String(c).toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x'); }
 
-  /* ---------------------------------------------------------------- örnek veri */
+  /* ---------------------------------------------------------------- standard catalog */
 
   /*
-   * Kamuya açık yaygın tanımlamalarla standart katalog. Kendi envanterinize göre düzenleyin.
-   * Sürüm artırıldığında, eski projelere açılışta eksik öğeler otomatik eklenir (silinmez).
+   * Standard catalog using common public designations. Edit to match your own inventory.
+   * When the version is raised, missing items are added to older projects on open (nothing is removed).
    */
-  const STANDARD_CATALOG_VERSION = 2;
+  const STANDARD_CATALOG_VERSION = 3;
 
-  const AAM = 'Hava-hava füzesi';
-  const AGM = 'Hava-yer füzesi';
-  const ASM = 'Gemi karşıtı füze';
-  const CRUISE = 'Seyir füzesi';
-  const GP = 'Genel maksat bombası';
-  const PEN = 'Nüfuz edici bomba';
-  const LGB = 'Lazer güdümlü bomba';
-  const GPS = 'GPS/INS güdümlü bomba';
-  const KIT = 'Güdüm kiti (yerli)';
-  const CBU = 'Misket bombası';
-  const ROCKET = 'Roket';
-  const PRACTICE = 'Eğitim bombası';
-  const TANK = 'Yakıt tankı';
-  const POD_T = 'Hedefleme podu';
-  const POD_EW = 'Elektronik harp podu';
-  const POD_O = 'Diğer pod';
+  const AAM = 'Air-to-air missile';
+  const AGM = 'Air-to-ground missile';
+  const ASM = 'Anti-ship missile';
+  const CRUISE = 'Cruise missile';
+  const GP = 'General purpose bomb';
+  const PEN = 'Penetrator bomb';
+  const LGB = 'Laser-guided bomb';
+  const GPS = 'GPS/INS-guided bomb';
+  const KIT = 'Guidance kit (Turkish)';
+  const CBU = 'Cluster bomb';
+  const ROCKET = 'Rocket';
+  const PRACTICE = 'Practice bomb';
+  const TANK = 'Fuel tank';
+  const POD_T = 'Targeting pod';
+  const POD_EW = 'Electronic warfare pod';
+  const POD_O = 'Other pod';
 
   const STANDARD_CATALOG = {
-    // [kod, ad, kategori]
+    // [code, name, category]
     munition: [
-      ['AIM-9L', 'Sidewinder kısa menzil hava-hava füzesi', AAM],
-      ['AIM-9M', 'Sidewinder kısa menzil hava-hava füzesi', AAM],
-      ['AIM-9X', 'Sidewinder (Block II) kısa menzil hava-hava füzesi', AAM],
-      ['AIM-120B', 'AMRAAM orta menzil hava-hava füzesi', AAM],
-      ['AIM-120C', 'AMRAAM orta menzil hava-hava füzesi', AAM],
-      ['AIM-120D', 'AMRAAM uzun menzil hava-hava füzesi', AAM],
-      ['AIM-7M', 'Sparrow orta menzil hava-hava füzesi', AAM],
-      ['AIM-132', 'ASRAAM kısa menzil hava-hava füzesi', AAM],
-      ['IRIS-T', 'Kısa menzil hava-hava füzesi', AAM],
-      ['METEOR', 'Ramjet itkili uzun menzil hava-hava füzesi', AAM],
-      ['MICA-IR', 'Kızılötesi güdümlü hava-hava füzesi', AAM],
-      ['MICA-EM', 'Radar güdümlü hava-hava füzesi', AAM],
-      ['PYTHON-5', 'Kısa menzil hava-hava füzesi', AAM],
-      ['DERBY', 'Orta menzil hava-hava füzesi', AAM],
-      ['R-73', 'Kısa menzil hava-hava füzesi', AAM],
-      ['R-77', 'Orta menzil hava-hava füzesi', AAM],
-      ['R-27', 'Orta menzil hava-hava füzesi', AAM],
-      ['BOZDOGAN', 'Bozdoğan görüş içi hava-hava füzesi', AAM],
-      ['GOKDOGAN', 'Gökdoğan görüş ötesi hava-hava füzesi', AAM],
+      ['AIM-9L', 'Sidewinder short-range air-to-air missile', AAM],
+      ['AIM-9M', 'Sidewinder short-range air-to-air missile', AAM],
+      ['AIM-9X', 'Sidewinder (Block II) short-range air-to-air missile', AAM],
+      ['AIM-120B', 'AMRAAM medium-range air-to-air missile', AAM],
+      ['AIM-120C', 'AMRAAM medium-range air-to-air missile', AAM],
+      ['AIM-120D', 'AMRAAM long-range air-to-air missile', AAM],
+      ['AIM-7M', 'Sparrow medium-range air-to-air missile', AAM],
+      ['AIM-132', 'ASRAAM short-range air-to-air missile', AAM],
+      ['IRIS-T', 'Short-range air-to-air missile', AAM],
+      ['METEOR', 'Ramjet long-range air-to-air missile', AAM],
+      ['MICA-IR', 'Infrared-guided air-to-air missile', AAM],
+      ['MICA-EM', 'Radar-guided air-to-air missile', AAM],
+      ['PYTHON-5', 'Short-range air-to-air missile', AAM],
+      ['DERBY', 'Medium-range air-to-air missile', AAM],
+      ['R-73', 'Short-range air-to-air missile', AAM],
+      ['R-77', 'Medium-range air-to-air missile', AAM],
+      ['R-27', 'Medium-range air-to-air missile', AAM],
+      ['BOZDOGAN', 'Bozdoğan within-visual-range air-to-air missile', AAM],
+      ['GOKDOGAN', 'Gökdoğan beyond-visual-range air-to-air missile', AAM],
 
-      ['AGM-65D', 'Maverick (IIR) hava-yer füzesi', AGM],
-      ['AGM-65G', 'Maverick (IIR, ağır harp başlığı) hava-yer füzesi', AGM],
-      ['AGM-65H', 'Maverick (CCD) hava-yer füzesi', AGM],
-      ['AGM-65K', 'Maverick (CCD, ağır harp başlığı) hava-yer füzesi', AGM],
-      ['AGM-88B', 'HARM radar karşıtı füze', AGM],
-      ['AGM-88E', 'AARGM radar karşıtı füze', AGM],
-      ['AGM-114', 'Hellfire hava-yer füzesi', AGM],
-      ['AGM-154A', 'JSOW süzülen silah (alt mühimmatlı)', AGM],
-      ['AGM-154C', 'JSOW süzülen silah (tekil harp başlığı)', AGM],
-      ['AGM-142', 'Popeye hava-yer füzesi', AGM],
-      ['BRIMSTONE', 'Hava-yer füzesi', AGM],
-      ['AGM-84D', 'Harpoon gemi karşıtı füze', ASM],
-      ['AGM-84H', 'SLAM-ER kara/gemi taarruz füzesi', AGM],
-      ['AGM-158A', 'JASSM seyir füzesi', CRUISE],
-      ['AGM-158B', 'JASSM-ER seyir füzesi', CRUISE],
-      ['KEPD-350', 'Taurus seyir füzesi', CRUISE],
-      ['STORM-SHADOW', 'Seyir füzesi', CRUISE],
-      ['SOM-A', 'SOM seyir füzesi', CRUISE],
-      ['SOM-J', 'SOM-J seyir füzesi (iç bölmeye uygun)', CRUISE],
+      ['AGM-65D', 'Maverick (IIR) air-to-ground missile', AGM],
+      ['AGM-65G', 'Maverick (IIR, heavy warhead) air-to-ground missile', AGM],
+      ['AGM-65H', 'Maverick (CCD) air-to-ground missile', AGM],
+      ['AGM-65K', 'Maverick (CCD, heavy warhead) air-to-ground missile', AGM],
+      ['AGM-88B', 'HARM anti-radiation missile', AGM],
+      ['AGM-88E', 'AARGM anti-radiation missile', AGM],
+      ['AGM-114', 'Hellfire air-to-ground missile', AGM],
+      ['AGM-154A', 'JSOW glide weapon (submunitions)', AGM],
+      ['AGM-154C', 'JSOW glide weapon (unitary warhead)', AGM],
+      ['AGM-142', 'Popeye air-to-ground missile', AGM],
+      ['BRIMSTONE', 'Air-to-ground missile', AGM],
+      ['AGM-84D', 'Harpoon anti-ship missile', ASM],
+      ['AGM-84H', 'SLAM-ER land/ship attack missile', AGM],
+      ['AGM-158A', 'JASSM cruise missile', CRUISE],
+      ['AGM-158B', 'JASSM-ER cruise missile', CRUISE],
+      ['KEPD-350', 'Taurus cruise missile', CRUISE],
+      ['STORM-SHADOW', 'Cruise missile', CRUISE],
+      ['SOM-A', 'SOM cruise missile', CRUISE],
+      ['SOM-J', 'SOM-J cruise missile (internal-bay capable)', CRUISE],
 
-      ['MK-81', '250 lb genel maksat bombası', GP],
-      ['MK-82', '500 lb genel maksat bombası', GP],
-      ['MK-82AIR', '500 lb yavaşlatıcılı genel maksat bombası (BSU-49)', GP],
-      ['MK-83', '1000 lb genel maksat bombası', GP],
-      ['MK-84', '2000 lb genel maksat bombası', GP],
-      ['MK-84AIR', '2000 lb yavaşlatıcılı genel maksat bombası (BSU-50)', GP],
-      ['BLU-109', '2000 lb nüfuz edici bomba gövdesi', PEN],
-      ['BLU-110', '1000 lb ısıl korumalı bomba gövdesi', GP],
-      ['BLU-111', '500 lb ısıl korumalı bomba gövdesi', GP],
+      ['MK-81', '250 lb general purpose bomb', GP],
+      ['MK-82', '500 lb general purpose bomb', GP],
+      ['MK-82AIR', '500 lb retarded general purpose bomb (BSU-49)', GP],
+      ['MK-83', '1000 lb general purpose bomb', GP],
+      ['MK-84', '2000 lb general purpose bomb', GP],
+      ['MK-84AIR', '2000 lb retarded general purpose bomb (BSU-50)', GP],
+      ['BLU-109', '2000 lb penetrator bomb body', PEN],
+      ['BLU-110', '1000 lb thermally protected bomb body', GP],
+      ['BLU-111', '500 lb thermally protected bomb body', GP],
 
-      ['GBU-10', 'Paveway II lazer güdümlü bomba (MK-84)', LGB],
-      ['GBU-12', 'Paveway II lazer güdümlü bomba (MK-82)', LGB],
-      ['GBU-16', 'Paveway II lazer güdümlü bomba (MK-83)', LGB],
-      ['GBU-24', 'Paveway III lazer güdümlü bomba (2000 lb)', LGB],
-      ['GBU-27', 'Paveway III lazer güdümlü nüfuz edici bomba', LGB],
-      ['GBU-28', '5000 lb lazer güdümlü nüfuz edici bomba', LGB],
-      ['GBU-54', 'Lazer JDAM (MK-82)', LGB],
+      ['GBU-10', 'Paveway II laser-guided bomb (MK-84)', LGB],
+      ['GBU-12', 'Paveway II laser-guided bomb (MK-82)', LGB],
+      ['GBU-16', 'Paveway II laser-guided bomb (MK-83)', LGB],
+      ['GBU-24', 'Paveway III laser-guided bomb (2000 lb)', LGB],
+      ['GBU-27', 'Paveway III laser-guided penetrator bomb', LGB],
+      ['GBU-28', '5000 lb laser-guided penetrator bomb', LGB],
+      ['GBU-54', 'Laser JDAM (MK-82)', LGB],
       ['GBU-31', 'JDAM (MK-84 / BLU-109)', GPS],
       ['GBU-32', 'JDAM (MK-83)', GPS],
       ['GBU-38', 'JDAM (MK-82)', GPS],
-      ['GBU-39', 'SDB küçük çaplı bomba', GPS],
-      ['GBU-53', 'SDB II küçük çaplı bomba', GPS],
+      ['GBU-39', 'SDB small diameter bomb', GPS],
+      ['GBU-53', 'SDB II small diameter bomb', GPS],
 
-      ['HGK-82', 'Hassas güdüm kiti (MK-82)', KIT],
-      ['HGK-83', 'Hassas güdüm kiti (MK-83)', KIT],
-      ['HGK-84', 'Hassas güdüm kiti (MK-84)', KIT],
-      ['KGK-82', 'Kanatlı güdüm kiti (MK-82)', KIT],
-      ['KGK-83', 'Kanatlı güdüm kiti (MK-83)', KIT],
-      ['TEBER-81', 'Lazer/GPS güdüm kiti (MK-81)', KIT],
-      ['TEBER-82', 'Lazer/GPS güdüm kiti (MK-82)', KIT],
+      ['HGK-82', 'Precision guidance kit (MK-82)', KIT],
+      ['HGK-83', 'Precision guidance kit (MK-83)', KIT],
+      ['HGK-84', 'Precision guidance kit (MK-84)', KIT],
+      ['KGK-82', 'Wing-assisted guidance kit (MK-82)', KIT],
+      ['KGK-83', 'Wing-assisted guidance kit (MK-83)', KIT],
+      ['TEBER-81', 'Laser/GPS guidance kit (MK-81)', KIT],
+      ['TEBER-82', 'Laser/GPS guidance kit (MK-82)', KIT],
 
-      ['CBU-87', 'Kombine etkili misket bombası', CBU],
-      ['CBU-89', 'Gator mayın atar misket bombası', CBU],
-      ['CBU-97', 'Algılayıcı tapalı misket bombası', CBU],
-      ['CBU-103', 'Rüzgâr düzeltmeli CBU-87', CBU],
-      ['CBU-105', 'Rüzgâr düzeltmeli CBU-97', CBU],
+      ['CBU-87', 'Combined effects cluster bomb', CBU],
+      ['CBU-89', 'Gator mine-dispensing cluster bomb', CBU],
+      ['CBU-97', 'Sensor-fuzed cluster bomb', CBU],
+      ['CBU-103', 'Wind-corrected CBU-87', CBU],
+      ['CBU-105', 'Wind-corrected CBU-97', CBU],
 
-      ['HYDRA-70', '2,75 inç güdümsüz roket', ROCKET],
-      ['APKWS', '2,75 inç lazer güdümlü roket', ROCKET],
-      ['ZUNI', '5 inç güdümsüz roket', ROCKET],
-      ['CIRIT', '2,75 inç lazer güdümlü roket', ROCKET],
+      ['HYDRA-70', '2.75 in unguided rocket', ROCKET],
+      ['APKWS', '2.75 in laser-guided rocket', ROCKET],
+      ['ZUNI', '5 in unguided rocket', ROCKET],
+      ['CIRIT', '2.75 in laser-guided rocket', ROCKET],
 
-      ['BDU-33', '25 lb eğitim bombası', PRACTICE],
-      ['MK-106', '5 lb eğitim bombası', PRACTICE],
-      ['BDU-50', '500 lb eğitim bombası (MK-82 benzeri)', PRACTICE],
-      ['BDU-56', '2000 lb eğitim bombası (MK-84 benzeri)', PRACTICE],
+      ['BDU-33', '25 lb practice bomb', PRACTICE],
+      ['MK-106', '5 lb practice bomb', PRACTICE],
+      ['BDU-50', '500 lb practice bomb (MK-82 shape)', PRACTICE],
+      ['BDU-56', '2000 lb practice bomb (MK-84 shape)', PRACTICE],
 
-      ['FT-300', '300 galon harici yakıt tankı', TANK],
-      ['FT-370', '370 galon harici yakıt tankı', TANK],
-      ['FT-600', '600 galon harici yakıt tankı', TANK],
+      ['FT-300', '300 gal external fuel tank', TANK],
+      ['FT-370', '370 gal external fuel tank', TANK],
+      ['FT-600', '600 gal external fuel tank', TANK],
 
-      ['AN/AAQ-33', 'Sniper hedefleme podu', POD_T],
-      ['AN/AAQ-28', 'LITENING hedefleme podu', POD_T],
-      ['AN/AAQ-14', 'LANTIRN hedefleme podu', POD_T],
-      ['ASELPOD', 'ASELPOD hedefleme podu', POD_T],
-      ['AN/AAQ-13', 'LANTIRN navigasyon podu', POD_O],
-      ['AN/ASQ-213', 'HARM hedefleme sistemi podu', POD_O],
-      ['DB-110', 'Keşif podu', POD_O],
-      ['ACMI', 'Eğitim / muharebe manevra kayıt podu', POD_O],
-      ['AN/ALQ-131', 'Elektronik harp podu', POD_EW],
-      ['AN/ALQ-184', 'Elektronik harp podu', POD_EW],
+      ['AN/AAQ-33', 'Sniper targeting pod', POD_T],
+      ['AN/AAQ-28', 'LITENING targeting pod', POD_T],
+      ['AN/AAQ-14', 'LANTIRN targeting pod', POD_T],
+      ['ASELPOD', 'ASELPOD targeting pod', POD_T],
+      ['AN/AAQ-13', 'LANTIRN navigation pod', POD_O],
+      ['AN/ASQ-213', 'HARM targeting system pod', POD_O],
+      ['DB-110', 'Reconnaissance pod', POD_O],
+      ['ACMI', 'Air combat manoeuvring instrumentation pod', POD_O],
+      ['AN/ALQ-131', 'Electronic warfare pod', POD_EW],
+      ['AN/ALQ-184', 'Electronic warfare pod', POD_EW],
     ],
-    // [kod, ad, pozisyon]
+    // [code, name, positions]
     rack: [
-      ['MAU-12', 'Bomba askı rafı (pilon içi)', 1],
-      ['BRU-32', 'Bomba ejektör rafı', 1],
-      ['LAU-129', 'Füze lançeri (AIM-9 / AIM-120)', 1],
-      ['LAU-127', 'Füze lançeri (AIM-9 / AIM-120)', 1],
-      ['LAU-114', 'AIM-9 lançeri', 1],
-      ['LAU-7', 'AIM-9 lançeri', 1],
-      ['LAU-106', 'AIM-7 / AIM-120 ejektör lançeri', 1],
-      ['LAU-117', 'Tekli AGM-65 lançeri', 1],
-      ['LAU-88', 'Üçlü AGM-65 lançeri', 3],
-      ['LAU-118', 'AGM-88 lançeri', 1],
-      ['LAU-61', '19 tüplü 2,75 inç roket lançeri', 19],
-      ['LAU-68', '7 tüplü 2,75 inç roket lançeri', 7],
-      ['LAU-131', '7 tüplü 2,75 inç roket lançeri', 7],
-      ['LAU-10', '4 tüplü 5 inç roket lançeri', 4],
-      ['SUU-20', 'Eğitim bombası dağıtıcısı', 6],
+      ['MAU-12', 'Bomb rack (inside pylon)', 1],
+      ['BRU-32', 'Bomb ejector rack', 1],
+      ['LAU-129', 'Missile launcher (AIM-9 / AIM-120)', 1],
+      ['LAU-127', 'Missile launcher (AIM-9 / AIM-120)', 1],
+      ['LAU-114', 'AIM-9 launcher', 1],
+      ['LAU-7', 'AIM-9 launcher', 1],
+      ['LAU-106', 'AIM-7 / AIM-120 ejector launcher', 1],
+      ['LAU-117', 'Single AGM-65 launcher', 1],
+      ['LAU-88', 'Triple AGM-65 launcher', 3],
+      ['LAU-118', 'AGM-88 launcher', 1],
+      ['LAU-61', '19-tube 2.75 in rocket launcher', 19],
+      ['LAU-68', '7-tube 2.75 in rocket launcher', 7],
+      ['LAU-131', '7-tube 2.75 in rocket launcher', 7],
+      ['LAU-10', '4-tube 5 in rocket launcher', 4],
+      ['SUU-20', 'Practice bomb dispenser', 6],
     ],
-    // [kod, ad, pozisyon]
+    // [code, name, positions]
     subrack: [
-      ['TER-9', 'TER-9/A üçlü ejektör rack', 3],
-      ['BRU-42', 'Geliştirilmiş üçlü ejektör rack (ITER)', 3],
-      ['MER-10', 'MER-10N çoklu ejektör rack', 6],
-      ['BRU-41', 'Geliştirilmiş çoklu ejektör rack (IMER)', 6],
-      ['BRU-33', 'Eğik dikey ejektör rack (CVER)', 2],
-      ['BRU-55', 'Akıllı çift ejektör rack', 2],
-      ['BRU-57', 'Akıllı çift ejektör rack', 2],
-      ['BRU-61', 'GBU-39 / GBU-53 dörtlü taşıyıcı', 4],
+      ['TER-9', 'TER-9/A triple ejector rack', 3],
+      ['BRU-42', 'Improved triple ejector rack (ITER)', 3],
+      ['MER-10', 'MER-10N multiple ejector rack', 6],
+      ['BRU-41', 'Improved multiple ejector rack (IMER)', 6],
+      ['BRU-33', 'Canted vertical ejector rack (CVER)', 2],
+      ['BRU-55', 'Smart dual ejector rack', 2],
+      ['BRU-57', 'Smart dual ejector rack', 2],
+      ['BRU-61', 'GBU-39 / GBU-53 quad carriage', 4],
     ],
-    // [kod, ad, çap, mermi kapasitesi] — kapasite uçağa göre değişir, kendi verinizle doğrulayın.
+    // [code, name, caliber, round capacity] — capacity varies by aircraft; verify with your own data.
     gun: [
-      ['M61A1', 'Vulcan 20 mm altı namlulu top', '20x102', 511],
-      ['M61A2', 'Hafifletilmiş Vulcan 20 mm top', '20x102', 480],
-      ['M39', '20 mm revolver top', '20x102', 280],
-      ['SUU-23', '20 mm harici top podu (GAU-4)', '20x102', 1200],
-      ['GAU-22/A', '25 mm dört namlulu top', '25x137', 182],
-      ['GAU-12/U', 'Equalizer 25 mm beş namlulu top', '25x137', 300],
-      ['GAU-8/A', 'Avenger 30 mm yedi namlulu top', '30x173', 1174],
-      ['GPU-5/A', '30 mm harici top podu', '30x173', 353],
-      ['BK-27', 'Mauser 27 mm revolver top', '27x145', 150],
-      ['DEFA 554', '30 mm revolver top', '30x113', 125],
-      ['GIAT 30', '30 mm revolver top (30M791)', '30x150', 125],
-      ['GSh-23', '23 mm çift namlulu top', '23x115', 200],
-      ['GSh-30-1', '30 mm tek namlulu top', '30x165', 150],
+      ['M61A1', 'Vulcan 20 mm six-barrel cannon', '20x102', 511],
+      ['M61A2', 'Lightweight Vulcan 20 mm cannon', '20x102', 480],
+      ['M39', '20 mm revolver cannon', '20x102', 280],
+      ['SUU-23', '20 mm external gun pod (GAU-4)', '20x102', 1200],
+      ['GAU-22/A', '25 mm four-barrel cannon', '25x137', 182],
+      ['GAU-12/U', 'Equalizer 25 mm five-barrel cannon', '25x137', 300],
+      ['GAU-8/A', 'Avenger 30 mm seven-barrel cannon', '30x173', 1174],
+      ['GPU-5/A', '30 mm external gun pod', '30x173', 353],
+      ['BK-27', 'Mauser 27 mm revolver cannon', '27x145', 150],
+      ['DEFA 554', '30 mm revolver cannon', '30x113', 125],
+      ['GIAT 30', '30 mm revolver cannon (30M791)', '30x150', 125],
+      ['GSh-23', '23 mm twin-barrel cannon', '23x115', 200],
+      ['GSh-30-1', '30 mm single-barrel cannon', '30x165', 150],
     ],
-    // [kod, ad, çap, tip]
+    // [code, name, caliber, type]
     ammo: [
-      ['M56A3', '20 mm yüksek infilaklı yakıcı', '20x102', 'HEI'],
-      ['M55A2', '20 mm eğitim mermisi', '20x102', 'TP'],
-      ['M53', '20 mm zırh delici yakıcı', '20x102', 'API'],
-      ['M220', '20 mm izli eğitim mermisi', '20x102', 'TP-T'],
-      ['PGU-28/B', '20 mm yarı zırh delici yüksek infilaklı yakıcı', '20x102', 'SAPHEI'],
-      ['PGU-27/A', '20 mm eğitim mermisi', '20x102', 'TP'],
-      ['PGU-30/A', '20 mm izli eğitim mermisi', '20x102', 'TP-T'],
-      ['PGU-20/U', '25 mm zırh delici yakıcı', '25x137', 'API'],
-      ['PGU-23/U', '25 mm eğitim mermisi', '25x137', 'TP'],
-      ['PGU-25/U', '25 mm yüksek infilaklı yakıcı', '25x137', 'HEI'],
-      ['PGU-32/U', '25 mm yarı zırh delici yüksek infilaklı yakıcı', '25x137', 'SAPHEI-T'],
-      ['PGU-47/U', '25 mm zırh delici patlayıcı', '25x137', 'APEX'],
-      ['PGU-13/B', '30 mm yüksek infilaklı yakıcı', '30x173', 'HEI'],
-      ['PGU-14/B', '30 mm zırh delici yakıcı', '30x173', 'API'],
-      ['PGU-15/B', '30 mm eğitim mermisi', '30x173', 'TP'],
-      ['27x145 HE', '27 mm yüksek infilaklı', '27x145', 'HE'],
-      ['27x145 TP', '27 mm eğitim mermisi', '27x145', 'TP'],
-      ['30x113 HEI', '30 mm yüksek infilaklı yakıcı (DEFA)', '30x113', 'HEI'],
-      ['30x113 TP', '30 mm eğitim mermisi (DEFA)', '30x113', 'TP'],
-      ['30x150 HE', '30 mm yüksek infilaklı (GIAT 30)', '30x150', 'HE'],
-      ['23x115 HEI', '23 mm yüksek infilaklı yakıcı (OFZ)', '23x115', 'HEI'],
-      ['30x165 HEI', '30 mm yüksek infilaklı yakıcı (OFZ)', '30x165', 'HEI'],
+      ['M56A3', '20 mm high-explosive incendiary', '20x102', 'HEI'],
+      ['M55A2', '20 mm target practice', '20x102', 'TP'],
+      ['M53', '20 mm armour-piercing incendiary', '20x102', 'API'],
+      ['M220', '20 mm target practice tracer', '20x102', 'TP-T'],
+      ['PGU-28/B', '20 mm semi-armour-piercing high-explosive incendiary', '20x102', 'SAPHEI'],
+      ['PGU-27/A', '20 mm target practice', '20x102', 'TP'],
+      ['PGU-30/A', '20 mm target practice tracer', '20x102', 'TP-T'],
+      ['PGU-20/U', '25 mm armour-piercing incendiary', '25x137', 'API'],
+      ['PGU-23/U', '25 mm target practice', '25x137', 'TP'],
+      ['PGU-25/U', '25 mm high-explosive incendiary', '25x137', 'HEI'],
+      ['PGU-32/U', '25 mm semi-armour-piercing high-explosive incendiary', '25x137', 'SAPHEI-T'],
+      ['PGU-47/U', '25 mm armour-piercing explosive', '25x137', 'APEX'],
+      ['PGU-13/B', '30 mm high-explosive incendiary', '30x173', 'HEI'],
+      ['PGU-14/B', '30 mm armour-piercing incendiary', '30x173', 'API'],
+      ['PGU-15/B', '30 mm target practice', '30x173', 'TP'],
+      ['27x145 HE', '27 mm high-explosive', '27x145', 'HE'],
+      ['27x145 TP', '27 mm target practice', '27x145', 'TP'],
+      ['30x113 HEI', '30 mm high-explosive incendiary (DEFA)', '30x113', 'HEI'],
+      ['30x113 TP', '30 mm target practice (DEFA)', '30x113', 'TP'],
+      ['30x150 HE', '30 mm high-explosive (GIAT 30)', '30x150', 'HE'],
+      ['23x115 HEI', '23 mm high-explosive incendiary (OFZ)', '23x115', 'HEI'],
+      ['30x165 HEI', '30 mm high-explosive incendiary (OFZ)', '30x165', 'HEI'],
     ],
   };
 
@@ -1009,7 +1015,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return out;
   }
 
-  /* Standart katalogdan projede kodu bulunmayan öğeleri ekler; eklenen öğe sayısını döner. */
+  /* Adds standard catalog items whose code is not yet in the project; returns the number added. */
   function mergeStandardCatalog(project) {
     const std = standardCatalog();
     let added = 0;
@@ -1023,10 +1029,44 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return added;
   }
 
-  /* Gösterim amaçlı örnek: uyumluluklar gerçek teknik verilerle doğrulanmalıdır. */
+  /*
+   * Translates standard catalog entries that still carry the Turkish names/categories of catalog
+   * version 2 into English. Entries the user has edited are left alone. Returns the number changed.
+   */
+  function translateLegacyCatalog(project) {
+    const std = standardCatalog();
+    let changed = 0;
+    KINDS.forEach(function (kind) {
+      const key = CATALOG_KEY[kind];
+      const byCode = {};
+      std[key].forEach(function (s) { byCode[s.code] = s; });
+      project.catalog[key].forEach(function (s) {
+        const legacy = LEGACY_TR[kind + ':' + s.code];
+        const en = byCode[s.code];
+        if (!legacy || !en) return;
+        let hit = false;
+        if (s.name === legacy[0]) { s.name = en.name; hit = true; }
+        if (legacy[1] && s.category === legacy[1]) { s.category = en.category; hit = true; }
+        if (hit) changed++;
+      });
+    });
+    return changed;
+  }
+
+  /* Brings an older project's catalog up to date: translation and missing items. */
+  function upgradeCatalog(project) {
+    if ((project.catalogVersion || 0) >= STANDARD_CATALOG_VERSION) return { added: 0, translated: 0 };
+    const translated = translateLegacyCatalog(project);
+    const added = mergeStandardCatalog(project);
+    return { added: added, translated: translated };
+  }
+
+  /* ---------------------------------------------------------------- sample data */
+
+  /* For demonstration only: compatibilities must be checked against real technical data. */
   function sampleProject() {
     const p = emptyProject();
-    p.name = 'Örnek Proje';
+    p.name = 'Sample Project';
     p.catalog = standardCatalog();
     p.catalogVersion = STANDARD_CATALOG_VERSION;
     const kindOf = function (code) {
@@ -1047,27 +1087,27 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const rule = function (type, stations, extra) {
       return Object.assign(newConstraint(), { type: type, stationIds: stations.map(function (s) { return s.id; }) }, extra || {});
     };
-    // Ortak füze rayı paketi: birçok istasyonda aynı kural, tek yerden yönetilir.
-    const railPkg = Object.assign(newPackage(), {
-      code: 'AAM-RAY', name: 'LAU-129 füze rayı (AIM-9 / AIM-120)',
+    // Shared missile rail preset: the same rule on many stations, managed in one place.
+    const railPreset = Object.assign(newPreset(), {
+      code: 'AAM-RAIL', name: 'LAU-129 missile rail (AIM-9 / AIM-120)',
       loads: [n('LAU-129', [n('AIM-9X'), n('AIM-9M'), n('AIM-120C')])],
     });
-    p.packages.push(railPkg);
-    const aamRail = function () { return newLoadNode('package', railPkg.id); };
+    p.presets.push(railPreset);
+    const aamRail = function () { return newLoadNode('preset', railPreset.id); };
 
-    // Uçak A: tek motorlu avcı, 9 istasyon + 5L / 5R.
-    const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A (tek motorlu)', silhouette: 'single' });
-    const a1 = st('1', 'Sol kanat ucu', 'LEFT');
-    const a2 = st('2', 'Sol dış kanat', 'LEFT');
-    const a3 = st('3', 'Sol orta kanat', 'LEFT');
-    const a4 = st('4', 'Sol iç kanat', 'LEFT');
-    const a5 = st('5', 'Gövde altı', 'CENTER');
-    const a6 = st('6', 'Sağ iç kanat', 'RIGHT');
-    const a7 = st('7', 'Sağ orta kanat', 'RIGHT');
-    const a8 = st('8', 'Sağ dış kanat', 'RIGHT');
-    const a9 = st('9', 'Sağ kanat ucu', 'RIGHT');
-    const a5l = side(a5, 'L', 'Sol hava alığı yanı');
-    const a5r = side(a5, 'R', 'Sağ hava alığı yanı');
+    // Aircraft A: single-engine fighter, 9 stations + 5L / 5R.
+    const a = Object.assign(newAircraft(), { code: 'SAMPLE-A', name: 'Sample aircraft A (single-engine)', silhouette: 'single' });
+    const a1 = st('1', 'Left wing tip', 'LEFT');
+    const a2 = st('2', 'Left outboard wing', 'LEFT');
+    const a3 = st('3', 'Left mid wing', 'LEFT');
+    const a4 = st('4', 'Left inboard wing', 'LEFT');
+    const a5 = st('5', 'Centreline', 'CENTER');
+    const a6 = st('6', 'Right inboard wing', 'RIGHT');
+    const a7 = st('7', 'Right mid wing', 'RIGHT');
+    const a8 = st('8', 'Right outboard wing', 'RIGHT');
+    const a9 = st('9', 'Right wing tip', 'RIGHT');
+    const a5l = side(a5, 'L', 'Left intake side');
+    const a5r = side(a5, 'R', 'Right intake side');
     [a1, a2, a8, a9].forEach(function (s) { s.loads.push(aamRail()); });
     [a3, a7].forEach(function (s) {
       s.loads.push(
@@ -1085,35 +1125,64 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     a5.loads.push(n('FT-300'), n('AN/ALQ-131'));
     a5l.loads.push(n('AN/AAQ-13'));
     a5r.loads.push(n('AN/AAQ-33'), n('AN/AAQ-28'), n('ASELPOD'));
-    const aGun = Object.assign(newStation(), { type: 'GUN', code: 'GUN', name: 'Dahili top' });
+    const aGun = Object.assign(newStation(), { type: 'GUN', code: 'GUN', name: 'Internal gun' });
     aGun.loads.push(n('M61A1', [n('PGU-28/B', [], 511), n('M56A3', [], 511), n('PGU-27/A', [], 511)]));
     a.stations.push(a1, a2, a3, a4, a5, a5l, a5r, a6, a7, a8, a9, aGun);
     a.constraints.push(
-      rule('SYMMETRIC', [a1, a9], { description: 'Kanat ucu füzeleri simetrik.' }),
-      rule('SYMMETRIC', [a3, a7], { description: 'Orta kanat yükleri simetrik olmalı.' }),
-      rule('SYMMETRIC', [a4, a6], { description: 'İç kanat yükleri simetrik olmalı.' }),
-      rule('EXCLUSIVE', [a5l, a5r], { description: 'Aynı anda tek pod.' }),
-      rule('MAX_TOTAL', [a3, a4, a6, a7], { munitionId: S('MK-84').id, value: 2, description: 'En fazla 2 adet MK-84.' })
+      rule('SYMMETRIC', [a1, a9], { description: 'Wing tip missiles symmetric.' }),
+      rule('SYMMETRIC', [a3, a7], { description: 'Mid wing loads must be symmetric.' }),
+      rule('SYMMETRIC', [a4, a6], { description: 'Inboard wing loads must be symmetric.' }),
+      rule('EXCLUSIVE', [a5l, a5r], { description: 'Only one pod at a time.' }),
+      rule('MAX_TOTAL', [a3, a4, a6, a7], { munitionId: S('MK-84').id, value: 2, description: 'At most 2 MK-84.' })
     );
 
-    // Uçak B: delta kanat, 5 istasyon.
-    const b = Object.assign(newAircraft(), { code: 'UCAK-B', name: 'Örnek Uçak B (delta kanat)', silhouette: 'delta' });
-    const b1 = st('1', 'Sol dış kanat', 'LEFT');
-    const b2 = st('2', 'Sol iç kanat', 'LEFT');
-    const b3 = st('3', 'Gövde altı', 'CENTER');
-    const b4 = st('4', 'Sağ iç kanat', 'RIGHT');
-    const b5 = st('5', 'Sağ dış kanat', 'RIGHT');
+    // Aircraft B: delta wing, 5 stations.
+    const b = Object.assign(newAircraft(), { code: 'SAMPLE-B', name: 'Sample aircraft B (delta wing)', silhouette: 'delta' });
+    const b1 = st('1', 'Left outboard wing', 'LEFT');
+    const b2 = st('2', 'Left inboard wing', 'LEFT');
+    const b3 = st('3', 'Centreline', 'CENTER');
+    const b4 = st('4', 'Right inboard wing', 'RIGHT');
+    const b5 = st('5', 'Right outboard wing', 'RIGHT');
     [b1, b5].forEach(function (s) { s.loads.push(aamRail()); });
     [b2, b4].forEach(function (s) { s.loads.push(n('MAU-12', [n('MK-82'), n('GBU-12'), n('FT-370')])); });
     b3.loads.push(n('FT-300'), n('MAU-12', [n('MK-84'), n('GBU-31'), n('GPU-5/A', [n('PGU-13/B', [], 353), n('PGU-15/B', [], 353)])]));
     b.stations.push(b1, b2, b3, b4, b5);
     b.constraints.push(
-      rule('SYMMETRIC', [b2, b4], { description: 'İç kanat yükleri simetrik.' })
+      rule('SYMMETRIC', [b2, b4], { description: 'Inboard wing loads symmetric.' })
     );
 
-    p.aircraft.push(a, b);
+    // Aircraft C and D: show the Eurofighter and CALIDUS B-250 drawings. Stations are placed
+    // automatically; loads are illustrative only.
+    const stationsFor = function (left, centre, right, wingLoad, centreLoad) {
+      const list = [];
+      for (let i = 0; i < left; i++) list.push(st('', '', 'LEFT'));
+      for (let i = 0; i < centre; i++) list.push(st('', '', 'CENTER'));
+      for (let i = 0; i < right; i++) list.push(st('', '', 'RIGHT'));
+      list.forEach(function (s, i) {
+        s.code = String(i + 1);
+        s.loads = s.location === 'CENTER' ? centreLoad() : wingLoad();
+      });
+      return list;
+    };
+    const c = Object.assign(newAircraft(), { code: 'SAMPLE-C', name: 'Sample aircraft C (Eurofighter drawing)', silhouette: 'eurofighter' });
+    c.stations = stationsFor(4, 1, 4,
+      function () { return [n('MAU-12', [n('GBU-12'), n('MK-82'), n('FT-370')]), aamRail()]; },
+      function () { return [n('FT-300')]; });
+    const cGun = Object.assign(newStation(), { type: 'GUN', code: 'GUN', name: 'Internal gun' });
+    cGun.loads.push(n('BK-27', [n('27x145 HE', [], 150), n('27x145 TP', [], 150)]));
+    c.stations.push(cGun);
+
+    const d = Object.assign(newAircraft(), { code: 'SAMPLE-D', name: 'Sample aircraft D (CALIDUS B-250 drawing)', silhouette: 'calidus' });
+    d.stations = stationsFor(3, 1, 3,
+      function () { return [n('MAU-12', [n('MK-82'), n('GBU-12')]), n('LAU-68', [n('HYDRA-70', [], 7), n('CIRIT', [], 7)])]; },
+      function () { return [n('FT-300')]; });
+
+    p.aircraft.push(a, b, c, d);
     return p;
   }
+
+  // Turkish names/categories used by standard catalog version 2 (for translateLegacyCatalog).
+  const LEGACY_TR = {"munition:AIM-9L":["Sidewinder kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-9M":["Sidewinder kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-9X":["Sidewinder (Block II) kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-120B":["AMRAAM orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-120C":["AMRAAM orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-120D":["AMRAAM uzun menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-7M":["Sparrow orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:AIM-132":["ASRAAM kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:IRIS-T":["Kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:METEOR":["Ramjet itkili uzun menzil hava-hava füzesi","Hava-hava füzesi"],"munition:MICA-IR":["Kızılötesi güdümlü hava-hava füzesi","Hava-hava füzesi"],"munition:MICA-EM":["Radar güdümlü hava-hava füzesi","Hava-hava füzesi"],"munition:PYTHON-5":["Kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:DERBY":["Orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:R-73":["Kısa menzil hava-hava füzesi","Hava-hava füzesi"],"munition:R-77":["Orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:R-27":["Orta menzil hava-hava füzesi","Hava-hava füzesi"],"munition:BOZDOGAN":["Bozdoğan görüş içi hava-hava füzesi","Hava-hava füzesi"],"munition:GOKDOGAN":["Gökdoğan görüş ötesi hava-hava füzesi","Hava-hava füzesi"],"munition:AGM-65D":["Maverick (IIR) hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-65G":["Maverick (IIR, ağır harp başlığı) hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-65H":["Maverick (CCD) hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-65K":["Maverick (CCD, ağır harp başlığı) hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-88B":["HARM radar karşıtı füze","Hava-yer füzesi"],"munition:AGM-88E":["AARGM radar karşıtı füze","Hava-yer füzesi"],"munition:AGM-114":["Hellfire hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-154A":["JSOW süzülen silah (alt mühimmatlı)","Hava-yer füzesi"],"munition:AGM-154C":["JSOW süzülen silah (tekil harp başlığı)","Hava-yer füzesi"],"munition:AGM-142":["Popeye hava-yer füzesi","Hava-yer füzesi"],"munition:BRIMSTONE":["Hava-yer füzesi","Hava-yer füzesi"],"munition:AGM-84D":["Harpoon gemi karşıtı füze","Gemi karşıtı füze"],"munition:AGM-84H":["SLAM-ER kara/gemi taarruz füzesi","Hava-yer füzesi"],"munition:AGM-158A":["JASSM seyir füzesi","Seyir füzesi"],"munition:AGM-158B":["JASSM-ER seyir füzesi","Seyir füzesi"],"munition:KEPD-350":["Taurus seyir füzesi","Seyir füzesi"],"munition:STORM-SHADOW":["Seyir füzesi","Seyir füzesi"],"munition:SOM-A":["SOM seyir füzesi","Seyir füzesi"],"munition:SOM-J":["SOM-J seyir füzesi (iç bölmeye uygun)","Seyir füzesi"],"munition:MK-81":["250 lb genel maksat bombası","Genel maksat bombası"],"munition:MK-82":["500 lb genel maksat bombası","Genel maksat bombası"],"munition:MK-82AIR":["500 lb yavaşlatıcılı genel maksat bombası (BSU-49)","Genel maksat bombası"],"munition:MK-83":["1000 lb genel maksat bombası","Genel maksat bombası"],"munition:MK-84":["2000 lb genel maksat bombası","Genel maksat bombası"],"munition:MK-84AIR":["2000 lb yavaşlatıcılı genel maksat bombası (BSU-50)","Genel maksat bombası"],"munition:BLU-109":["2000 lb nüfuz edici bomba gövdesi","Nüfuz edici bomba"],"munition:BLU-110":["1000 lb ısıl korumalı bomba gövdesi","Genel maksat bombası"],"munition:BLU-111":["500 lb ısıl korumalı bomba gövdesi","Genel maksat bombası"],"munition:GBU-10":["Paveway II lazer güdümlü bomba (MK-84)","Lazer güdümlü bomba"],"munition:GBU-12":["Paveway II lazer güdümlü bomba (MK-82)","Lazer güdümlü bomba"],"munition:GBU-16":["Paveway II lazer güdümlü bomba (MK-83)","Lazer güdümlü bomba"],"munition:GBU-24":["Paveway III lazer güdümlü bomba (2000 lb)","Lazer güdümlü bomba"],"munition:GBU-27":["Paveway III lazer güdümlü nüfuz edici bomba","Lazer güdümlü bomba"],"munition:GBU-28":["5000 lb lazer güdümlü nüfuz edici bomba","Lazer güdümlü bomba"],"munition:GBU-54":["Lazer JDAM (MK-82)","Lazer güdümlü bomba"],"munition:GBU-31":["JDAM (MK-84 / BLU-109)","GPS/INS güdümlü bomba"],"munition:GBU-32":["JDAM (MK-83)","GPS/INS güdümlü bomba"],"munition:GBU-38":["JDAM (MK-82)","GPS/INS güdümlü bomba"],"munition:GBU-39":["SDB küçük çaplı bomba","GPS/INS güdümlü bomba"],"munition:GBU-53":["SDB II küçük çaplı bomba","GPS/INS güdümlü bomba"],"munition:HGK-82":["Hassas güdüm kiti (MK-82)","Güdüm kiti (yerli)"],"munition:HGK-83":["Hassas güdüm kiti (MK-83)","Güdüm kiti (yerli)"],"munition:HGK-84":["Hassas güdüm kiti (MK-84)","Güdüm kiti (yerli)"],"munition:KGK-82":["Kanatlı güdüm kiti (MK-82)","Güdüm kiti (yerli)"],"munition:KGK-83":["Kanatlı güdüm kiti (MK-83)","Güdüm kiti (yerli)"],"munition:TEBER-81":["Lazer/GPS güdüm kiti (MK-81)","Güdüm kiti (yerli)"],"munition:TEBER-82":["Lazer/GPS güdüm kiti (MK-82)","Güdüm kiti (yerli)"],"munition:CBU-87":["Kombine etkili misket bombası","Misket bombası"],"munition:CBU-89":["Gator mayın atar misket bombası","Misket bombası"],"munition:CBU-97":["Algılayıcı tapalı misket bombası","Misket bombası"],"munition:CBU-103":["Rüzgâr düzeltmeli CBU-87","Misket bombası"],"munition:CBU-105":["Rüzgâr düzeltmeli CBU-97","Misket bombası"],"munition:HYDRA-70":["2,75 inç güdümsüz roket","Roket"],"munition:APKWS":["2,75 inç lazer güdümlü roket","Roket"],"munition:ZUNI":["5 inç güdümsüz roket","Roket"],"munition:CIRIT":["2,75 inç lazer güdümlü roket","Roket"],"munition:BDU-33":["25 lb eğitim bombası","Eğitim bombası"],"munition:MK-106":["5 lb eğitim bombası","Eğitim bombası"],"munition:BDU-50":["500 lb eğitim bombası (MK-82 benzeri)","Eğitim bombası"],"munition:BDU-56":["2000 lb eğitim bombası (MK-84 benzeri)","Eğitim bombası"],"munition:FT-300":["300 galon harici yakıt tankı","Yakıt tankı"],"munition:FT-370":["370 galon harici yakıt tankı","Yakıt tankı"],"munition:FT-600":["600 galon harici yakıt tankı","Yakıt tankı"],"munition:AN/AAQ-33":["Sniper hedefleme podu","Hedefleme podu"],"munition:AN/AAQ-28":["LITENING hedefleme podu","Hedefleme podu"],"munition:AN/AAQ-14":["LANTIRN hedefleme podu","Hedefleme podu"],"munition:ASELPOD":["ASELPOD hedefleme podu","Hedefleme podu"],"munition:AN/AAQ-13":["LANTIRN navigasyon podu","Diğer pod"],"munition:AN/ASQ-213":["HARM hedefleme sistemi podu","Diğer pod"],"munition:DB-110":["Keşif podu","Diğer pod"],"munition:ACMI":["Eğitim / muharebe manevra kayıt podu","Diğer pod"],"munition:AN/ALQ-131":["Elektronik harp podu","Elektronik harp podu"],"munition:AN/ALQ-184":["Elektronik harp podu","Elektronik harp podu"],"rack:MAU-12":["Bomba askı rafı (pilon içi)",""],"rack:BRU-32":["Bomba ejektör rafı",""],"rack:LAU-129":["Füze lançeri (AIM-9 / AIM-120)",""],"rack:LAU-127":["Füze lançeri (AIM-9 / AIM-120)",""],"rack:LAU-114":["AIM-9 lançeri",""],"rack:LAU-7":["AIM-9 lançeri",""],"rack:LAU-106":["AIM-7 / AIM-120 ejektör lançeri",""],"rack:LAU-117":["Tekli AGM-65 lançeri",""],"rack:LAU-88":["Üçlü AGM-65 lançeri",""],"rack:LAU-118":["AGM-88 lançeri",""],"rack:LAU-61":["19 tüplü 2,75 inç roket lançeri",""],"rack:LAU-68":["7 tüplü 2,75 inç roket lançeri",""],"rack:LAU-131":["7 tüplü 2,75 inç roket lançeri",""],"rack:LAU-10":["4 tüplü 5 inç roket lançeri",""],"rack:SUU-20":["Eğitim bombası dağıtıcısı",""],"subrack:TER-9":["TER-9/A üçlü ejektör rack",""],"subrack:BRU-42":["Geliştirilmiş üçlü ejektör rack (ITER)",""],"subrack:MER-10":["MER-10N çoklu ejektör rack",""],"subrack:BRU-41":["Geliştirilmiş çoklu ejektör rack (IMER)",""],"subrack:BRU-33":["Eğik dikey ejektör rack (CVER)",""],"subrack:BRU-55":["Akıllı çift ejektör rack",""],"subrack:BRU-57":["Akıllı çift ejektör rack",""],"subrack:BRU-61":["GBU-39 / GBU-53 dörtlü taşıyıcı",""],"gun:M61A1":["Vulcan 20 mm altı namlulu top",""],"gun:M61A2":["Hafifletilmiş Vulcan 20 mm top",""],"gun:M39":["20 mm revolver top",""],"gun:SUU-23":["20 mm harici top podu (GAU-4)",""],"gun:GAU-22/A":["25 mm dört namlulu top",""],"gun:GAU-12/U":["Equalizer 25 mm beş namlulu top",""],"gun:GAU-8/A":["Avenger 30 mm yedi namlulu top",""],"gun:GPU-5/A":["30 mm harici top podu",""],"gun:BK-27":["Mauser 27 mm revolver top",""],"gun:DEFA 554":["30 mm revolver top",""],"gun:GIAT 30":["30 mm revolver top (30M791)",""],"gun:GSh-23":["23 mm çift namlulu top",""],"gun:GSh-30-1":["30 mm tek namlulu top",""],"ammo:M56A3":["20 mm yüksek infilaklı yakıcı","HEI"],"ammo:M55A2":["20 mm eğitim mermisi","TP"],"ammo:M53":["20 mm zırh delici yakıcı","API"],"ammo:M220":["20 mm izli eğitim mermisi","TP-T"],"ammo:PGU-28/B":["20 mm yarı zırh delici yüksek infilaklı yakıcı","SAPHEI"],"ammo:PGU-27/A":["20 mm eğitim mermisi","TP"],"ammo:PGU-30/A":["20 mm izli eğitim mermisi","TP-T"],"ammo:PGU-20/U":["25 mm zırh delici yakıcı","API"],"ammo:PGU-23/U":["25 mm eğitim mermisi","TP"],"ammo:PGU-25/U":["25 mm yüksek infilaklı yakıcı","HEI"],"ammo:PGU-32/U":["25 mm yarı zırh delici yüksek infilaklı yakıcı","SAPHEI-T"],"ammo:PGU-47/U":["25 mm zırh delici patlayıcı","APEX"],"ammo:PGU-13/B":["30 mm yüksek infilaklı yakıcı","HEI"],"ammo:PGU-14/B":["30 mm zırh delici yakıcı","API"],"ammo:PGU-15/B":["30 mm eğitim mermisi","TP"],"ammo:27x145 HE":["27 mm yüksek infilaklı","HE"],"ammo:27x145 TP":["27 mm eğitim mermisi","TP"],"ammo:30x113 HEI":["30 mm yüksek infilaklı yakıcı (DEFA)","HEI"],"ammo:30x113 TP":["30 mm eğitim mermisi (DEFA)","TP"],"ammo:30x150 HE":["30 mm yüksek infilaklı (GIAT 30)","HE"],"ammo:23x115 HEI":["23 mm yüksek infilaklı yakıcı (OFZ)","HEI"],"ammo:30x165 HEI":["30 mm yüksek infilaklı yakıcı (OFZ)","HEI"]};
 
   return {
     SCHEMA_VERSION: SCHEMA_VERSION,
@@ -1131,10 +1200,12 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     standardCatalog: standardCatalog,
     STANDARD_CATALOG_VERSION: STANDARD_CATALOG_VERSION,
     mergeStandardCatalog: mergeStandardCatalog,
-    newPackage: newPackage,
+    translateLegacyCatalog: translateLegacyCatalog,
+    upgradeCatalog: upgradeCatalog,
+    newPreset: newPreset,
     cloneLoads: cloneLoads,
     expandLoads: expandLoads,
-    packageUsage: packageUsage,
+    presetUsage: presetUsage,
     duplicateAircraft: duplicateAircraft,
     compatibility: compatibility,
     normalizeProject: normalizeProject,
@@ -1151,11 +1222,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 </script>
   <script>
 /*
- * XML dışa aktarım katmanı.
+ * XML export layer.
  *
- * Her exporter { label, fileExtension, exportProject(project, model) -> string } biçimindedir.
- * Hedef yazılımın XML formatı netleştiğinde EXPORTERS içine yeni bir giriş eklenir;
- * kural tanımlama arayüzü ve veri modeli değişmeden kalır.
+ * Each exporter is { label, fileExtension, exportProject(project, model) -> string }.
+ * When the target software's XML format is known, a new entry is added to EXPORTERS;
+ * the rule editor and the data model stay unchanged.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -1172,7 +1243,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       .replace(/'/g, '&apos;');
   }
 
-  /* Basit XML düğüm kurucu: el(tag, attrs, children). Boş/undefined özellikler atlanır. */
+  /* Minimal XML node builder: el(tag, attrs, children). Empty/undefined attributes are skipped. */
   function el(tag, attrs, children) {
     return { tag: tag, attrs: attrs || {}, children: (children || []).filter(Boolean) };
   }
@@ -1197,7 +1268,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + serialize(rootNode) + '\n';
   }
 
-  /* ------------------------------------------------------------ genel format */
+  /* ------------------------------------------------------------ generic format */
 
   const TAG_BY_KIND = { munition: 'Munition', rack: 'Rack', subrack: 'Subrack', gun: 'Gun', ammo: 'Ammo' };
 
@@ -1267,11 +1338,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   const EXPORTERS = {
     generic: {
-      label: 'Genel XML (geçici format)',
+      label: 'Generic XML (interim format)',
       fileExtension: 'xml',
       exportProject: genericExport,
     },
-    // target: { label: 'Hedef yazılım formatı', fileExtension: 'xml', exportProject: function (project, model) { ... } },
+    // target: { label: 'Target software format', fileExtension: 'xml', exportProject: function (project, model) { ... } },
   };
 
   return {
@@ -1285,9 +1356,9 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 </script>
   <script>
 /*
- * Uçak üstten görünüm çizimleri ve istasyon yerleşimi.
- * Çizimler şematiktir: burun yukarıda, koordinat sistemi VIEW (400 x 500), merkez hattı x = 200.
- * Her şekil sağ yarının dış hat noktalarıyla tanımlanır; sol yarı ayna ile üretilir.
+ * Aircraft top-view drawings and station layout.
+ * Drawings are schematic: nose up, coordinate system VIEW (400 x 500), centre line x = 200.
+ * Each shape is defined by the outline points of its right half; the left half is mirrored.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -1299,18 +1370,18 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   const SHAPES = {
     single: {
-      label: 'Tek motorlu avcı (F-16 tipi)',
+      label: 'Single-engine fighter (F-16 type)',
       half: [[0, 14], [7, 40], [13, 80], [17, 130], [21, 165], [34, 212], [160, 312], [168, 314], [168, 342],
         [40, 350], [30, 392], [92, 438], [94, 458], [28, 462], [17, 486], [0, 486]],
       canopy: { y: 92, rx: 9, ry: 28 },
       fins: [{ x: 0, y1: 400, y2: 482 }],
-      // İstasyonların kanat üzerinde dizileceği hat (sağ yarı, kökten uca) ve gövde hattı.
+      // Line along which wing stations are spread (right half, root to tip) and the fuselage band.
       wing: { root: [36, 288], tip: [166, 328] },
       gun: [-20, 170],
       body: { y1: 250, y2: 340 },
     },
     twin: {
-      label: 'Çift motorlu avcı (F-15 / F-4 tipi)',
+      label: 'Twin-engine fighter (F-15 / F-4 type)',
       half: [[0, 14], [9, 48], [17, 96], [22, 138], [44, 150], [48, 205], [172, 300], [176, 304], [176, 334],
         [50, 346], [50, 392], [116, 438], [116, 462], [44, 466], [38, 490], [0, 490]],
       canopy: { y: 100, rx: 10, ry: 30 },
@@ -1319,8 +1390,31 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       gun: [44, 190],
       body: { y1: 240, y2: 360 },
     },
+    eurofighter: {
+      label: 'Eurofighter Typhoon (canard delta)',
+      // Long nose, canards behind the cockpit, chin intake, cranked delta wing, single fin.
+      half: [[0, 10], [6, 40], [11, 80], [14, 112], [16, 126], [54, 152], [56, 160], [19, 163], [26, 196],
+        [30, 214], [170, 392], [173, 398], [173, 410], [44, 416], [36, 446], [30, 470], [0, 470]],
+      canopy: { y: 96, rx: 9, ry: 26 },
+      fins: [{ x: 0, y1: 350, y2: 466 }],
+      wing: { root: [40, 330], tip: [152, 396] },
+      gun: [30, 300],
+      body: { y1: 250, y2: 390 },
+    },
+    calidus: {
+      label: 'CALIDUS B-250 (turboprop light attack)',
+      // Turboprop nose with propeller, tandem cockpit, straight tapered low wing, conventional tail.
+      half: [[0, 34], [10, 42], [16, 60], [19, 102], [20, 178], [186, 192], [189, 196], [189, 214], [176, 220],
+        [22, 246], [16, 340], [80, 410], [83, 416], [83, 430], [16, 436], [10, 474], [0, 476]],
+      canopy: { y: 134, rx: 10, ry: 34 },
+      fins: [{ x: 0, y1: 390, y2: 474 }],
+      prop: { y: 32, half: 46 },
+      wing: { root: [40, 216], tip: [172, 209] },
+      gun: [0, 82],
+      body: { y1: 210, y2: 280 },
+    },
     delta: {
-      label: 'Delta kanat',
+      label: 'Delta wing',
       half: [[0, 14], [9, 56], [17, 112], [22, 162], [150, 418], [152, 438], [26, 442], [19, 470], [0, 470]],
       canopy: { y: 104, rx: 9, ry: 30 },
       fins: [{ x: 0, y1: 360, y2: 466 }],
@@ -1329,7 +1423,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       body: { y1: 300, y2: 420 },
     },
     none: {
-      label: 'Çizimsiz (serbest yerleşim)',
+      label: 'No drawing (free layout)',
       half: [],
       fins: [],
       wing: { root: [30, 250], tip: [170, 250] },
@@ -1348,10 +1442,10 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return 'M' + right.concat(left).map(function (p) { return p[0] + ',' + p[1]; }).join(' L') + ' Z';
   }
 
-  // Merkez hattına bu kadar yakın istasyonlar gövde (CENTER) sayılır.
+  // Stations this close to the centre line count as fuselage (CENTER) stations.
   const CENTER_TOLERANCE = 12;
 
-  // Ana istasyon: numaralı, ek nokta veya top değil.
+  // Main station: numbered; not a side point and not a gun.
   function isMain(s) { return !s.parentId && s.type !== 'GUN'; }
   function isGun(s) { return s.type === 'GUN'; }
 
@@ -1369,7 +1463,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return x < VIEW.cx ? 'LEFT' : 'RIGHT';
   }
 
-  /* Ek takma noktasının (ör. 5L, 5R) ana istasyona göre konumu. */
+  /* Offset of a side station (e.g. 5L, 5R) from its parent station. */
   function sideOffset(side, siblings) {
     if (side.suffix === 'L') return [-24, 6];
     if (side.suffix === 'R') return [24, 6];
@@ -1391,8 +1485,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   /*
-   * Varsayılan yerleşim (yalnızca ana istasyonlar): sol istasyonlar kanat ucundan köke, merkez
-   * istasyonlar gövde boyunca, sağ istasyonlar kökten kanat ucuna. Grup içi sıra liste sırasıdır.
+   * Default layout (main stations only): left stations from wing tip to root, centre stations along
+   * the fuselage, right stations from root to wing tip. Order within a group is list order.
    */
   function autoLayout(aircraft) {
     const shape = shapeOf(aircraft.silhouette);
@@ -1423,7 +1517,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   function hasPosition(s) { return typeof s.x === 'number' && typeof s.y === 'number'; }
 
-  /* Konumu olmayan istasyonlara varsayılan konum atar; true dönerse değişiklik yapılmıştır. */
+  /* Gives stations without a position a default one; returns true if anything changed. */
   function ensurePositions(aircraft) {
     let changed = false;
     const mains = aircraft.stations.filter(isMain);
@@ -1445,7 +1539,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return changed;
   }
 
-  /* Otomatik yerleşim; locations verilirse yalnızca o gruplardaki (LEFT/CENTER/RIGHT) istasyonlar taşınır. */
+  /* Auto layout; when locations is given only stations in those groups (LEFT/CENTER/RIGHT) move. */
   function applyAutoLayout(aircraft, locations) {
     const layout = autoLayout(aircraft);
     if (!locations) placeGuns(aircraft, false);
@@ -1465,17 +1559,17 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   /*
-   * İstasyonları soldan sağa sıralar ve numaralar: ana istasyonlar 1..N (x, eşitlikte y sırası),
-   * ek takma noktaları ana istasyon numarası + son ek (5L, 5R). Konum (sol/merkez/sağ) x'ten türetilir.
-   * Liste sırası da buna göre güncellenir (her ana istasyonun ardından kendi ek noktaları).
-   * true dönerse sıra veya kodlar değişmiştir.
+   * Sorts and numbers stations left to right: main stations 1..N (by x, then y), side stations get
+   * parent number + suffix (5L, 5R). Location (left/centre/right) is derived from x. The list order
+   * is updated too (each main station followed by its side stations).
+   * Returns true if order or codes changed.
    */
   function arrangeStations(aircraft) {
     ensurePositions(aircraft);
     const before = aircraft.stations.map(function (s) { return s.id + ':' + s.code + ':' + s.location; }).join('|');
     const byId = {};
     aircraft.stations.forEach(function (s) { byId[s.id] = s; });
-    // Ana istasyonu silinmiş ek noktalar bağımsız istasyon olur.
+    // Side stations whose parent was deleted become independent stations.
     aircraft.stations.forEach(function (s) {
       const parent = s.parentId ? byId[s.parentId] : null;
       if (s.parentId && (!parent || parent.parentId || isGun(parent))) { s.parentId = null; s.suffix = ''; }
@@ -1493,7 +1587,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
         ordered.push(side);
       });
     });
-    // Toplar numarasız: tek ise GUN, birden fazla ise soldan sağa GUN1, GUN2...
+    // Guns are unnumbered: GUN when there is one, otherwise GUN1, GUN2... left to right.
     const guns = aircraft.stations.filter(isGun).sort(function (a, b) { return a.x - b.x || a.y - b.y; });
     guns.forEach(function (g, i) {
       g.code = guns.length === 1 ? 'GUN' : 'GUN' + (i + 1);
@@ -1506,8 +1600,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   /*
-   * Merkez hattına göre aynadaki istasyon (ör. 3 ↔ 7, 5L ↔ 5R). Aynı türden (ana / ek nokta),
-   * aynalanmış konuma en yakın ve en fazla 40 birim uzaktaki istasyon; yoksa null.
+   * Mirror station across the centre line (e.g. 3 <-> 7, 5L <-> 5R): the station of the same kind
+   * (main / side) closest to the mirrored position and at most 40 units away; otherwise null.
    */
   function mirrorOf(aircraft, st) {
     if (isGun(st) || !hasPosition(st) || Math.abs(st.x - VIEW.cx) <= CENTER_TOLERANCE / 2) return null;
@@ -1543,9 +1637,9 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 </script>
   <script>
 /*
- * Arayüz. Bağımlılıksız; dosyayı doğrudan tarayıcıda açarak (file://) çalışır.
- * Metin alanları durumu yerinde günceller (yeniden çizim yok, odak kaybolmaz);
- * yapısal değişiklikler (ekle/sil/seç) görünümü yeniden çizer.
+ * User interface. No dependencies; works when the file is opened directly in a browser (file://).
+ * Text fields update state in place (no re-render, focus is kept);
+ * structural changes (add/delete/select) re-render the view.
  */
 (function () {
   'use strict';
@@ -1562,7 +1656,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     catalogKind: 'munition',
     catalogFilter: '',
     catalogGroup: '',
-    packageId: null,
+    presetId: null,
     matrixKinds: ['munition', 'ammo', 'gun'],
     matrixFilter: '',
     aircraftId: null,
@@ -1570,7 +1664,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     exporter: 'generic',
   };
 
-  /* ------------------------------------------------------------ yardımcılar */
+  /* ------------------------------------------------------------ helpers */
 
   function h(tag, attrs, children) {
     const node = document.createElement(tag);
@@ -1606,7 +1700,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return node;
   }
 
-  // 24x24 çizgi ikonlar.
+  // 24x24 line icons.
   const ICONS = {
     plane: 'M12 2l1.6 6.5L21 13v2l-7.3-2-.9 5.6L15 20v1.5l-3-.9-3 .9V20l2.2-1.4-.9-5.6L3 15v-2l7.4-4.5z',
     box: 'M3 7.5l9-4.5 9 4.5v9L12 21l-9-4.5zM3 7.5l9 4.5 9-4.5M12 12v9',
@@ -1650,8 +1744,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   /*
-   * Geri al / yinele: her kayıtta (250 ms'lik değişiklik grubu) önceki anlık görüntü yığına atılır.
-   * Dosya: File System Access API varsa aynı dosyanın üzerine kaydedilir; yoksa indirme yapılır.
+   * Undo / redo: on every save (a 250 ms burst of changes) the previous snapshot is pushed on the stack.
+   * File: with the File System Access API the same file is overwritten; otherwise it is downloaded.
    */
   const history = { undo: [], redo: [], last: null, limit: 150 };
   const fileState = { handle: null, name: '', saved: null };
@@ -1672,13 +1766,13 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     saveTimer = null;
     const cur = JSON.stringify(state.project);
     commitHistory(cur);
-    try { localStorage.setItem(STORAGE_KEY, cur); } catch (e) { /* depolama kapalı olabilir */ }
+    try { localStorage.setItem(STORAGE_KEY, cur); } catch (e) { /* storage may be disabled */ }
   }
 
   function restore(json) {
     history.last = json;
     state.project = JSON.parse(json);
-    try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { /* depolama kapalı olabilir */ }
+    try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { /* storage may be disabled */ }
     render();
     updateTopbar();
   }
@@ -1688,7 +1782,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (!history.undo.length) return;
     history.redo.push(history.last);
     restore(history.undo.pop());
-    toast('Geri alındı.');
+    toast('Undone.');
   }
 
   function redo() {
@@ -1696,7 +1790,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (!history.redo.length) return;
     history.undo.push(history.last);
     restore(history.redo.pop());
-    toast('Yinelendi.');
+    toast('Redone.');
   }
 
   function updateTopbar() {
@@ -1708,11 +1802,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (!fileEl || !state.project) return;
     const dirty = fileState.saved !== null && fileState.saved !== (history.last || JSON.stringify(state.project));
     fileEl.textContent = fileState.name ? fileState.name + (dirty ? ' •' : '') : '';
-    fileEl.title = fileState.name ? (dirty ? 'Dosyaya kaydedilmemiş değişiklikler var' : 'Dosya güncel') : '';
+    fileEl.title = fileState.name ? (dirty ? 'There are changes not yet saved to the file' : 'File is up to date') : '';
     fileEl.className = 'file-status' + (dirty ? ' dirty' : '') + (fileState.name ? '' : ' hidden');
   }
 
-  const FILE_TYPES = [{ description: 'Yükleme kuralları projesi (JSON)', accept: { 'application/json': ['.json'] } }];
+  const FILE_TYPES = [{ description: 'Loadout rules project (JSON)', accept: { 'application/json': ['.json'] } }];
 
   function markSaved(name) {
     if (saveTimer) saveNow();
@@ -1727,7 +1821,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (!window.showSaveFilePicker) {
       download(suggested, text, 'application/json');
       markSaved(suggested);
-      toast('Proje indirildi (' + suggested + ').', 'ok');
+      toast('Project downloaded (' + suggested + ').', 'ok');
       return;
     }
     try {
@@ -1736,9 +1830,9 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       await w.write(text);
       await w.close();
       markSaved(fileState.handle.name);
-      toast(fileState.handle.name + ' kaydedildi.', 'ok');
+      toast(fileState.handle.name + ' saved.', 'ok');
     } catch (e) {
-      if (e && e.name !== 'AbortError') toast('Kaydedilemedi: ' + e.message, 'error');
+      if (e && e.name !== 'AbortError') toast('Could not save: ' + e.message, 'error');
     }
   }
 
@@ -1750,9 +1844,9 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       setProject(JSON.parse(await f.text()));
       fileState.handle = handles[0];
       markSaved(f.name);
-      toast(f.name + ' açıldı.', 'ok');
+      toast(f.name + ' opened.', 'ok');
     } catch (e) {
-      if (e && e.name !== 'AbortError') toast('Dosya okunamadı: ' + e.message, 'error');
+      if (e && e.name !== 'AbortError') toast('Could not read the file: ' + e.message, 'error');
     }
   }
   function persist() {
@@ -1783,7 +1877,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     toastTimer = setTimeout(function () { el.className = 'toast ' + (kind || ''); }, 2600);
   }
 
-  /* Metin/sayı alanı: değişikliği nesneye yazar, yeniden çizmez. */
+  /* Text/number field: writes the change to the object without re-rendering. */
   function field(label, obj, key, opts) {
     opts = opts || {};
     const isNum = opts.type === 'number';
@@ -1815,7 +1909,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   function confirmDelete(what) {
-    return window.confirm(what + ' silinsin mi?');
+    return window.confirm('Delete ' + what + '?');
   }
 
   function download(filename, text, mime) {
@@ -1827,7 +1921,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   function safeFileName(name) {
-    return (name || 'proje').replace(/[^\w\-ğüşıöçĞÜŞİÖÇ]+/g, '_');
+    return (name || 'project').replace(/[^\w\-ğüşıöçĞÜŞİÖÇ]+/g, '_');
   }
 
   function panel(title, opts, children) {
@@ -1843,11 +1937,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     ]);
   }
 
-  /* Bir mağazanın yükleme ağaçlarında kullanılıp kullanılmadığını sayar. */
+  /* Counts how often a store is used in load trees, presets and rules. */
   function usageCount(storeId) {
     let count = 0;
     const walk = function (n) { if (n.refId === storeId) count++; n.children.forEach(walk); };
-    (state.project.packages || []).forEach(function (pkg) { pkg.loads.forEach(walk); });
+    (state.project.presets || []).forEach(function (preset) { preset.loads.forEach(walk); });
     state.project.aircraft.forEach(function (ac) {
       ac.stations.forEach(function (st) { st.loads.forEach(walk); });
       ac.constraints.forEach(function (c) { if (c.munitionId === storeId) count++; });
@@ -1856,21 +1950,21 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   function stationTitle(st) {
-    if (st.type === 'GUN') return 'Top ' + st.code;
-    return (st.parentId ? 'Ek nokta ' : 'İstasyon ') + st.code;
+    if (st.type === 'GUN') return 'Gun ' + st.code;
+    return (st.parentId ? 'Side station ' : 'Station ') + st.code;
   }
 
   function isGun(st) { return st.type === 'GUN'; }
 
-  /* ------------------------------------------------------------ sekmeler */
+  /* ------------------------------------------------------------ tabs */
 
   const TABS = [
-    { id: 'aircraft', label: 'Uçaklar', icon: 'plane' },
-    { id: 'matrix', label: 'Matris', icon: 'table' },
-    { id: 'packages', label: 'Paketler', icon: 'layers' },
-    { id: 'catalog', label: 'Katalog', icon: 'box' },
-    { id: 'validation', label: 'Doğrulama', icon: 'check' },
-    { id: 'xml', label: 'XML Çıktısı', icon: 'code' },
+    { id: 'aircraft', label: 'Aircraft', icon: 'plane' },
+    { id: 'matrix', label: 'Matrix', icon: 'table' },
+    { id: 'presets', label: 'Presets', icon: 'layers' },
+    { id: 'catalog', label: 'Catalog', icon: 'box' },
+    { id: 'validation', label: 'Validation', icon: 'check' },
+    { id: 'xml', label: 'XML Output', icon: 'code' },
   ];
 
   function renderTabs() {
@@ -1885,41 +1979,41 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       }, [
         icon(t.icon),
         h('span', {}, t.label),
-        t.id === 'validation' && errors ? h('span', { class: 'badge', title: errors + ' hata' }, errors) : null,
-        t.id === 'validation' && warnings ? h('span', { class: 'badge warn', title: warnings + ' uyarı' }, warnings) : null,
+        t.id === 'validation' && errors ? h('span', { class: 'badge', title: errors + ' errors' }, errors) : null,
+        t.id === 'validation' && warnings ? h('span', { class: 'badge warn', title: warnings + ' warnings' }, warnings) : null,
       ]);
     }));
   }
 
-  /* ------------------------------------------------------------ katalog */
+  /* ------------------------------------------------------------ catalog */
 
   const CATALOG_COLUMNS = {
-    munition: [['code', 'Kod'], ['name', 'Ad'], ['category', 'Kategori'], ['notes', 'Not']],
-    rack: [['code', 'Kod'], ['name', 'Ad'], ['positions', 'Pozisyon', 'number'], ['notes', 'Not']],
-    subrack: [['code', 'Kod'], ['name', 'Ad'], ['positions', 'Pozisyon', 'number'], ['notes', 'Not']],
-    gun: [['code', 'Kod'], ['name', 'Ad'], ['caliber', 'Çap'], ['positions', 'Mermi kapasitesi', 'number'], ['notes', 'Not']],
-    ammo: [['code', 'Kod'], ['name', 'Ad'], ['caliber', 'Çap'], ['category', 'Tip (HEI, TP…)'], ['notes', 'Not']],
+    munition: [['code', 'Code'], ['name', 'Name'], ['category', 'Category'], ['notes', 'Notes']],
+    rack: [['code', 'Code'], ['name', 'Name'], ['positions', 'Positions', 'number'], ['notes', 'Notes']],
+    subrack: [['code', 'Code'], ['name', 'Name'], ['positions', 'Positions', 'number'], ['notes', 'Notes']],
+    gun: [['code', 'Code'], ['name', 'Name'], ['caliber', 'Caliber'], ['positions', 'Round capacity', 'number'], ['notes', 'Notes']],
+    ammo: [['code', 'Code'], ['name', 'Name'], ['caliber', 'Caliber'], ['category', 'Type (HEI, TP…)'], ['notes', 'Notes']],
   };
 
   const CATALOG_HINTS = {
-    munition: 'Uçağa takılabilen bomba, füze, yakıt tankı, pod vb. yükler.',
-    rack: 'İstasyona doğrudan takılan askı/lançerler. Pozisyon: üzerine aynı anda takılabilecek en fazla öğe sayısı.',
-    subrack: 'Rack altına takılan çoklu taşıyıcılar (TER, MER, BRU…). Pozisyon: üzerine takılabilecek en fazla öğe sayısı.',
-    gun: 'Dahili toplar ve top podları. Mermi kapasitesi, mühimmat adedinin üst sınırıdır; çap, mühimmat uyumunu kontrol eder.',
-    ammo: 'Top mühimmatı. Çap, topun çapıyla eşleşmezse doğrulama uyarı verir.',
+    munition: 'Bombs, missiles, fuel tanks, pods and other stores that can be carried.',
+    rack: 'Racks and launchers fitted directly to a station. Positions: the most items it can carry at once.',
+    subrack: 'Multiple carriers fitted under a rack (TER, MER, BRU…). Positions: the most items it can carry.',
+    gun: 'Internal guns and gun pods. Round capacity limits the ammunition count; caliber is checked against the ammunition.',
+    ammo: 'Gun ammunition. Validation warns when the caliber does not match the gun.',
   };
 
   function renderCatalog() {
     const kind = state.catalogKind;
     const list = state.project.catalog[M.CATALOG_KEY[kind]];
     const cols = CATALOG_COLUMNS[kind];
-    const q = state.catalogFilter.trim().toLocaleLowerCase('tr');
-    // Mühimmat kategoriye, top ve top mühimmatı çapa göre gruplanır.
+    const q = state.catalogFilter.trim().toLocaleLowerCase();
+    // Stores are grouped by category, guns and gun ammunition by caliber.
     const groupKey = kind === 'munition' ? 'category' : (kind === 'gun' || kind === 'ammo') ? 'caliber' : null;
     const groups = groupKey ? list.map(function (s) { return s[groupKey] || '—'; }).filter(function (g, i, arr) { return arr.indexOf(g) === i; }) : [];
     const group = groups.indexOf(state.catalogGroup) >= 0 ? state.catalogGroup : '';
 
-    const nav = panel('Katalog', { icon: 'box', class: 'nav-panel' }, h('ul', { class: 'list' }, M.KINDS.map(function (k) {
+    const nav = panel('Catalog', { icon: 'box', class: 'nav-panel' }, h('ul', { class: 'list' }, M.KINDS.map(function (k) {
       return h('li', {
         class: k === kind ? 'selected' : '',
         onclick: function () { state.catalogKind = k; state.catalogGroup = ''; render(); },
@@ -1927,17 +2021,17 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     })));
 
     const rowFor = function (s) {
-      const text = cols.map(function (c) { return s[c[0]]; }).join(' ').toLocaleLowerCase('tr');
+      const text = cols.map(function (c) { return s[c[0]]; }).join(' ').toLocaleLowerCase();
       if (group && (s[groupKey] || '—') !== group) return null;
       return h('tr', { hidden: q && text.indexOf(q) < 0 ? true : undefined, 'data-search': text }, [
         cols.map(function (c) {
           return h('td', { class: c[2] === 'number' ? 'num' : (c[0] === 'code' ? 'code-col' : '') }, field(null, s, c[0], { type: c[2], min: c[2] === 'number' ? 1 : undefined }));
         }),
         h('td', { class: 'row-actions' }, btn('', {
-          icon: 'trash', class: 'ghost danger', aria: 'Sil',
+          icon: 'trash', class: 'ghost danger', aria: 'Delete',
           onclick: function () {
             const used = usageCount(s.id);
-            const msg = M.KIND_LABELS[kind] + ' ' + M.storeLabel(s) + (used ? ' (' + used + ' yerde kullanılıyor)' : '');
+            const msg = M.KIND_LABELS[kind] + ' ' + M.storeLabel(s) + (used ? ' (used in ' + used + ' places)' : '');
             if (confirmDelete(msg)) { removeFrom(list, s); rerender(); }
           },
         })),
@@ -1947,10 +2041,10 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const search = h('label', { class: 'search' }, [
       icon('search'),
       h('input', {
-        type: 'search', placeholder: 'Ara…', value: state.catalogFilter,
+        type: 'search', placeholder: 'Search…', value: state.catalogFilter,
         oninput: function (e) {
           state.catalogFilter = e.target.value;
-          const qq = e.target.value.trim().toLocaleLowerCase('tr');
+          const qq = e.target.value.trim().toLocaleLowerCase();
           document.querySelectorAll('.catalog-table tbody tr').forEach(function (tr) {
             tr.hidden = !!qq && tr.getAttribute('data-search').indexOf(qq) < 0;
           });
@@ -1958,25 +2052,25 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       }),
     ]);
 
-    const body = panel(M.KIND_LABELS[kind] + ' tanımları', {
-      extra: h('span', { class: 'kind-pill ' + kind }, list.length + ' kayıt'),
+    const body = panel(M.KIND_LABELS[kind] + ' definitions', {
+      extra: h('span', { class: 'kind-pill ' + kind }, list.length + ' records'),
       actions: [
         search,
-        btn('Standart katalogu ekle', {
+        btn('Add standard catalog', {
           icon: 'spark',
-          title: 'MK-82, GBU-12, AIM-9, AIM-120, MAU-12, TER-9, M61A1, PGU-28/B vb. hazır tanımlardan eksik olanları ekler',
+          title: 'Adds the missing items from the built-in definitions (MK-82, GBU-12, AIM-9, AIM-120, MAU-12, TER-9, M61A1, PGU-28/B …)',
           onclick: function () {
             const added = M.mergeStandardCatalog(state.project);
             rerender();
-            toast(added ? added + ' öğe kataloğa eklendi.' : 'Standart katalogdaki tüm öğeler zaten mevcut.', added ? 'ok' : '');
+            toast(added ? added + ' items added to the catalog.' : 'All standard catalog items are already present.', added ? 'ok' : '');
           },
         }),
-        btn(M.KIND_LABELS[kind] + ' ekle', { icon: 'plus', class: 'primary', onclick: function () { list.push(M.newStore(kind)); rerender(); } }),
+        btn('Add ' + M.KIND_LABELS[kind].toLowerCase(), { icon: 'plus', class: 'primary', onclick: function () { list.push(M.newStore(kind)); rerender(); } }),
       ],
     }, [
       h('p', { class: 'hint' }, CATALOG_HINTS[kind]),
       groups.length > 1 ? h('div', { class: 'group-chips' }, [
-        h('button', { class: 'small group-chip' + (group ? '' : ' on'), onclick: function () { state.catalogGroup = ''; render(); } }, ['Tümü ', h('span', { class: 'count' }, list.length)]),
+        h('button', { class: 'small group-chip' + (group ? '' : ' on'), onclick: function () { state.catalogGroup = ''; render(); } }, ['All ', h('span', { class: 'count' }, list.length)]),
         groups.map(function (g) {
           const n = list.filter(function (s) { return (s[groupKey] || '—') === g; }).length;
           return h('button', { class: 'small group-chip' + (g === group ? ' on' : ''), onclick: function () { state.catalogGroup = g; render(); } }, [g + ' ', h('span', { class: 'count' }, n)]);
@@ -1987,7 +2081,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
           h('thead', {}, h('tr', {}, cols.map(function (c) { return h('th', {}, c[1]); }).concat([h('th', {}, '')]))),
           h('tbody', {}, list.map(rowFor)),
         ]))
-        : emptyState('box', 'Henüz kayıt yok', '"' + M.KIND_LABELS[kind] + ' ekle" veya "Standart katalogu ekle" ile başlayın.'),
+        : emptyState('box', 'No records yet', 'Start with "Add ' + M.KIND_LABELS[kind].toLowerCase() + '" or "Add standard catalog".'),
     ]);
 
     return h('div', { class: 'layout' }, [nav, body]);
@@ -1997,7 +2091,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return h('div', { class: 'empty-state' }, [icon(iconName), h('b', {}, title), text ? h('span', {}, text) : null]);
   }
 
-  /* ------------------------------------------------------------ uçaklar */
+  /* ------------------------------------------------------------ aircraft */
 
   function currentAircraft() {
     const list = state.project.aircraft;
@@ -2026,13 +2120,13 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   function renderAircraft() {
     const ac = currentAircraft();
-    const nav = panel('Uçaklar', {
+    const nav = panel('Aircraft', {
       icon: 'plane', class: 'nav-panel',
       actions: [btn('', {
-        icon: 'plus', class: 'primary small', aria: 'Uçak ekle',
+        icon: 'plus', class: 'primary small', aria: 'Add aircraft',
         onclick: function () {
           const a = M.newAircraft();
-          a.code = 'UCAK-' + (state.project.aircraft.length + 1);
+          a.code = 'AIRCRAFT-' + (state.project.aircraft.length + 1);
           state.project.aircraft.push(a);
           state.aircraftId = a.id; state.stationId = null;
           rerender();
@@ -2047,15 +2141,15 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
         }, [
           miniSilhouette(a),
           h('div', { class: 'ac-meta' }, [
-            h('b', { class: 'ac-code' }, a.code || '(kodsuz)'),
+            h('b', { class: 'ac-code' }, a.code || '(no code)'),
             a.name ? h('span', { class: 'ac-name' }, a.name) : null,
-            h('span', { class: 'ac-counts' }, c.main + ' istasyon' + (c.side ? ' · ' + c.side + ' ek' : '') + (c.gun ? ' · ' + c.gun + ' top' : '')),
+            h('span', { class: 'ac-counts' }, c.main + ' stations' + (c.side ? ' · ' + c.side + ' side' : '') + (c.gun ? ' · ' + c.gun + ' gun' : '')),
           ]),
         ]);
       }))
-      : emptyState('plane', 'Henüz uçak yok', '+ ile ilk uçağı ekleyin.'));
+      : emptyState('plane', 'No aircraft yet', 'Add the first one with +.'));
 
-    if (!ac) return h('div', { class: 'layout' }, [nav, h('div', {}, panel('', {}, emptyState('plane', 'Uçak seçilmedi', 'Başlamak için soldan bir uçak ekleyin.')))]);
+    if (!ac) return h('div', { class: 'layout' }, [nav, h('div', {}, panel('', {}, emptyState('plane', 'No aircraft selected', 'Add an aircraft on the left to start.')))]);
 
     if (SH.arrangeStations(ac)) persist();
     const st = currentStation(ac);
@@ -2063,7 +2157,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       renderAircraftInfo(ac),
       h('div', { class: 'stage' }, [
         renderDrawing(ac, st),
-        st ? renderStationPanel(ac, st) : panel('', {}, emptyState('target', 'İstasyon yok', 'Çizimin altındaki düğmelerle istasyon ekleyin.')),
+        st ? renderStationPanel(ac, st) : panel('', {}, emptyState('target', 'No stations', 'Add stations with the buttons below the drawing.')),
       ]),
       renderStations(ac, st),
       renderConstraints(ac),
@@ -2074,58 +2168,58 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const shapeOptions = Object.keys(SH.SHAPES).map(function (k) { return { value: k, label: SH.SHAPES[k].label }; });
     const c = counts(ac);
     const stat = function (value, label) { return h('div', { class: 'stat' }, [h('b', {}, value), h('span', {}, label)]); };
-    return panel(ac.name || ac.code || 'Uçak', {
+    return panel(ac.name || ac.code || 'Aircraft', {
       class: 'aircraft-info',
       extra: h('div', { class: 'stats' }, [
-        stat(c.main, 'istasyon'), stat(c.side, 'ek nokta'), stat(c.gun, 'top'), stat(ac.constraints.length, 'kural'),
+        stat(c.main, 'stations'), stat(c.side, 'side stations'), stat(c.gun, 'guns'), stat(ac.constraints.length, 'rules'),
       ]),
-      actions: [btn('Çoğalt', {
+      actions: [btn('Duplicate', {
         icon: 'duplicate', class: 'small',
-        title: 'Uçağı tüm istasyon, yük ve kurallarıyla kopyala (ör. varyant oluşturmak için)',
+        title: 'Copy the aircraft with all its stations, loads and rules (e.g. to create a variant)',
         onclick: function () {
           const copy = M.duplicateAircraft(ac);
           const i = state.project.aircraft.indexOf(ac);
           state.project.aircraft.splice(i + 1, 0, copy);
           state.aircraftId = copy.id; state.stationId = null;
           rerender();
-          toast(copy.code + ' oluşturuldu.', 'ok');
+          toast(copy.code + ' created.', 'ok');
         },
       }), btn('', {
-        icon: 'trash', class: 'ghost danger', aria: 'Uçağı sil',
+        icon: 'trash', class: 'ghost danger', aria: 'Delete aircraft',
         onclick: function () {
-          if (confirmDelete('Uçak ' + (ac.code || '(kodsuz)'))) {
+          if (confirmDelete('aircraft ' + (ac.code || '(no code)'))) {
             removeFrom(state.project.aircraft, ac); state.aircraftId = null; rerender();
           }
         },
       })],
     }, [
       h('div', { class: 'grid4' }, [
-        field('Kod', ac, 'code', { onInput: renderNavLater }),
-        field('Ad', ac, 'name'),
+        field('Code', ac, 'code', { onInput: renderNavLater }),
+        field('Name', ac, 'name'),
         h('label', { class: 'field' }, [
-          h('span', {}, 'Çizim'),
+          h('span', {}, 'Drawing'),
           select(ac, 'silhouette', shapeOptions, function () { SH.applyAutoLayout(ac); rerender(); }),
         ]),
-        field('Not', ac, 'notes', { placeholder: 'İsteğe bağlı' }),
+        field('Notes', ac, 'notes', { placeholder: 'Optional' }),
       ]),
     ]);
   }
 
-  // Uçak kodu yazılırken sol listedeki adı güncellemek için, odak kaybetmeden.
+  // Updates the name in the list on the left while the aircraft code is typed, keeping focus.
   function renderNavLater() {
     const ac = currentAircraft();
     const b = document.querySelector('.aircraft-list li.selected .ac-code');
-    if (b && ac) b.textContent = ac.code || '(kodsuz)';
+    if (b && ac) b.textContent = ac.code || '(no code)';
   }
 
-  /* ---- uçak çizimi */
+  /* ---- aircraft drawing */
 
   function loadLines(st) {
     const lines = [];
     const walk = function (n, depth) {
       const store = M.findStore(state.project, n.kind, n.refId);
-      if (n.kind === 'package') {
-        lines.push({ depth: depth, kind: 'package', text: 'Paket ' + (store ? store.code : '?') });
+      if (n.kind === 'preset') {
+        lines.push({ depth: depth, kind: 'preset', text: 'Preset ' + (store ? store.code : '?') });
         if (store) store.loads.forEach(function (c) { walk(c, depth + 1); });
         return;
       }
@@ -2145,8 +2239,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       lines.length
         ? h('ul', {}, lines.slice(0, 14).map(function (l) {
           return h('li', { style: 'padding-left:' + (l.depth * 12) + 'px' }, [h('i', { class: 'kind-dot ' + l.kind }), l.text]);
-        }).concat(lines.length > 14 ? [h('li', { class: 'more' }, '+' + (lines.length - 14) + ' daha')] : []))
-        : h('div', { class: 'tt-empty' }, 'Yük izni tanımlı değil')
+        }).concat(lines.length > 14 ? [h('li', { class: 'more' }, '+' + (lines.length - 14) + ' more')] : []))
+        : h('div', { class: 'tt-empty' }, 'No loads allowed yet')
     );
     tooltipEl.classList.add('show');
     moveTooltip(evt);
@@ -2162,7 +2256,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     tooltipEl.style.top = y + 'px';
   }
   function hideTooltip() { if (tooltipEl) tooltipEl.classList.remove('show'); }
-  // İşaret yeniden çizilince pointerleave kaçabilir; fare işaretten çıkınca her durumda gizle.
+  // pointerleave can be missed when a marker is re-rendered; hide whenever the pointer leaves markers.
   document.addEventListener('pointermove', function (e) {
     if (tooltipEl && tooltipEl.classList.contains('show') && !(e.target.closest && e.target.closest('.aircraft-svg .station'))) hideTooltip();
   });
@@ -2171,7 +2265,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   function renderDrawing(ac, selected) {
     const V = SH.VIEW;
     const shape = SH.shapeOf(ac.silhouette);
-    const root = svg('svg', { viewBox: '0 0 ' + V.width + ' ' + V.height, class: 'aircraft-svg', role: 'img', 'aria-label': (ac.code || 'Uçak') + ' istasyon yerleşimi' });
+    const root = svg('svg', { viewBox: '0 0 ' + V.width + ' ' + V.height, class: 'aircraft-svg', role: 'img', 'aria-label': (ac.code || 'Aircraft') + ' station layout' });
 
     root.appendChild(svg('defs', {}, [
       svg('pattern', { id: 'grid-s', width: 10, height: 10, patternUnits: 'userSpaceOnUse' }, [svg('path', { d: 'M10 0H0V10', class: 'grid-minor' })]),
@@ -2191,12 +2285,13 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     shape.fins.forEach(function (f) {
       root.appendChild(svg('line', { x1: V.cx + f.x, y1: f.y1, x2: V.cx + f.x, y2: f.y2, class: 'fin' }));
     });
+    if (shape.prop) root.appendChild(svg('line', { x1: V.cx - shape.prop.half, y1: shape.prop.y, x2: V.cx + shape.prop.half, y2: shape.prop.y, class: 'prop' }));
     if (shape.canopy) root.appendChild(svg('ellipse', { cx: V.cx, cy: shape.canopy.y, rx: shape.canopy.rx, ry: shape.canopy.ry, class: 'canopy' }));
-    root.appendChild(svg('text', { x: 12, y: 22, class: 'drawing-caption' }, (ac.code || 'UÇAK') + ' · ÜSTTEN GÖRÜNÜM'));
-    root.appendChild(svg('text', { x: 12, y: V.height - 12, class: 'drawing-caption' }, 'SOL'));
-    root.appendChild(svg('text', { x: V.width - 12, y: V.height - 12, class: 'drawing-caption', 'text-anchor': 'end' }, 'SAĞ'));
+    root.appendChild(svg('text', { x: 12, y: 22, class: 'drawing-caption' }, (ac.code || 'AIRCRAFT') + ' · TOP VIEW'));
+    root.appendChild(svg('text', { x: 12, y: V.height - 12, class: 'drawing-caption' }, 'LEFT'));
+    root.appendChild(svg('text', { x: V.width - 12, y: V.height - 12, class: 'drawing-caption', 'text-anchor': 'end' }, 'RIGHT'));
 
-    // Ana istasyonlar ek noktalarının üstünde çizilsin diye önce ek noktalar.
+    // Side stations first so that main stations are drawn on top of them.
     const ordered = ac.stations.filter(function (s) { return s.parentId; }).concat(ac.stations.filter(function (s) { return !s.parentId; }));
     ordered.forEach(function (st) {
       const isSel = selected && st.id === selected.id;
@@ -2231,34 +2326,34 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     };
     const c = counts(ac);
 
-    return panel('Yerleşim', {
+    return panel('Layout', {
       class: 'drawing',
-      extra: h('span', { class: 'muted small-text' }, c.main + ' istasyon' + (c.gun ? ' · ' + c.gun + ' top' : '')),
-      actions: [btn('Otomatik', {
+      extra: h('span', { class: 'muted small-text' }, c.main + ' stations' + (c.gun ? ' · ' + c.gun + ' gun' : '')),
+      actions: [btn('Auto layout', {
         icon: 'grid', class: 'small ghost',
-        title: 'İstasyonları çizime göre eşit aralıklarla yeniden diz',
-        onclick: function () { SH.applyAutoLayout(ac); rerender(); toast('İstasyonlar yeniden yerleştirildi.'); },
+        title: 'Re-space the stations evenly on the drawing',
+        onclick: function () { SH.applyAutoLayout(ac); rerender(); toast('Stations re-arranged.'); },
       })],
     }, [
       h('div', { class: 'svg-frame' }, root),
       h('div', { class: 'legend' }, [
-        h('span', {}, [h('i', { class: 'dot loaded' }), 'Yük izni var']),
-        h('span', {}, [h('i', { class: 'dot none' }), 'Tanımsız']),
-        h('span', {}, [h('i', { class: 'dot gun' }), 'Top']),
-        h('span', { class: 'legend-hint' }, 'Tıkla: seç · Sürükle: taşı'),
+        h('span', {}, [h('i', { class: 'dot loaded' }), 'Loads allowed']),
+        h('span', {}, [h('i', { class: 'dot none' }), 'Undefined']),
+        h('span', {}, [h('i', { class: 'dot gun' }), 'Gun']),
+        h('span', { class: 'legend-hint' }, 'Click: select · Drag: move'),
       ]),
       h('div', { class: 'add-row' }, [
-        addButton('LEFT', 'Sol kanat'),
-        addButton('CENTER', 'Gövde'),
-        addButton('RIGHT', 'Sağ kanat'),
-        btn('Top (GUN)', { icon: 'target', class: 'small gun-btn', onclick: function () { addGunStation(ac); } }),
+        addButton('LEFT', 'Left wing'),
+        addButton('CENTER', 'Fuselage'),
+        addButton('RIGHT', 'Right wing'),
+        btn('Gun (GUN)', { icon: 'target', class: 'small gun-btn', onclick: function () { addGunStation(ac); } }),
       ]),
     ]);
   }
 
   /*
-   * İstasyon işaretini sürükleyerek konumunu değiştirir; hareketsiz tıklama seçim yapar.
-   * Ana istasyon taşınırken ek noktaları da birlikte taşınır. Bırakınca numaralar yenilenir.
+   * Dragging a station marker moves it; a click without movement selects it.
+   * Side stations move together with their main station. Numbers are refreshed on drop.
    */
   function makeDraggable(svgRoot, g, st, ac) {
     g.addEventListener('pointerdown', function (e) {
@@ -2312,8 +2407,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   /*
-   * Yeni ana istasyon ekler. Sol kanatta en dışa (yeni 1 numara), sağ kanatta en dışa, gövdede en
-   * arkaya eklenir; aynı gruptaki istasyonlar yeniden aralıklandırılır, numaralar yenilenir.
+   * Adds a main station: outermost on the left wing (becomes number 1), outermost on the right wing,
+   * rearmost on the fuselage; stations in the same group are re-spaced and renumbered.
    */
   function addStation(ac, location) {
     const s = M.newStation();
@@ -2325,7 +2420,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   }
 
   function addGunStation(ac) {
-    const s = Object.assign(M.newStation(), { type: 'GUN', name: 'Dahili top' });
+    const s = Object.assign(M.newStation(), { type: 'GUN', name: 'Internal gun' });
     ac.stations.push(s);
     SH.ensurePositions(ac);
     SH.arrangeStations(ac);
@@ -2333,12 +2428,12 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     rerender();
   }
 
-  /* Ana istasyona ek takma noktası (ör. 5L, 5R) ekler. */
+  /* Adds a side station (e.g. 5L, 5R) to a main station. */
   function addSideStation(ac, parent, suffix) {
     suffix = String(suffix || '').trim().toUpperCase();
-    if (!/^[A-Z0-9]{1,3}$/.test(suffix)) { toast('Son ek 1-3 harf/rakam olmalı (ör. L, R, A).', 'error'); return; }
+    if (!/^[A-Z0-9]{1,3}$/.test(suffix)) { toast('The suffix must be 1-3 letters/digits (e.g. L, R, A).', 'error'); return; }
     if (SH.sidesOf(ac, parent).some(function (x) { return x.suffix === suffix; })) {
-      toast(parent.code + suffix + ' zaten tanımlı.', 'error'); return;
+      toast(parent.code + suffix + ' already exists.', 'error'); return;
     }
     const s = M.newStation();
     s.parentId = parent.id;
@@ -2352,8 +2447,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
 
   function deleteStation(ac, st) {
     const removed = [st].concat(st.parentId || isGun(st) ? [] : SH.sidesOf(ac, st));
-    const extra = removed.length > 1 ? ' (ek noktalarıyla birlikte: ' + removed.slice(1).map(function (s) { return s.code; }).join(', ') + ')' : '';
-    if (!confirmDelete(stationTitle(st) + extra)) return;
+    const extra = removed.length > 1 ? ' (together with side stations ' + removed.slice(1).map(function (s) { return s.code; }).join(', ') + ')' : '';
+    if (!confirmDelete(stationTitle(st).toLowerCase() + extra)) return;
     const ids = removed.map(function (s) { return s.id; });
     ac.stations = ac.stations.filter(function (s) { return ids.indexOf(s.id) < 0; });
     ac.constraints.forEach(function (c) { c.stationIds = c.stationIds.filter(function (id) { return ids.indexOf(id) < 0; }); });
@@ -2362,7 +2457,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     rerender();
   }
 
-  /* ---- seçili istasyon */
+  /* ---- selected station */
 
   function renderStationPanel(ac, st) {
     const related = ac.constraints.filter(function (c) { return c.stationIds.indexOf(st.id) >= 0; });
@@ -2374,7 +2469,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const sides = parent || gun ? [] : SH.sidesOf(ac, st);
     const pick = function (s) { return function () { state.stationId = s.id; render(); }; };
     const parentKind = gun ? 'gunStation' : 'station';
-    const tag = gun ? 'Top istasyonu' : parent ? 'Ek takma noktası' : M.LOCATIONS[st.location];
+    const tag = gun ? 'Gun station' : parent ? 'Side station' : M.LOCATIONS[st.location];
     const mirror = SH.mirrorOf(ac, st);
 
     return h('section', { class: 'panel station-panel' }, [
@@ -2384,48 +2479,48 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
           h('h2', {}, stationTitle(st)),
           h('span', { class: 'tag' }, tag),
         ]),
-        btn('', { icon: 'trash', class: 'ghost danger', aria: 'İstasyonu sil', onclick: function () { deleteStation(ac, st); } }),
+        btn('', { icon: 'trash', class: 'ghost danger', aria: 'Delete station', onclick: function () { deleteStation(ac, st); } }),
       ]),
-      field('Ad / açıklama', st, 'name', { placeholder: gun ? 'ör. Dahili top' : 'ör. Sol iç kanat' }),
+      field('Name / description', st, 'name', { placeholder: gun ? 'e.g. Internal gun' : 'e.g. Left inboard wing' }),
       parent
         ? h('div', { class: 'side-row' }, [
-          h('span', { class: 'muted' }, 'Bağlı olduğu istasyon:'),
+          h('span', { class: 'muted' }, 'Parent station:'),
           h('button', { class: 'small chip-btn', onclick: pick(parent) }, parent.code),
         ])
         : gun ? null : h('div', { class: 'side-row' }, [
-          h('span', { class: 'muted' }, 'Ek takma noktaları:'),
+          h('span', { class: 'muted' }, 'Side stations:'),
           sides.map(function (s) { return h('button', { class: 'small chip-btn', onclick: pick(s) }, s.code); }),
           ['L', 'R'].filter(function (x) { return !sides.some(function (s) { return s.suffix === x; }); }).map(function (x) {
             return btn(st.code + x, { icon: 'plus', class: 'small dashed', onclick: function () { addSideStation(ac, st, x); } });
           }),
-          btn('Diğer…', {
+          btn('Other…', {
             icon: 'plus', class: 'small dashed',
             onclick: function () {
-              const sfx = window.prompt('Ek takma noktası son eki (ör. A, C, L2):', '');
+              const sfx = window.prompt('Side station suffix (e.g. A, C, L2):', '');
               if (sfx != null) addSideStation(ac, st, sfx);
             },
           }),
         ]),
       h('div', { class: 'section-title' }, [
-        h('h3', {}, 'İzin verilen yükler'), h('span', { class: 'muted small-text' }, st.loads.length + ' seçenek'),
+        h('h3', {}, 'Allowed loads'), h('span', { class: 'muted small-text' }, st.loads.length + ' options'),
         h('span', { class: 'grow' }),
         mirror ? btn('→ ' + mirror.code, {
-          icon: 'mirror', class: 'small', title: 'Bu kuralları simetrik istasyon ' + mirror.code + "'e kopyala",
+          icon: 'mirror', class: 'small', title: 'Copy these rules to the symmetric station ' + mirror.code,
           disabled: !st.loads.length, onclick: function () { copyToMirror(ac, st); },
         }) : null,
-        btn('Kopyala…', { icon: 'copy', class: 'small', title: 'Kuralları başka istasyonlara kopyala', disabled: !st.loads.length, onclick: function () { openCopyDialog(ac, st); } }),
-        gun ? null : btn('Paket yap', {
-          icon: 'layers', class: 'small', title: 'Bu yükleri tekrar kullanılabilir bir pakete dönüştür',
-          disabled: !st.loads.some(function (n) { return n.kind !== 'package'; }), onclick: function () { makePackageFrom(ac, st); },
+        btn('Copy…', { icon: 'copy', class: 'small', title: 'Copy the rules to other stations', disabled: !st.loads.length, onclick: function () { openCopyDialog(ac, st); } }),
+        gun ? null : btn('Make preset', {
+          icon: 'layers', class: 'small', title: 'Turn these loads into a reusable preset',
+          disabled: !st.loads.some(function (n) { return n.kind !== 'preset'; }), onclick: function () { makePresetFrom(ac, st); },
         }),
       ]),
       h('p', { class: 'hint' }, gun
-        ? 'Topu seçin, altına kullanılabilecek mühimmatı ve en fazla mermi adedini ekleyin.'
-        : 'Aynı seviyedeki öğeler birbirinin alternatifidir. "Maks. adet", öğenin üst seviyeye en fazla kaç adet takılabileceğidir.'),
+        ? 'Select the gun, then add the ammunition it may use and the maximum number of rounds.'
+        : 'Items on the same level are alternatives. "Max qty" is the most of that item on its parent.'),
       renderNodeList(st.loads, parentKind),
       addButtons(st.loads, parentKind),
       related.length ? h('div', { class: 'related' }, [
-        h('h3', {}, [icon('link'), 'Bu istasyonu içeren kurallar']),
+        h('h3', {}, [icon('link'), 'Rules involving this station']),
         h('ul', {}, related.map(function (c) {
           const def = M.CONSTRAINT_TYPES[c.type] || { label: c.type };
           return h('li', {}, [h('span', { class: 'rule-type ' + c.type }, def.label), ' ', c.stationIds.map(codeOf).join(', '), c.description ? h('span', { class: 'muted' }, ' — ' + c.description) : null]);
@@ -2445,29 +2540,29 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       }, [
         h('td', { class: 'code-cell' }, h('span', { class: 'code-chip' + (isGun(st) ? ' gun' : '') + (st.parentId ? ' side' : '') }, st.code)),
         h('td', {}, field(null, st, 'name', { placeholder: '—' })),
-        h('td', {}, isGun(st) ? 'Top' : st.parentId ? 'Ek nokta' : M.LOCATIONS[st.location]),
-        h('td', {}, st.loads.length ? h('span', { class: 'pill ok' }, st.loads.length + ' seçenek') : h('span', { class: 'pill' }, 'tanımsız')),
-        h('td', { class: 'row-actions' }, btn('', { icon: 'trash', class: 'ghost danger', aria: 'Sil', onclick: function () { deleteStation(ac, st); } })),
+        h('td', {}, isGun(st) ? 'Gun' : st.parentId ? 'Side station' : M.LOCATIONS[st.location]),
+        h('td', {}, st.loads.length ? h('span', { class: 'pill ok' }, st.loads.length + ' options') : h('span', { class: 'pill' }, 'undefined')),
+        h('td', { class: 'row-actions' }, btn('', { icon: 'trash', class: 'ghost danger', aria: 'Delete', onclick: function () { deleteStation(ac, st); } })),
       ]);
     });
 
-    return panel('İstasyon listesi', { icon: 'grid' }, [
-      h('p', { class: 'hint' }, 'Ana istasyonlar çizimdeki konuma göre soldan sağa 1\'den başlayarak otomatik numaralanır; toplar numaralandırmaya girmez. Sırayı değiştirmek için istasyonu çizimde sürükleyin.'),
+    return panel('Station list', { icon: 'grid' }, [
+      h('p', { class: 'hint' }, 'Main stations are numbered automatically from 1, left to right by their position on the drawing; guns are not numbered. Drag a station on the drawing to change the order.'),
       ac.stations.length
         ? h('div', { class: 'table-wrap' }, h('table', {}, [
-          h('thead', {}, h('tr', {}, ['No', 'Ad', 'Konum', 'İzinli yük', ''].map(function (x) { return h('th', {}, x); }))),
+          h('thead', {}, h('tr', {}, ['No', 'Name', 'Location', 'Allowed loads', ''].map(function (x) { return h('th', {}, x); }))),
           h('tbody', {}, rows),
         ]))
-        : emptyState('grid', 'Henüz istasyon yok'),
+        : emptyState('grid', 'No stations yet'),
     ]);
   }
 
-  /* ---- yükleme ağacı */
+  /* ---- load tree */
 
   function renderNodeList(nodes, parentKind) {
     if (!nodes.length) {
-      return parentKind === 'station' || parentKind === 'gunStation' || parentKind === 'packageRoot'
-        ? h('div', { class: 'tree-empty' }, parentKind === 'packageRoot' ? 'Paket boş; aşağıdan öğe ekleyin.' : 'Henüz yük izni tanımlanmadı.')
+      return parentKind === 'station' || parentKind === 'gunStation' || parentKind === 'presetRoot'
+        ? h('div', { class: 'tree-empty' }, parentKind === 'presetRoot' ? 'The preset is empty; add items below.' : 'No loads allowed yet.')
         : null;
     }
     return h('ul', { class: 'tree' }, nodes.map(function (n) {
@@ -2482,50 +2577,50 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     }));
   }
 
-  function renderPackageNode(siblings, n) {
-    const pkg = M.findStore(state.project, 'package', n.refId);
-    const options = [{ value: '', label: state.project.packages.length ? '— paket seçin —' : '— önce Paketler sekmesinde paket oluşturun —' }]
-      .concat(state.project.packages.map(function (p) { return { value: p.id, label: M.storeLabel(p) }; }));
-    if (n.refId && !pkg) options.push({ value: n.refId, label: '(silinmiş paket)' });
+  function renderPresetNode(siblings, n) {
+    const preset = M.findStore(state.project, 'preset', n.refId);
+    const options = [{ value: '', label: state.project.presets.length ? '— select a preset —' : '— create a preset in the Presets tab first —' }]
+      .concat(state.project.presets.map(function (p) { return { value: p.id, label: M.storeLabel(p) }; }));
+    if (n.refId && !preset) options.push({ value: n.refId, label: '(deleted preset)' });
     const summary = [];
     const walk = function (nodes, depth) {
       nodes.forEach(function (c) {
         const s = M.findStore(state.project, c.kind, c.refId);
-        summary.push(h('span', { class: 'pkg-item d' + Math.min(depth, 3) }, [h('i', { class: 'kind-dot ' + c.kind }), (s ? s.code : '?') + (c.qty > 1 ? ' ×' + c.qty : '')]));
+        summary.push(h('span', { class: 'preset-item d' + Math.min(depth, 3) }, [h('i', { class: 'kind-dot ' + c.kind }), (s ? s.code : '?') + (c.qty > 1 ? ' ×' + c.qty : '')]));
         walk(c.children || [], depth + 1);
       });
     };
-    if (pkg) walk(pkg.loads, 0);
+    if (preset) walk(preset.loads, 0);
     return h('div', {}, [
       h('div', { class: 'tree-node' }, [
-        h('span', { class: 'kind package' }, 'Paket'),
+        h('span', { class: 'kind preset' }, 'Preset'),
         select(n, 'refId', options, function () { rerender(); }),
-        pkg ? btn('Düzenle', { icon: 'layers', class: 'small ghost', onclick: function () { state.view = 'packages'; state.packageId = pkg.id; render(); } }) : null,
+        preset ? btn('Edit', { icon: 'layers', class: 'small ghost', onclick: function () { state.view = 'presets'; state.presetId = preset.id; render(); } }) : null,
         btn('', {
-          icon: 'trash', class: 'ghost danger small', aria: 'Paketi istasyondan kaldır',
+          icon: 'trash', class: 'ghost danger small', aria: 'Remove the preset from this station',
           onclick: function () { removeFrom(siblings, n); rerender(); },
         }),
       ]),
-      summary.length ? h('div', { class: 'pkg-summary' }, summary) : null,
+      summary.length ? h('div', { class: 'preset-summary' }, summary) : null,
     ]);
   }
 
   function renderNode(siblings, n) {
-    if (n.kind === 'package') return renderPackageNode(siblings, n);
+    if (n.kind === 'preset') return renderPresetNode(siblings, n);
     const list = state.project.catalog[M.CATALOG_KEY[n.kind]];
     const extra = function (s) { return n.kind === 'ammo' || n.kind === 'gun' ? (s.caliber ? ' [' + s.caliber + ']' : '') : ''; };
-    const options = [{ value: '', label: '— seçin —' }].concat(list.map(function (s) { return { value: s.id, label: M.storeLabel(s) + extra(s) }; }));
-    if (n.refId && !M.findStore(state.project, n.kind, n.refId)) options.push({ value: n.refId, label: '(silinmiş öğe)' });
-    const qtyLabel = n.kind === 'ammo' ? 'Maks. mermi' : 'Maks. adet';
+    const options = [{ value: '', label: '— select —' }].concat(list.map(function (s) { return { value: s.id, label: M.storeLabel(s) + extra(s) }; }));
+    if (n.refId && !M.findStore(state.project, n.kind, n.refId)) options.push({ value: n.refId, label: '(deleted item)' });
+    const qtyLabel = n.kind === 'ammo' ? 'Max rounds' : 'Max qty';
     return h('div', { class: 'tree-node' }, [
       h('span', { class: 'kind ' + n.kind }, M.KIND_LABELS[n.kind]),
       select(n, 'refId', options, function () { rerender(); }),
       h('label', { class: 'qty-field' }, [h('span', {}, qtyLabel), field(null, n, 'qty', { type: 'number', min: 1, inputClass: 'qty' })]),
       btn('', {
-        icon: 'trash', class: 'ghost danger small', aria: 'Sil',
+        icon: 'trash', class: 'ghost danger small', aria: 'Delete',
         onclick: function () {
-          const more = n.children.length ? ' (alt öğeleriyle birlikte)' : '';
-          if (confirmDelete(M.KIND_LABELS[n.kind] + more)) { removeFrom(siblings, n); rerender(); }
+          const more = n.children.length ? ' (with everything under it)' : '';
+          if (confirmDelete(M.KIND_LABELS[n.kind].toLowerCase() + more)) { removeFrom(siblings, n); rerender(); }
         },
       }),
     ]);
@@ -2541,11 +2636,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     }));
   }
 
-  /* ---- istasyonlar arası kurallar */
+  /* ---- cross-station rules */
 
   function renderConstraints(ac) {
     const typeOptions = Object.keys(M.CONSTRAINT_TYPES).map(function (k) { return { value: k, label: M.CONSTRAINT_TYPES[k].label }; });
-    const munOptions = [{ value: '', label: '— mühimmat seçin —' }].concat(state.project.catalog.munitions.map(function (s) { return { value: s.id, label: M.storeLabel(s) }; }));
+    const munOptions = [{ value: '', label: '— select a store —' }].concat(state.project.catalog.munitions.map(function (s) { return { value: s.id, label: M.storeLabel(s) }; }));
 
     const items = ac.constraints.map(function (c, i) {
       const def = M.CONSTRAINT_TYPES[c.type] || { help: '' };
@@ -2554,11 +2649,11 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
           h('span', { class: 'rule-no' }, '#' + (i + 1)),
           h('label', { class: 'field inline' }, select(c, 'type', typeOptions, rerender)),
           c.type === 'MAX_TOTAL' ? h('label', { class: 'field inline' }, select(c, 'munitionId', munOptions)) : null,
-          c.type === 'MAX_TOTAL' ? h('label', { class: 'qty-field' }, [h('span', {}, 'En fazla'), field(null, c, 'value', { type: 'number', inputClass: 'qty' })]) : null,
+          c.type === 'MAX_TOTAL' ? h('label', { class: 'qty-field' }, [h('span', {}, 'At most'), field(null, c, 'value', { type: 'number', inputClass: 'qty' })]) : null,
           h('span', { class: 'grow' }),
-          btn('', { icon: 'trash', class: 'ghost danger small', aria: 'Kuralı sil', onclick: function () { removeFrom(ac.constraints, c); rerender(); } }),
+          btn('', { icon: 'trash', class: 'ghost danger small', aria: 'Delete rule', onclick: function () { removeFrom(ac.constraints, c); rerender(); } }),
         ]),
-        h('p', { class: 'hint' }, def.help + (c.type === 'REQUIRES' ? ' Sıra: istasyon listesindeki sıra geçerlidir.' : '')),
+        h('p', { class: 'hint' }, def.help + (c.type === 'REQUIRES' ? ' Order: the station list order applies.' : '')),
         h('div', { class: 'chips' }, ac.stations.map(function (st) {
           const on = c.stationIds.indexOf(st.id) >= 0;
           return h('label', { class: 'chip' + (on ? ' on' : '') + (isGun(st) ? ' gun' : '') }, [
@@ -2574,30 +2669,30 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
                 rerender();
               },
             }),
-            st.code || '(kodsuz)',
+            st.code || '(no code)',
           ]);
         })),
-        h('div', { class: 'rule-desc' }, field(null, c, 'description', { placeholder: 'Açıklama (isteğe bağlı)' })),
+        h('div', { class: 'rule-desc' }, field(null, c, 'description', { placeholder: 'Description (optional)' })),
       ]);
     });
 
-    return panel('İstasyonlar arası kurallar', {
+    return panel('Cross-station rules', {
       icon: 'link',
-      actions: [btn('Kural ekle', { icon: 'plus', class: 'primary small', onclick: function () { ac.constraints.push(M.newConstraint()); rerender(); } })],
-    }, items.length ? h('div', { class: 'rules' }, items) : emptyState('link', 'Henüz kural yok', 'Simetri, birbirini dışlama veya toplam üst sınır kuralları ekleyin.'));
+      actions: [btn('Add rule', { icon: 'plus', class: 'primary small', onclick: function () { ac.constraints.push(M.newConstraint()); rerender(); } })],
+    }, items.length ? h('div', { class: 'rules' }, items) : emptyState('link', 'No rules yet', 'Add symmetry, mutual exclusion or total limit rules.'));
   }
 
-  /* ------------------------------------------------------------ doğrulama */
+  /* ------------------------------------------------------------ validation */
 
   function renderValidation() {
     const issues = M.validate(state.project);
     issues.sort(function (a, b) { return (a.level === 'error' ? 0 : 1) - (b.level === 'error' ? 0 : 1); });
     const errors = issues.filter(function (i) { return i.level === 'error'; }).length;
-    return panel('Doğrulama', {
+    return panel('Validation', {
       icon: 'check',
       extra: h('div', { class: 'stats' }, [
-        h('div', { class: 'stat err' }, [h('b', {}, errors), h('span', {}, 'hata')]),
-        h('div', { class: 'stat warn' }, [h('b', {}, issues.length - errors), h('span', {}, 'uyarı')]),
+        h('div', { class: 'stat err' }, [h('b', {}, errors), h('span', {}, 'errors')]),
+        h('div', { class: 'stat warn' }, [h('b', {}, issues.length - errors), h('span', {}, 'warnings')]),
       ]),
     }, issues.length
       ? h('div', { class: 'issues' }, issues.map(function (i) {
@@ -2606,12 +2701,12 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
           h('div', {}, [h('div', { class: 'where' }, i.where), h('div', { class: 'msg' }, i.message)]),
         ]);
       }))
-      : emptyState('check', 'Sorun bulunamadı', 'Tüm kurallar tutarlı görünüyor.'));
+      : emptyState('check', 'No problems found', 'All rules look consistent.'));
   }
 
   /* ------------------------------------------------------------ XML */
 
-  /* Basit XML renklendirme: önce kaçırılır, sonra etiket/özellikler işaretlenir. */
+  /* Simple XML highlighting: escape first, then mark tags/attributes. */
   function highlightXml(xml) {
     const esc = X.escapeXml(xml);
     return esc
@@ -2627,37 +2722,37 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const options = Object.keys(X.EXPORTERS).map(function (k) { return { value: k, label: X.EXPORTERS[k].label }; });
     const pre = h('pre', { class: 'xml' });
     pre.innerHTML = highlightXml(xml);
-    return panel('XML çıktısı', {
+    return panel('XML output', {
       icon: 'code',
       actions: [
         h('label', { class: 'field inline' }, select(state, 'exporter', options, render)),
-        btn('Kopyala', {
+        btn('Copy', {
           icon: 'copy', class: 'small',
           onclick: function () {
-            if (navigator.clipboard) navigator.clipboard.writeText(xml).then(function () { toast('XML panoya kopyalandı.', 'ok'); }, function () { toast('Kopyalanamadı.', 'error'); });
+            if (navigator.clipboard) navigator.clipboard.writeText(xml).then(function () { toast('XML copied to the clipboard.', 'ok'); }, function () { toast('Could not copy.', 'error'); });
           },
         }),
-        btn('XML indir', {
+        btn('Download XML', {
           icon: 'download', class: 'primary small',
           onclick: function () {
-            if (errors.length && !window.confirm(errors.length + ' doğrulama hatası var. Yine de indirilsin mi?')) return;
+            if (errors.length && !window.confirm('There are ' + errors.length + ' validation errors. Download anyway?')) return;
             download(safeFileName(state.project.name) + '.' + exporter.fileExtension, xml, 'application/xml');
           },
         }),
       ],
     }, [
-      errors.length ? h('div', { class: 'banner error' }, [icon('alert'), errors.length + ' doğrulama hatası var; Doğrulama sekmesine bakın.']) : null,
+      errors.length ? h('div', { class: 'banner error' }, [icon('alert'), errors.length + ' validation errors; see the Validation tab.']) : null,
       pre,
     ]);
   }
 
-  /* ------------------------------------------------------------ pencere (modal) */
+  /* ------------------------------------------------------------ modal */
 
   function openModal(title, body, actions) {
     closeModal();
     const overlay = h('div', { class: 'modal-overlay', id: 'modal', onclick: function (e) { if (e.target === overlay) closeModal(); } }, [
       h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }, [
-        h('div', { class: 'modal-head' }, [h('h2', {}, title), btn('', { icon: 'close', class: 'ghost small', aria: 'Kapat', onclick: closeModal })]),
+        h('div', { class: 'modal-head' }, [h('h2', {}, title), btn('', { icon: 'close', class: 'ghost small', aria: 'Close', onclick: closeModal })]),
         h('div', { class: 'modal-body' }, body),
         h('div', { class: 'modal-actions' }, actions),
       ]),
@@ -2672,7 +2767,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (m) m.remove();
   }
 
-  /* ------------------------------------------------------------ kural kopyalama */
+  /* ------------------------------------------------------------ copying rules */
 
   function copyLoadsTo(ac, src, targets, mode) {
     targets.forEach(function (t) {
@@ -2680,13 +2775,13 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       t.loads = mode === 'append' ? t.loads.concat(copy) : copy;
     });
     rerender();
-    toast(src.code + ' kuralları ' + targets.map(function (t) { return t.code; }).join(', ') + ' istasyonuna kopyalandı.', 'ok');
+    toast('Rules of ' + src.code + ' copied to ' + targets.map(function (t) { return t.code; }).join(', ') + '.', 'ok');
   }
 
   function copyToMirror(ac, st) {
     const m = SH.mirrorOf(ac, st);
     if (!m) return;
-    if (m.loads.length && !window.confirm(m.code + ' istasyonundaki ' + m.loads.length + ' seçenek, ' + st.code + ' kurallarıyla değiştirilsin mi?')) return;
+    if (m.loads.length && !window.confirm('Replace the ' + m.loads.length + ' options on station ' + m.code + ' with the rules of ' + st.code + '?')) return;
     copyLoadsTo(ac, st, [m], 'replace');
   }
 
@@ -2701,21 +2796,21 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
       return lab;
     }));
     const modeSel = select(opts, 'mode', [
-      { value: 'replace', label: 'Hedefteki mevcut kuralların yerine koy' },
-      { value: 'append', label: 'Hedefteki kurallara ekle' },
+      { value: 'replace', label: 'Replace the existing rules on the target' },
+      { value: 'append', label: 'Add to the existing rules on the target' },
     ], function () {});
-    openModal(st.code + ' kurallarını kopyala', [
-      h('p', { class: 'hint' }, st.loads.length + ' seçenek, seçilen istasyonlara bağımsız kopya olarak aktarılır. Ortak yönetmek isterseniz "Paket yap" kullanın.' + (mirror ? ' Simetriği: ' + mirror.code + '.' : '')),
-      h('div', { class: 'section-label' }, 'Hedef istasyonlar'),
+    openModal('Copy rules of ' + st.code, [
+      h('p', { class: 'hint' }, st.loads.length + ' options are copied to the selected stations as independent copies. Use "Make preset" to manage them in one place.' + (mirror ? ' Symmetric station: ' + mirror.code + '.' : '')),
+      h('div', { class: 'section-label' }, 'Target stations'),
       chips,
-      h('label', { class: 'field', style: 'margin-top:14px' }, [h('span', {}, 'Yöntem'), modeSel]),
+      h('label', { class: 'field', style: 'margin-top:14px' }, [h('span', {}, 'Mode'), modeSel]),
     ], [
-      btn('Vazgeç', { onclick: closeModal }),
-      btn('Kopyala', {
+      btn('Cancel', { onclick: closeModal }),
+      btn('Copy', {
         icon: 'copy', class: 'primary',
         onclick: function () {
           const sel = targets.filter(function (s) { return chosen[s.id]; });
-          if (!sel.length) { toast('En az bir hedef istasyon seçin.', 'error'); return; }
+          if (!sel.length) { toast('Select at least one target station.', 'error'); return; }
           closeModal();
           copyLoadsTo(ac, st, sel, opts.mode);
         },
@@ -2723,124 +2818,124 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     ]);
   }
 
-  /* İstasyonun yüklerini yeni bir pakete taşır ve istasyonda pakete referans bırakır. */
-  function makePackageFrom(ac, st) {
-    const code = window.prompt('Paket kodu (ör. AAM-RAY, BOMBA-STD):', '');
+  /* Moves a station's loads into a new preset and leaves a reference to it on the station. */
+  function makePresetFrom(ac, st) {
+    const code = window.prompt('Preset code (e.g. AAM-RAIL, BOMB-STD):', '');
     if (code == null) return;
-    if (!code.trim()) { toast('Paket kodu boş olamaz.', 'error'); return; }
-    if (state.project.packages.some(function (p) { return p.code === code.trim(); })) { toast(code.trim() + ' kodlu paket zaten var.', 'error'); return; }
-    const pkg = Object.assign(M.newPackage(), {
+    if (!code.trim()) { toast('The preset code must not be empty.', 'error'); return; }
+    if (state.project.presets.some(function (p) { return p.code === code.trim(); })) { toast('A preset with code ' + code.trim() + ' already exists.', 'error'); return; }
+    const preset = Object.assign(M.newPreset(), {
       code: code.trim(),
-      name: (ac.code || '') + ' ' + st.code + ' istasyonundan',
-      loads: M.cloneLoads(st.loads.filter(function (n) { return n.kind !== 'package'; })),
+      name: 'From ' + (ac.code || '') + ' station ' + st.code,
+      loads: M.cloneLoads(st.loads.filter(function (n) { return n.kind !== 'preset'; })),
     });
-    state.project.packages.push(pkg);
-    st.loads = st.loads.filter(function (n) { return n.kind === 'package'; }).concat([M.newLoadNode('package', pkg.id)]);
+    state.project.presets.push(preset);
+    st.loads = st.loads.filter(function (n) { return n.kind === 'preset'; }).concat([M.newLoadNode('preset', preset.id)]);
     rerender();
-    toast(pkg.code + ' paketi oluşturuldu. Diğer istasyonlara "+ Paket" ile ekleyebilirsiniz.', 'ok');
+    toast('Preset ' + preset.code + ' created. Add it to other stations with "+ Preset".', 'ok');
   }
 
-  /* ------------------------------------------------------------ paketler */
+  /* ------------------------------------------------------------ presets */
 
   function goToStation(ac, st) {
     state.view = 'aircraft'; state.aircraftId = ac.id; state.stationId = st.id; render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function renderPackages() {
-    const list = state.project.packages;
-    let pkg = list.find(function (p) { return p.id === state.packageId; }) || list[0] || null;
-    if (pkg) state.packageId = pkg.id;
+  function renderPresets() {
+    const list = state.project.presets;
+    let preset = list.find(function (p) { return p.id === state.presetId; }) || list[0] || null;
+    if (preset) state.presetId = preset.id;
 
-    const nav = panel('Paketler', {
+    const nav = panel('Presets', {
       icon: 'layers', class: 'nav-panel',
       actions: [btn('', {
-        icon: 'plus', class: 'primary small', aria: 'Paket ekle',
+        icon: 'plus', class: 'primary small', aria: 'Add preset',
         onclick: function () {
-          const p = Object.assign(M.newPackage(), { code: 'PAKET-' + (list.length + 1) });
-          list.push(p); state.packageId = p.id; rerender();
+          const p = Object.assign(M.newPreset(), { code: 'PRESET-' + (list.length + 1) });
+          list.push(p); state.presetId = p.id; rerender();
         },
       })],
     }, list.length
       ? h('ul', { class: 'list' }, list.map(function (p) {
-        return h('li', { class: pkg && p.id === pkg.id ? 'selected' : '', onclick: function () { state.packageId = p.id; render(); } }, [
-          h('i', { class: 'kind-dot package' }),
-          h('span', { class: 'grow' }, p.code || '(kodsuz)'),
-          h('span', { class: 'count', title: 'Kullanıldığı istasyon sayısı' }, M.packageUsage(state.project, p.id).length),
+        return h('li', { class: preset && p.id === preset.id ? 'selected' : '', onclick: function () { state.presetId = p.id; render(); } }, [
+          h('i', { class: 'kind-dot preset' }),
+          h('span', { class: 'grow' }, p.code || '(no code)'),
+          h('span', { class: 'count', title: 'Number of stations using it' }, M.presetUsage(state.project, p.id).length),
         ]);
       }))
-      : emptyState('layers', 'Henüz paket yok', '+ ile oluşturun veya bir istasyonda "Paket yap" deyin.'));
+      : emptyState('layers', 'No presets yet', 'Create one with + or use "Make preset" on a station.'));
 
-    if (!pkg) {
-      return h('div', { class: 'layout' }, [nav, panel('Yükleme paketleri', { icon: 'layers' }, [
-        h('p', { class: 'hint' }, 'Paket, birden fazla istasyonda aynen kullanılan bir yük ağacıdır (ör. "LAU-129 → AIM-9X / AIM-120C"). Paketi değiştirdiğinizde, kullanıldığı tüm istasyonlar güncellenir. XML çıktısında paketler açılarak yazılır.'),
-        emptyState('layers', 'Paket seçilmedi'),
+    if (!preset) {
+      return h('div', { class: 'layout' }, [nav, panel('Presets', { icon: 'layers' }, [
+        h('p', { class: 'hint' }, 'A preset is a load tree used unchanged on several stations (e.g. "LAU-129 → AIM-9X / AIM-120C"). When you change a preset, every station that uses it is updated. Presets are expanded in the XML output.'),
+        emptyState('layers', 'No preset selected'),
       ])]);
     }
 
-    const usage = M.packageUsage(state.project, pkg.id);
+    const usage = M.presetUsage(state.project, preset.id);
     const body = h('div', { class: 'content' }, [
-      panel(pkg.code || 'Paket', {
+      panel(preset.code || 'Preset', {
         icon: 'layers',
-        extra: h('span', { class: 'kind-pill' }, usage.length + ' istasyonda kullanılıyor'),
+        extra: h('span', { class: 'kind-pill' }, 'Used on ' + usage.length + ' stations'),
         actions: [btn('', {
-          icon: 'trash', class: 'ghost danger', aria: 'Paketi sil',
+          icon: 'trash', class: 'ghost danger', aria: 'Delete preset',
           onclick: function () {
-            const msg = 'Paket ' + (pkg.code || '') + (usage.length ? ' (' + usage.length + ' istasyondaki referanslarıyla birlikte)' : '');
+            const msg = 'preset ' + (preset.code || '') + (usage.length ? ' (and its references on ' + usage.length + ' stations)' : '');
             if (!confirmDelete(msg)) return;
             state.project.aircraft.forEach(function (ac) {
-              ac.stations.forEach(function (st) { st.loads = st.loads.filter(function (n) { return !(n.kind === 'package' && n.refId === pkg.id); }); });
+              ac.stations.forEach(function (st) { st.loads = st.loads.filter(function (n) { return !(n.kind === 'preset' && n.refId === preset.id); }); });
             });
-            removeFrom(list, pkg); state.packageId = null; rerender();
+            removeFrom(list, preset); state.presetId = null; rerender();
           },
         })],
       }, [
         h('div', { class: 'grid4' }, [
-          field('Kod', pkg, 'code', { onInput: function () { const li = document.querySelector('.nav-panel .list li.selected .grow'); if (li) li.textContent = pkg.code || '(kodsuz)'; } }),
-          field('Ad', pkg, 'name'),
-          field('Not', pkg, 'notes', { placeholder: 'İsteğe bağlı' }),
+          field('Code', preset, 'code', { onInput: function () { const li = document.querySelector('.nav-panel .list li.selected .grow'); if (li) li.textContent = preset.code || '(no code)'; } }),
+          field('Name', preset, 'name'),
+          field('Notes', preset, 'notes', { placeholder: 'Optional' }),
         ]),
-        h('div', { class: 'section-title' }, [h('h3', {}, 'Paket içeriği'), h('span', { class: 'muted small-text' }, pkg.loads.length + ' seçenek')]),
-        h('p', { class: 'hint' }, 'Aynı seviyedeki öğeler birbirinin alternatifidir. Değişiklikler, paketi kullanan tüm istasyonlara yansır.'),
-        renderNodeList(pkg.loads, 'packageRoot'),
-        addButtons(pkg.loads, 'packageRoot'),
+        h('div', { class: 'section-title' }, [h('h3', {}, 'Preset contents'), h('span', { class: 'muted small-text' }, preset.loads.length + ' options')]),
+        h('p', { class: 'hint' }, 'Items on the same level are alternatives. Changes apply to every station that uses this preset.'),
+        renderNodeList(preset.loads, 'presetRoot'),
+        addButtons(preset.loads, 'presetRoot'),
       ]),
-      panel('Kullanıldığı istasyonlar', { icon: 'link' }, usage.length
+      panel('Used on stations', { icon: 'link' }, usage.length
         ? h('div', { class: 'chips' }, usage.map(function (u) {
           return h('button', { class: 'small chip-btn', onclick: function () { goToStation(u.aircraft, u.station); } }, (u.aircraft.code || '?') + ' / ' + u.station.code);
         }))
-        : emptyState('link', 'Henüz kullanılmıyor', 'Bir istasyonda "+ Paket" ile ekleyin.')),
+        : emptyState('link', 'Not used yet', 'Add it to a station with "+ Preset".')),
     ]);
     return h('div', { class: 'layout' }, [nav, body]);
   }
 
-  /* ------------------------------------------------------------ uyumluluk matrisi */
+  /* ------------------------------------------------------------ compatibility matrix */
 
   const MATRIX_KINDS = [
-    ['munition', 'Mühimmat'], ['ammo', 'Top mühimmatı'], ['gun', 'Top'], ['subrack', 'Subrack'], ['rack', 'Rack'],
+    ['munition', 'Stores'], ['ammo', 'Gun ammunition'], ['gun', 'Guns'], ['subrack', 'Subracks'], ['rack', 'Racks'],
   ];
 
   function matrixData(ac) {
     const mx = M.compatibility(state.project, ac, state.matrixKinds);
-    const q = state.matrixFilter.trim().toLocaleLowerCase('tr');
-    if (q) mx.rows = mx.rows.filter(function (r) { return (r.store.code + ' ' + r.store.name + ' ' + (r.store.category || '')).toLocaleLowerCase('tr').indexOf(q) >= 0; });
+    const q = state.matrixFilter.trim().toLocaleLowerCase();
+    if (q) mx.rows = mx.rows.filter(function (r) { return (r.store.code + ' ' + r.store.name + ' ' + (r.store.category || '')).toLocaleLowerCase().indexOf(q) >= 0; });
     return mx;
   }
 
   function matrixCsv(ac, mx) {
     const esc = function (v) { v = String(v == null ? '' : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    const lines = [['Kod', 'Ad', 'Tür', 'Kategori / çap'].concat(mx.stations.map(function (s) { return s.code; })).map(esc).join(';')];
+    const lines = [['Code', 'Name', 'Kind', 'Category / caliber'].concat(mx.stations.map(function (s) { return s.code; })).map(esc).join(';')];
     mx.rows.forEach(function (r) {
       lines.push([r.store.code, r.store.name, M.KIND_LABELS[r.kind], r.store.category || r.store.caliber || '']
         .concat(mx.stations.map(function (s) { return r.cells[s.id] ? r.cells[s.id].qty : ''; })).map(esc).join(';'));
     });
-    // Excel'in Türkçe karakterleri doğru açması için BOM; ayırıcı ";" (Türkçe bölge ayarı).
+    // BOM so Excel opens non-ASCII characters correctly; ";" separator (works with European locales).
     return '﻿' + lines.join('\r\n');
   }
 
   function renderMatrix() {
     const ac = currentAircraft();
-    if (!ac) return panel('Uyumluluk matrisi', { icon: 'table' }, emptyState('plane', 'Uçak yok', 'Önce bir uçak ekleyin.'));
+    if (!ac) return panel('Compatibility matrix', { icon: 'table' }, emptyState('plane', 'No aircraft', 'Add an aircraft first.'));
     SH.arrangeStations(ac);
     const mx = matrixData(ac);
     const kindChips = h('div', { class: 'chips no-print' }, MATRIX_KINDS.map(function (k) {
@@ -2858,7 +2953,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     }));
 
     const acTabs = h('div', { class: 'seg no-print' }, state.project.aircraft.map(function (a) {
-      return h('button', { class: 'small' + (a.id === ac.id ? ' on' : ''), onclick: function () { state.aircraftId = a.id; state.stationId = null; render(); } }, a.code || '(kodsuz)');
+      return h('button', { class: 'small' + (a.id === ac.id ? ' on' : ''), onclick: function () { state.aircraftId = a.id; state.stationId = null; render(); } }, a.code || '(no code)');
     }));
 
     let lastGroup = null;
@@ -2881,43 +2976,43 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     });
 
     const table = h('table', { class: 'matrix' }, [
-      h('thead', {}, h('tr', {}, [h('th', { class: 'corner' }, 'Öğe \\ İstasyon')].concat(mx.stations.map(function (s) {
-        return h('th', { class: 'col-head' + (isGun(s) ? ' gun' : '') + (s.parentId ? ' side' : ''), title: (s.name || '') + ' — düzenlemek için tıklayın', onclick: function () { goToStation(ac, s); } }, s.code);
+      h('thead', {}, h('tr', {}, [h('th', { class: 'corner' }, 'Item \\ Station')].concat(mx.stations.map(function (s) {
+        return h('th', { class: 'col-head' + (isGun(s) ? ' gun' : '') + (s.parentId ? ' side' : ''), title: (s.name || '') + ' — click to edit', onclick: function () { goToStation(ac, s); } }, s.code);
       })))),
       h('tbody', {}, body),
     ]);
 
-    return panel('Uyumluluk matrisi', {
+    return panel('Compatibility matrix', {
       icon: 'table',
       extra: acTabs,
       actions: [
         h('label', { class: 'search no-print' }, [icon('search'), h('input', {
-          type: 'search', placeholder: 'Ara…', value: state.matrixFilter,
+          type: 'search', placeholder: 'Search…', value: state.matrixFilter,
           onchange: function (e) { state.matrixFilter = e.target.value; render(); },
           onkeydown: function (e) { if (e.key === 'Enter') { state.matrixFilter = e.target.value; render(); } },
         })]),
-        btn('Excel (CSV)', { icon: 'download', class: 'small no-print', onclick: function () { download(safeFileName((state.project.name || '') + '_' + (ac.code || '') + '_matris') + '.csv', matrixCsv(ac, mx), 'text/csv'); } }),
-        btn('Yazdır / PDF', { icon: 'print', class: 'small no-print', onclick: function () { window.print(); } }),
+        btn('Excel (CSV)', { icon: 'download', class: 'small no-print', onclick: function () { download(safeFileName((state.project.name || '') + '_' + (ac.code || '') + '_matrix') + '.csv', matrixCsv(ac, mx), 'text/csv'); } }),
+        btn('Print / PDF', { icon: 'print', class: 'small no-print', onclick: function () { window.print(); } }),
       ],
     }, [
-      h('p', { class: 'hint' }, 'Hangi öğenin hangi istasyona takılabildiğini gösterir. ✓ takılabilir, ×N en fazla N adet (iç içe adetler çarpılır). Hücrenin üzerine gelince takma yolu (ör. MAU-12 › TER-9 › MK-82 ×3), istasyon başlığına tıklayınca istasyon düzenleyicisi açılır.'),
+      h('p', { class: 'hint' }, 'Shows which item fits which station. ✓ allowed, ×N at most N (nested quantities are multiplied). Hover a cell for the mounting path (e.g. MAU-12 › TER-9 › MK-82 ×3); click a station header to open its editor.'),
       kindChips,
-      h('div', { class: 'print-title' }, (state.project.name || '') + ' — ' + (ac.code || '') + ' ' + (ac.name || '') + ' uyumluluk matrisi'),
+      h('div', { class: 'print-title' }, (state.project.name || '') + ' — ' + (ac.code || '') + ' ' + (ac.name || '') + ' compatibility matrix'),
       mx.rows.length
         ? h('div', { class: 'matrix-wrap' }, table)
-        : emptyState('table', 'Gösterilecek öğe yok', 'İstasyonlara yük izni ekleyin veya tür filtresini değiştirin.'),
-      h('div', { class: 'muted small-text', style: 'margin-top:8px' }, mx.rows.length + ' öğe × ' + mx.stations.length + ' istasyon'),
+        : emptyState('table', 'Nothing to show', 'Allow loads on stations or change the kind filter.'),
+      h('div', { class: 'muted small-text', style: 'margin-top:8px' }, mx.rows.length + ' items × ' + mx.stations.length + ' stations'),
     ]);
   }
 
-  /* ------------------------------------------------------------ ana çizim */
+  /* ------------------------------------------------------------ main render */
 
   function render() {
     const nameInput = document.getElementById('project-name');
     if (document.activeElement !== nameInput) nameInput.value = state.project.name;
     hideTooltip();
     renderTabs();
-    const views = { catalog: renderCatalog, aircraft: renderAircraft, matrix: renderMatrix, packages: renderPackages, validation: renderValidation, xml: renderXml };
+    const views = { catalog: renderCatalog, aircraft: renderAircraft, matrix: renderMatrix, presets: renderPresets, validation: renderValidation, xml: renderXml };
     const main = document.getElementById('main');
     main.replaceChildren(views[state.view]());
   }
@@ -2927,21 +3022,22 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     return project;
   }
 
-  /* Eski projelere, standart katalogun yeni sürümündeki eksik öğeleri ekler (mevcutlara dokunmaz). */
+  /* Older projects: translates untouched standard entries and adds missing ones (nothing is removed). */
   function upgradeCatalog(project) {
-    if ((project.catalogVersion || 0) >= M.STANDARD_CATALOG_VERSION) return 0;
-    return M.mergeStandardCatalog(project);
+    const r = M.upgradeCatalog(project);
+    if (!r.added && !r.translated) return '';
+    return 'Standard catalog updated: ' + r.added + ' new items added' + (r.translated ? ', ' + r.translated + ' translated to English' : '') + '.';
   }
 
   function setProject(p) {
     closeModal();
     fileState.handle = null; fileState.name = ''; fileState.saved = null;
     state.project = arrangeAll(M.normalizeProject(p));
-    const added = upgradeCatalog(state.project);
+    const upgradeMsg = upgradeCatalog(state.project);
     state.aircraftId = null;
     state.stationId = null;
     rerender();
-    if (added) toast('Standart katalog güncellendi: ' + added + ' yeni öğe eklendi.', 'ok');
+    if (upgradeMsg) toast(upgradeMsg, 'ok');
   }
 
   function newProject() {
@@ -2960,12 +3056,12 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const file = fileInput.files[0];
     if (!file) return;
     file.text().then(function (text) {
-      try { setProject(JSON.parse(text)); fileState.handle = null; markSaved(file.name); toast(file.name + ' açıldı.', 'ok'); } catch (e) { toast('Dosya okunamadı: ' + e.message, 'error'); }
+      try { setProject(JSON.parse(text)); fileState.handle = null; markSaved(file.name); toast(file.name + ' opened.', 'ok'); } catch (e) { toast('Could not read the file: ' + e.message, 'error'); }
       fileInput.value = '';
     });
   });
 
-  // Üst çubuk düğmelerine ikon ekle.
+  // Add icons to the top bar buttons.
   const ACTION_ICONS = { new: 'file', open: 'open', save: 'save', saveas: 'download', sample: 'spark', undo: 'undo', redo: 'redo' };
   document.querySelectorAll('.actions button[data-action]').forEach(function (b) {
     b.insertBefore(icon(ACTION_ICONS[b.getAttribute('data-action')]), b.firstChild);
@@ -2977,8 +3073,8 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     const b = e.target.closest('button[data-action]');
     if (!b) return;
     const action = b.getAttribute('data-action');
-    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(newProject());
-    if (action === 'sample' && window.confirm('Mevcut proje örnek veriyle değiştirilsin mi?')) setProject(M.sampleProject());
+    if (action === 'new' && window.confirm('Clear the current project? (Saving it as JSON first is recommended.)')) setProject(newProject());
+    if (action === 'sample' && window.confirm('Replace the current project with the sample data?')) setProject(M.sampleProject());
     if (action === 'open') openFromFile();
     if (action === 'save') saveToFile(false);
     if (action === 'saveas') saveToFile(true);
@@ -2986,7 +3082,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
     if (action === 'redo') redo();
   });
 
-  // Kısayollar: Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z), Ctrl+S. Metin alanlarında tarayıcının kendi geri alması çalışır.
+  // Shortcuts: Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z), Ctrl+S. In text fields the browser's own undo applies.
   document.addEventListener('keydown', function (e) {
     if (!(e.ctrlKey || e.metaKey)) { if (e.key === 'Escape') closeModal(); return; }
     const k = e.key.toLowerCase();
@@ -3004,7 +3100,7 @@ table.matrix .group-row .kind-dot { margin-right: 6px; }
   if (upgraded) persist();
   render();
   updateTopbar();
-  if (upgraded) toast('Standart katalog güncellendi: ' + upgraded + ' yeni öğe eklendi (top ve top mühimmatı dahil).', 'ok');
+  if (upgraded) toast(upgraded, 'ok');
 })();
 </script>
 </body>

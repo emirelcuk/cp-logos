@@ -1,6 +1,6 @@
 /*
- * Uygulamayı tek bir HTML dosyasında birleştirir (CSS ve JS satır içi).
- * Çıktı: dist/yukleme-kurallari.html — kurulum gerektirmeden çift tıklayarak açılır.
+ * Bundles the app into a single HTML file (CSS and JS inlined).
+ * Output: dist/loadout-rules.html — opens with a double click, no installation needed.
  */
 'use strict';
 const fs = require('fs');
@@ -15,11 +15,11 @@ html = html.replace('<link rel="stylesheet" href="css/style.css">', function () 
 });
 html = html.replace(/<script src="([^"]+)"><\/script>/g, function (_, src) {
   const js = read(src);
-  if (/<\/script/i.test(js)) throw new Error(src + ' içinde </script> geçiyor; satır içi gömülemez.');
+  if (/<\/script/i.test(js)) throw new Error(src + ' contains </script>; it cannot be inlined.');
   return '<script>\n' + js + '</script>';
 });
 
-const out = path.join(root, 'dist', 'yukleme-kurallari.html');
+const out = path.join(root, 'dist', 'loadout-rules.html');
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, html);
-console.log('Yazıldı: ' + path.relative(root, out) + ' (' + Math.round(html.length / 1024) + ' KB)');
+console.log('Written: ' + path.relative(root, out) + ' (' + Math.round(html.length / 1024) + ' KB)');
