@@ -321,3 +321,12 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
   .topbar { position: static; }
   .project-name { margin-left: 0; max-width: none; }
 }
+
+/* katalog grup filtresi */
+.group-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.group-chip { border-radius: 14px; background: #fff; }
+.group-chip .count { margin-left: 2px; }
+.group-chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); font-weight: 600; }
+.catalog-table th:first-child { width: 150px; }
+.catalog-table td:nth-child(2) { min-width: 300px; width: 38%; }
+.catalog-table td.num { width: 130px; }

@@ -45,9 +45,13 @@ rack altına da takılabilir. Mermi adedi topun mermi kapasitesini aşarsa hata,
 çapı uyuşmazsa uyarı verilir. XML'de `<Station type="GUN">`, `<Gun caliber capacity>` ve
 `<Ammo caliber type>` olarak yazılır.
 
-**Standart katalog:** Katalog sekmesindeki "Standart katalogu ekle" düğmesi MK-82, GBU-12, AIM-9,
-AIM-120, MAU-12, LAU-129, TER-9, BRU-57, M61A1, GAU-8/A, PGU-28/B gibi kamuya açık tanımlamalardan
-eksik olanları ekler. Top kapasiteleri uçağa göre değişir; kendi verinizle doğrulayın.
+**Standart katalog:** Kamuya açık tanımlamalarla 92 mühimmat (hava-hava / hava-yer / seyir füzeleri,
+genel maksat, lazer ve GPS güdümlü bombalar, yerli güdüm kitleri, misket, roket, eğitim bombaları,
+tanklar, podlar), 15 rack (MAU-12, LAU-129, LAU-117, LAU-88, roket lançerleri…), 8 subrack (TER-9,
+MER-10, BRU-57, BRU-61…), 13 top ve 22 top mühimmatı. Yeni projeler bu katalogla başlar; eski
+projelere açılışta eksik öğeler otomatik eklenir (mevcut kayıtlara dokunulmaz). "Standart katalogu
+ekle" düğmesi de aynı işi elle yapar. Katalogda kategori/çap filtresi ve arama vardır.
+Top kapasiteleri uçağa göre değişir; kendi verinizle doğrulayın.
 Örnek projedeki uyumluluklar gösterim amaçlıdır; gerçek teknik verilerle doğrulanmalıdır.
 
 **İstasyonlar arası kurallar:** Simetrik, Birbirini dışlar, Gerektirir, Toplam üst sınır.

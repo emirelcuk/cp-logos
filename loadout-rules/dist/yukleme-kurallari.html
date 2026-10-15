@@ -328,6 +328,15 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
   .topbar { position: static; }
   .project-name { margin-left: 0; max-width: none; }
 }
+
+/* katalog grup filtresi */
+.group-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.group-chip { border-radius: 14px; background: #fff; }
+.group-chip .count { margin-left: 2px; }
+.group-chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); font-weight: 600; }
+.catalog-table th:first-child { width: 150px; }
+.catalog-table td:nth-child(2) { min-width: 300px; width: 38%; }
+.catalog-table td.num { width: 130px; }
 </style>
 </head>
 <body>
@@ -418,6 +427,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     return {
       schemaVersion: SCHEMA_VERSION,
       name: 'Yeni Proje',
+      catalogVersion: 0,
       catalog: emptyCatalog(),
       aircraft: [],
     };
@@ -596,51 +606,176 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
   /* ---------------------------------------------------------------- örnek veri */
 
   /*
-   * Kamuya açık yaygın tanımlamalarla standart katalog. Pozisyon: rack/subrack üzerine
-   * aynı anda takılabilecek en fazla öğe sayısı. Kendi envanterinize göre düzenleyin.
+   * Kamuya açık yaygın tanımlamalarla standart katalog. Kendi envanterinize göre düzenleyin.
+   * Sürüm artırıldığında, eski projelere açılışta eksik öğeler otomatik eklenir (silinmez).
    */
+  const STANDARD_CATALOG_VERSION = 2;
+
+  const AAM = 'Hava-hava füzesi';
+  const AGM = 'Hava-yer füzesi';
+  const ASM = 'Gemi karşıtı füze';
+  const CRUISE = 'Seyir füzesi';
+  const GP = 'Genel maksat bombası';
+  const PEN = 'Nüfuz edici bomba';
+  const LGB = 'Lazer güdümlü bomba';
+  const GPS = 'GPS/INS güdümlü bomba';
+  const KIT = 'Güdüm kiti (yerli)';
+  const CBU = 'Misket bombası';
+  const ROCKET = 'Roket';
+  const PRACTICE = 'Eğitim bombası';
+  const TANK = 'Yakıt tankı';
+  const POD_T = 'Hedefleme podu';
+  const POD_EW = 'Elektronik harp podu';
+  const POD_O = 'Diğer pod';
+
   const STANDARD_CATALOG = {
+    // [kod, ad, kategori]
     munition: [
-      ['AIM-9', 'Sidewinder kısa menzil hava-hava füzesi', 'Hava-hava füzesi'],
-      ['AIM-120', 'AMRAAM orta menzil hava-hava füzesi', 'Hava-hava füzesi'],
-      ['AIM-7', 'Sparrow orta menzil hava-hava füzesi', 'Hava-hava füzesi'],
-      ['AGM-65', 'Maverick hava-yer füzesi', 'Hava-yer füzesi'],
-      ['AGM-88', 'HARM radar karşıtı füze', 'Hava-yer füzesi'],
-      ['MK-82', '500 lb genel maksat bombası', 'Genel maksat bombası'],
-      ['MK-83', '1000 lb genel maksat bombası', 'Genel maksat bombası'],
-      ['MK-84', '2000 lb genel maksat bombası', 'Genel maksat bombası'],
-      ['GBU-10', 'Lazer güdümlü bomba (MK-84 tabanlı)', 'Güdümlü bomba'],
-      ['GBU-12', 'Lazer güdümlü bomba (MK-82 tabanlı)', 'Güdümlü bomba'],
-      ['GBU-31', 'JDAM (MK-84 tabanlı)', 'Güdümlü bomba'],
-      ['GBU-38', 'JDAM (MK-82 tabanlı)', 'Güdümlü bomba'],
-      ['GBU-39', 'SDB küçük çaplı bomba', 'Güdümlü bomba'],
-      ['CBU-105', 'Rüzgâr düzeltmeli misket bombası', 'Misket bombası'],
-      ['HGK-84', 'Hassas güdüm kiti (MK-84)', 'Güdümlü bomba'],
-      ['KGK-82', 'Kanatlı güdüm kiti (MK-82)', 'Güdümlü bomba'],
-      ['TEBER-82', 'Lazer/GPS güdüm kiti (MK-82)', 'Güdümlü bomba'],
-      ['FT-370', '370 galon harici yakıt tankı', 'Yakıt tankı'],
-      ['FT-300', '300 galon harici yakıt tankı', 'Yakıt tankı'],
-      ['AN/AAQ-33', 'Sniper hedefleme podu', 'Pod'],
-      ['AN/AAQ-28', 'LITENING hedefleme podu', 'Pod'],
-      ['AN/AAQ-13', 'LANTIRN navigasyon podu', 'Pod'],
-      ['AN/ALQ-131', 'Elektronik harp podu', 'Pod'],
+      ['AIM-9L', 'Sidewinder kısa menzil hava-hava füzesi', AAM],
+      ['AIM-9M', 'Sidewinder kısa menzil hava-hava füzesi', AAM],
+      ['AIM-9X', 'Sidewinder (Block II) kısa menzil hava-hava füzesi', AAM],
+      ['AIM-120B', 'AMRAAM orta menzil hava-hava füzesi', AAM],
+      ['AIM-120C', 'AMRAAM orta menzil hava-hava füzesi', AAM],
+      ['AIM-120D', 'AMRAAM uzun menzil hava-hava füzesi', AAM],
+      ['AIM-7M', 'Sparrow orta menzil hava-hava füzesi', AAM],
+      ['AIM-132', 'ASRAAM kısa menzil hava-hava füzesi', AAM],
+      ['IRIS-T', 'Kısa menzil hava-hava füzesi', AAM],
+      ['METEOR', 'Ramjet itkili uzun menzil hava-hava füzesi', AAM],
+      ['MICA-IR', 'Kızılötesi güdümlü hava-hava füzesi', AAM],
+      ['MICA-EM', 'Radar güdümlü hava-hava füzesi', AAM],
+      ['PYTHON-5', 'Kısa menzil hava-hava füzesi', AAM],
+      ['DERBY', 'Orta menzil hava-hava füzesi', AAM],
+      ['R-73', 'Kısa menzil hava-hava füzesi', AAM],
+      ['R-77', 'Orta menzil hava-hava füzesi', AAM],
+      ['R-27', 'Orta menzil hava-hava füzesi', AAM],
+      ['BOZDOGAN', 'Bozdoğan görüş içi hava-hava füzesi', AAM],
+      ['GOKDOGAN', 'Gökdoğan görüş ötesi hava-hava füzesi', AAM],
+
+      ['AGM-65D', 'Maverick (IIR) hava-yer füzesi', AGM],
+      ['AGM-65G', 'Maverick (IIR, ağır harp başlığı) hava-yer füzesi', AGM],
+      ['AGM-65H', 'Maverick (CCD) hava-yer füzesi', AGM],
+      ['AGM-65K', 'Maverick (CCD, ağır harp başlığı) hava-yer füzesi', AGM],
+      ['AGM-88B', 'HARM radar karşıtı füze', AGM],
+      ['AGM-88E', 'AARGM radar karşıtı füze', AGM],
+      ['AGM-114', 'Hellfire hava-yer füzesi', AGM],
+      ['AGM-154A', 'JSOW süzülen silah (alt mühimmatlı)', AGM],
+      ['AGM-154C', 'JSOW süzülen silah (tekil harp başlığı)', AGM],
+      ['AGM-142', 'Popeye hava-yer füzesi', AGM],
+      ['BRIMSTONE', 'Hava-yer füzesi', AGM],
+      ['AGM-84D', 'Harpoon gemi karşıtı füze', ASM],
+      ['AGM-84H', 'SLAM-ER kara/gemi taarruz füzesi', AGM],
+      ['AGM-158A', 'JASSM seyir füzesi', CRUISE],
+      ['AGM-158B', 'JASSM-ER seyir füzesi', CRUISE],
+      ['KEPD-350', 'Taurus seyir füzesi', CRUISE],
+      ['STORM-SHADOW', 'Seyir füzesi', CRUISE],
+      ['SOM-A', 'SOM seyir füzesi', CRUISE],
+      ['SOM-J', 'SOM-J seyir füzesi (iç bölmeye uygun)', CRUISE],
+
+      ['MK-81', '250 lb genel maksat bombası', GP],
+      ['MK-82', '500 lb genel maksat bombası', GP],
+      ['MK-82AIR', '500 lb yavaşlatıcılı genel maksat bombası (BSU-49)', GP],
+      ['MK-83', '1000 lb genel maksat bombası', GP],
+      ['MK-84', '2000 lb genel maksat bombası', GP],
+      ['MK-84AIR', '2000 lb yavaşlatıcılı genel maksat bombası (BSU-50)', GP],
+      ['BLU-109', '2000 lb nüfuz edici bomba gövdesi', PEN],
+      ['BLU-110', '1000 lb ısıl korumalı bomba gövdesi', GP],
+      ['BLU-111', '500 lb ısıl korumalı bomba gövdesi', GP],
+
+      ['GBU-10', 'Paveway II lazer güdümlü bomba (MK-84)', LGB],
+      ['GBU-12', 'Paveway II lazer güdümlü bomba (MK-82)', LGB],
+      ['GBU-16', 'Paveway II lazer güdümlü bomba (MK-83)', LGB],
+      ['GBU-24', 'Paveway III lazer güdümlü bomba (2000 lb)', LGB],
+      ['GBU-27', 'Paveway III lazer güdümlü nüfuz edici bomba', LGB],
+      ['GBU-28', '5000 lb lazer güdümlü nüfuz edici bomba', LGB],
+      ['GBU-54', 'Lazer JDAM (MK-82)', LGB],
+      ['GBU-31', 'JDAM (MK-84 / BLU-109)', GPS],
+      ['GBU-32', 'JDAM (MK-83)', GPS],
+      ['GBU-38', 'JDAM (MK-82)', GPS],
+      ['GBU-39', 'SDB küçük çaplı bomba', GPS],
+      ['GBU-53', 'SDB II küçük çaplı bomba', GPS],
+
+      ['HGK-82', 'Hassas güdüm kiti (MK-82)', KIT],
+      ['HGK-83', 'Hassas güdüm kiti (MK-83)', KIT],
+      ['HGK-84', 'Hassas güdüm kiti (MK-84)', KIT],
+      ['KGK-82', 'Kanatlı güdüm kiti (MK-82)', KIT],
+      ['KGK-83', 'Kanatlı güdüm kiti (MK-83)', KIT],
+      ['TEBER-81', 'Lazer/GPS güdüm kiti (MK-81)', KIT],
+      ['TEBER-82', 'Lazer/GPS güdüm kiti (MK-82)', KIT],
+
+      ['CBU-87', 'Kombine etkili misket bombası', CBU],
+      ['CBU-89', 'Gator mayın atar misket bombası', CBU],
+      ['CBU-97', 'Algılayıcı tapalı misket bombası', CBU],
+      ['CBU-103', 'Rüzgâr düzeltmeli CBU-87', CBU],
+      ['CBU-105', 'Rüzgâr düzeltmeli CBU-97', CBU],
+
+      ['HYDRA-70', '2,75 inç güdümsüz roket', ROCKET],
+      ['APKWS', '2,75 inç lazer güdümlü roket', ROCKET],
+      ['ZUNI', '5 inç güdümsüz roket', ROCKET],
+      ['CIRIT', '2,75 inç lazer güdümlü roket', ROCKET],
+
+      ['BDU-33', '25 lb eğitim bombası', PRACTICE],
+      ['MK-106', '5 lb eğitim bombası', PRACTICE],
+      ['BDU-50', '500 lb eğitim bombası (MK-82 benzeri)', PRACTICE],
+      ['BDU-56', '2000 lb eğitim bombası (MK-84 benzeri)', PRACTICE],
+
+      ['FT-300', '300 galon harici yakıt tankı', TANK],
+      ['FT-370', '370 galon harici yakıt tankı', TANK],
+      ['FT-600', '600 galon harici yakıt tankı', TANK],
+
+      ['AN/AAQ-33', 'Sniper hedefleme podu', POD_T],
+      ['AN/AAQ-28', 'LITENING hedefleme podu', POD_T],
+      ['AN/AAQ-14', 'LANTIRN hedefleme podu', POD_T],
+      ['ASELPOD', 'ASELPOD hedefleme podu', POD_T],
+      ['AN/AAQ-13', 'LANTIRN navigasyon podu', POD_O],
+      ['AN/ASQ-213', 'HARM hedefleme sistemi podu', POD_O],
+      ['DB-110', 'Keşif podu', POD_O],
+      ['ACMI', 'Eğitim / muharebe manevra kayıt podu', POD_O],
+      ['AN/ALQ-131', 'Elektronik harp podu', POD_EW],
+      ['AN/ALQ-184', 'Elektronik harp podu', POD_EW],
     ],
+    // [kod, ad, pozisyon]
     rack: [
       ['MAU-12', 'Bomba askı rafı (pilon içi)', 1],
+      ['BRU-32', 'Bomba ejektör rafı', 1],
       ['LAU-129', 'Füze lançeri (AIM-9 / AIM-120)', 1],
+      ['LAU-127', 'Füze lançeri (AIM-9 / AIM-120)', 1],
+      ['LAU-114', 'AIM-9 lançeri', 1],
+      ['LAU-7', 'AIM-9 lançeri', 1],
+      ['LAU-106', 'AIM-7 / AIM-120 ejektör lançeri', 1],
       ['LAU-117', 'Tekli AGM-65 lançeri', 1],
-      ['LAU-118', 'AGM-88 lançeri', 1],
       ['LAU-88', 'Üçlü AGM-65 lançeri', 3],
+      ['LAU-118', 'AGM-88 lançeri', 1],
+      ['LAU-61', '19 tüplü 2,75 inç roket lançeri', 19],
+      ['LAU-68', '7 tüplü 2,75 inç roket lançeri', 7],
+      ['LAU-131', '7 tüplü 2,75 inç roket lançeri', 7],
+      ['LAU-10', '4 tüplü 5 inç roket lançeri', 4],
+      ['SUU-20', 'Eğitim bombası dağıtıcısı', 6],
     ],
-    // [kod, ad, çap, mermi kapasitesi] — kapasite uçağa göre değişebilir, kendi verinizle doğrulayın.
+    // [kod, ad, pozisyon]
+    subrack: [
+      ['TER-9', 'TER-9/A üçlü ejektör rack', 3],
+      ['BRU-42', 'Geliştirilmiş üçlü ejektör rack (ITER)', 3],
+      ['MER-10', 'MER-10N çoklu ejektör rack', 6],
+      ['BRU-41', 'Geliştirilmiş çoklu ejektör rack (IMER)', 6],
+      ['BRU-33', 'Eğik dikey ejektör rack (CVER)', 2],
+      ['BRU-55', 'Akıllı çift ejektör rack', 2],
+      ['BRU-57', 'Akıllı çift ejektör rack', 2],
+      ['BRU-61', 'GBU-39 / GBU-53 dörtlü taşıyıcı', 4],
+    ],
+    // [kod, ad, çap, mermi kapasitesi] — kapasite uçağa göre değişir, kendi verinizle doğrulayın.
     gun: [
       ['M61A1', 'Vulcan 20 mm altı namlulu top', '20x102', 511],
       ['M61A2', 'Hafifletilmiş Vulcan 20 mm top', '20x102', 480],
+      ['M39', '20 mm revolver top', '20x102', 280],
+      ['SUU-23', '20 mm harici top podu (GAU-4)', '20x102', 1200],
       ['GAU-22/A', '25 mm dört namlulu top', '25x137', 182],
       ['GAU-12/U', 'Equalizer 25 mm beş namlulu top', '25x137', 300],
       ['GAU-8/A', 'Avenger 30 mm yedi namlulu top', '30x173', 1174],
       ['GPU-5/A', '30 mm harici top podu', '30x173', 353],
+      ['BK-27', 'Mauser 27 mm revolver top', '27x145', 150],
       ['DEFA 554', '30 mm revolver top', '30x113', 125],
+      ['GIAT 30', '30 mm revolver top (30M791)', '30x150', 125],
+      ['GSh-23', '23 mm çift namlulu top', '23x115', 200],
       ['GSh-30-1', '30 mm tek namlulu top', '30x165', 150],
     ],
     // [kod, ad, çap, tip]
@@ -648,20 +783,25 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
       ['M56A3', '20 mm yüksek infilaklı yakıcı', '20x102', 'HEI'],
       ['M55A2', '20 mm eğitim mermisi', '20x102', 'TP'],
       ['M53', '20 mm zırh delici yakıcı', '20x102', 'API'],
+      ['M220', '20 mm izli eğitim mermisi', '20x102', 'TP-T'],
       ['PGU-28/B', '20 mm yarı zırh delici yüksek infilaklı yakıcı', '20x102', 'SAPHEI'],
       ['PGU-27/A', '20 mm eğitim mermisi', '20x102', 'TP'],
+      ['PGU-30/A', '20 mm izli eğitim mermisi', '20x102', 'TP-T'],
       ['PGU-20/U', '25 mm zırh delici yakıcı', '25x137', 'API'],
       ['PGU-23/U', '25 mm eğitim mermisi', '25x137', 'TP'],
+      ['PGU-25/U', '25 mm yüksek infilaklı yakıcı', '25x137', 'HEI'],
+      ['PGU-32/U', '25 mm yarı zırh delici yüksek infilaklı yakıcı', '25x137', 'SAPHEI-T'],
       ['PGU-47/U', '25 mm zırh delici patlayıcı', '25x137', 'APEX'],
       ['PGU-13/B', '30 mm yüksek infilaklı yakıcı', '30x173', 'HEI'],
       ['PGU-14/B', '30 mm zırh delici yakıcı', '30x173', 'API'],
       ['PGU-15/B', '30 mm eğitim mermisi', '30x173', 'TP'],
-    ],
-    subrack: [
-      ['TER-9', 'Üçlü ejektör rack', 3],
-      ['MER-10', 'Çoklu ejektör rack', 6],
-      ['BRU-57', 'Akıllı çift ejektör rack', 2],
-      ['BRU-61', 'GBU-39 dörtlü taşıyıcı', 4],
+      ['27x145 HE', '27 mm yüksek infilaklı', '27x145', 'HE'],
+      ['27x145 TP', '27 mm eğitim mermisi', '27x145', 'TP'],
+      ['30x113 HEI', '30 mm yüksek infilaklı yakıcı (DEFA)', '30x113', 'HEI'],
+      ['30x113 TP', '30 mm eğitim mermisi (DEFA)', '30x113', 'TP'],
+      ['30x150 HE', '30 mm yüksek infilaklı (GIAT 30)', '30x150', 'HE'],
+      ['23x115 HEI', '23 mm yüksek infilaklı yakıcı (OFZ)', '23x115', 'HEI'],
+      ['30x165 HEI', '30 mm yüksek infilaklı yakıcı (OFZ)', '30x165', 'HEI'],
     ],
   };
 
@@ -694,6 +834,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
       project.catalog[key].forEach(function (s) { have[s.code] = true; });
       std[key].forEach(function (s) { if (!have[s.code]) { project.catalog[key].push(s); added++; } });
     });
+    project.catalogVersion = STANDARD_CATALOG_VERSION;
     return added;
   }
 
@@ -702,6 +843,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     const p = emptyProject();
     p.name = 'Örnek Proje';
     p.catalog = standardCatalog();
+    p.catalogVersion = STANDARD_CATALOG_VERSION;
     const kindOf = function (code) {
       return KINDS.find(function (k) { return p.catalog[CATALOG_KEY[k]].some(function (x) { return x.code === code; }); });
     };
@@ -720,7 +862,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     const rule = function (type, stations, extra) {
       return Object.assign(newConstraint(), { type: type, stationIds: stations.map(function (s) { return s.id; }) }, extra || {});
     };
-    const aamRail = function () { return n('LAU-129', [n('AIM-9'), n('AIM-120')]); };
+    const aamRail = function () { return n('LAU-129', [n('AIM-9X'), n('AIM-9M'), n('AIM-120C')]); };
 
     // Uçak A: tek motorlu avcı, 9 istasyon + 5L / 5R.
     const a = Object.assign(newAircraft(), { code: 'UCAK-A', name: 'Örnek Uçak A (tek motorlu)', silhouette: 'single' });
@@ -741,8 +883,8 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
         n('MAU-12', [n('MK-82'), n('MK-84'), n('GBU-12'), n('GBU-31'), n('GBU-38'),
           n('TER-9', [n('MK-82', [], 3), n('GBU-12', [], 2)]),
           n('BRU-61', [n('GBU-39', [], 4)])]),
-        n('LAU-117', [n('AGM-65')]),
-        n('LAU-118', [n('AGM-88')]),
+        n('LAU-117', [n('AGM-65D'), n('AGM-65G')]),
+        n('LAU-118', [n('AGM-88B')]),
         aamRail()
       );
     });
@@ -751,7 +893,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     });
     a5.loads.push(n('FT-300'), n('AN/ALQ-131'));
     a5l.loads.push(n('AN/AAQ-13'));
-    a5r.loads.push(n('AN/AAQ-33'), n('AN/AAQ-28'));
+    a5r.loads.push(n('AN/AAQ-33'), n('AN/AAQ-28'), n('ASELPOD'));
     const aGun = Object.assign(newStation(), { type: 'GUN', code: 'GUN', name: 'Dahili top' });
     aGun.loads.push(n('M61A1', [n('PGU-28/B', [], 511), n('M56A3', [], 511), n('PGU-27/A', [], 511)]));
     a.stations.push(a1, a2, a3, a4, a5, a5l, a5r, a6, a7, a8, a9, aGun);
@@ -796,6 +938,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     emptyProject: emptyProject,
     sampleProject: sampleProject,
     standardCatalog: standardCatalog,
+    STANDARD_CATALOG_VERSION: STANDARD_CATALOG_VERSION,
     mergeStandardCatalog: mergeStandardCatalog,
     normalizeProject: normalizeProject,
     newStore: newStore,
@@ -1204,6 +1347,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     view: 'aircraft',
     catalogKind: 'munition',
     catalogFilter: '',
+    catalogGroup: '',
     aircraftId: null,
     stationId: null,
     exporter: 'generic',
@@ -1442,16 +1586,21 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     const list = state.project.catalog[M.CATALOG_KEY[kind]];
     const cols = CATALOG_COLUMNS[kind];
     const q = state.catalogFilter.trim().toLocaleLowerCase('tr');
+    // Mühimmat kategoriye, top ve top mühimmatı çapa göre gruplanır.
+    const groupKey = kind === 'munition' ? 'category' : (kind === 'gun' || kind === 'ammo') ? 'caliber' : null;
+    const groups = groupKey ? list.map(function (s) { return s[groupKey] || '—'; }).filter(function (g, i, arr) { return arr.indexOf(g) === i; }) : [];
+    const group = groups.indexOf(state.catalogGroup) >= 0 ? state.catalogGroup : '';
 
     const nav = panel('Katalog', { icon: 'box', class: 'nav-panel' }, h('ul', { class: 'list' }, M.KINDS.map(function (k) {
       return h('li', {
         class: k === kind ? 'selected' : '',
-        onclick: function () { state.catalogKind = k; render(); },
+        onclick: function () { state.catalogKind = k; state.catalogGroup = ''; render(); },
       }, [h('i', { class: 'kind-dot ' + k }), h('span', { class: 'grow' }, M.KIND_LABELS[k]), h('span', { class: 'count' }, state.project.catalog[M.CATALOG_KEY[k]].length)]);
     })));
 
     const rowFor = function (s) {
       const text = cols.map(function (c) { return s[c[0]]; }).join(' ').toLocaleLowerCase('tr');
+      if (group && (s[groupKey] || '—') !== group) return null;
       return h('tr', { hidden: q && text.indexOf(q) < 0 ? true : undefined, 'data-search': text }, [
         cols.map(function (c) {
           return h('td', { class: c[2] === 'number' ? 'num' : (c[0] === 'code' ? 'code-col' : '') }, field(null, s, c[0], { type: c[2], min: c[2] === 'number' ? 1 : undefined }));
@@ -1498,6 +1647,13 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
       ],
     }, [
       h('p', { class: 'hint' }, CATALOG_HINTS[kind]),
+      groups.length > 1 ? h('div', { class: 'group-chips' }, [
+        h('button', { class: 'small group-chip' + (group ? '' : ' on'), onclick: function () { state.catalogGroup = ''; render(); } }, ['Tümü ', h('span', { class: 'count' }, list.length)]),
+        groups.map(function (g) {
+          const n = list.filter(function (s) { return (s[groupKey] || '—') === g; }).length;
+          return h('button', { class: 'small group-chip' + (g === group ? ' on' : ''), onclick: function () { state.catalogGroup = g; render(); } }, [g + ' ', h('span', { class: 'count' }, n)]);
+        }),
+      ]) : null,
       list.length
         ? h('div', { class: 'table-wrap' }, h('table', { class: 'catalog-table' }, [
           h('thead', {}, h('tr', {}, cols.map(function (c) { return h('th', {}, c[1]); }).concat([h('th', {}, '')]))),
@@ -2126,11 +2282,25 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     return project;
   }
 
+  /* Eski projelere, standart katalogun yeni sürümündeki eksik öğeleri ekler (mevcutlara dokunmaz). */
+  function upgradeCatalog(project) {
+    if ((project.catalogVersion || 0) >= M.STANDARD_CATALOG_VERSION) return 0;
+    return M.mergeStandardCatalog(project);
+  }
+
   function setProject(p) {
     state.project = arrangeAll(M.normalizeProject(p));
+    const added = upgradeCatalog(state.project);
     state.aircraftId = null;
     state.stationId = null;
     rerender();
+    if (added) toast('Standart katalog güncellendi: ' + added + ' yeni öğe eklendi.', 'ok');
+  }
+
+  function newProject() {
+    const p = M.emptyProject();
+    M.mergeStandardCatalog(p);
+    return p;
   }
 
   document.getElementById('project-name').addEventListener('input', function (e) {
@@ -2160,7 +2330,7 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
     const b = e.target.closest('button[data-action]');
     if (!b) return;
     const action = b.getAttribute('data-action');
-    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(M.emptyProject());
+    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(newProject());
     if (action === 'sample' && window.confirm('Mevcut proje örnek veriyle değiştirilsin mi?')) setProject(M.sampleProject());
     if (action === 'open') fileInput.click();
     if (action === 'save') {
@@ -2170,7 +2340,10 @@ pre.xml { background: #0b1626; color: #cbd8ea; padding: 16px; border-radius: 10p
   });
 
   state.project = arrangeAll(loadFromStorage() || M.sampleProject());
+  const upgraded = upgradeCatalog(state.project);
+  if (upgraded) persist();
   render();
+  if (upgraded) toast('Standart katalog güncellendi: ' + upgraded + ' yeni öğe eklendi (top ve top mühimmatı dahil).', 'ok');
 })();
 </script>
 </body>

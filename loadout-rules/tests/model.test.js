@@ -147,8 +147,10 @@ test('standart katalog gerçek isimleri içerir ve tekrar eklemez', function () 
   const p = M.emptyProject();
   const added = M.mergeStandardCatalog(p);
   const all = p.catalog.munitions.concat(p.catalog.racks, p.catalog.subracks).map(function (s) { return s.code; });
-  ['MK-82', 'GBU-12', 'AIM-9', 'AIM-120', 'MAU-12', 'TER-9', 'LAU-129'].forEach(function (c) { assert.ok(all.indexOf(c) >= 0, c); });
-  assert.ok(added > 20);
+  ['MK-82', 'GBU-12', 'AIM-9X', 'AIM-120C', 'MAU-12', 'TER-9', 'LAU-129', 'BRU-61', 'LAU-61'].forEach(function (c) { assert.ok(all.indexOf(c) >= 0, c); });
+  assert.ok(p.catalog.guns.length >= 10 && p.catalog.ammo.length >= 15);
+  assert.ok(added > 100);
+  assert.strictEqual(p.catalogVersion, M.STANDARD_CATALOG_VERSION);
   assert.strictEqual(M.mergeStandardCatalog(p), 0);
   assert.deepStrictEqual(M.validate(p).filter(function (i) { return i.level === 'error'; }), []);
 });
@@ -189,4 +191,15 @@ test('XML top ve mühimmatı içerir', function () {
   assert.ok(xml.includes('<Ammo code="PGU-28/B"'));
   assert.ok(xml.includes('<Station code="GUN" type="GUN"'));
   assert.ok(xml.includes('<Allow type="AMMO" ref="PGU-28/B" maxQty="511"/>'));
+});
+
+test('standart katalogda tekrar eden kod yok ve her top için uygun çapta mühimmat var', function () {
+  const c = M.standardCatalog();
+  M.KINDS.forEach(function (k) {
+    const codes = c[M.CATALOG_KEY[k]].map(function (s) { return s.code; });
+    assert.strictEqual(new Set(codes).size, codes.length, k);
+  });
+  c.guns.forEach(function (g) {
+    assert.ok(c.ammo.some(function (a) { return a.caliber === g.caliber; }), g.code + ' için mühimmat yok');
+  });
 });

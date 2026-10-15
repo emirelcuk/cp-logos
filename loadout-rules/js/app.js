@@ -17,6 +17,7 @@
     view: 'aircraft',
     catalogKind: 'munition',
     catalogFilter: '',
+    catalogGroup: '',
     aircraftId: null,
     stationId: null,
     exporter: 'generic',
@@ -255,16 +256,21 @@
     const list = state.project.catalog[M.CATALOG_KEY[kind]];
     const cols = CATALOG_COLUMNS[kind];
     const q = state.catalogFilter.trim().toLocaleLowerCase('tr');
+    // Mühimmat kategoriye, top ve top mühimmatı çapa göre gruplanır.
+    const groupKey = kind === 'munition' ? 'category' : (kind === 'gun' || kind === 'ammo') ? 'caliber' : null;
+    const groups = groupKey ? list.map(function (s) { return s[groupKey] || '—'; }).filter(function (g, i, arr) { return arr.indexOf(g) === i; }) : [];
+    const group = groups.indexOf(state.catalogGroup) >= 0 ? state.catalogGroup : '';
 
     const nav = panel('Katalog', { icon: 'box', class: 'nav-panel' }, h('ul', { class: 'list' }, M.KINDS.map(function (k) {
       return h('li', {
         class: k === kind ? 'selected' : '',
-        onclick: function () { state.catalogKind = k; render(); },
+        onclick: function () { state.catalogKind = k; state.catalogGroup = ''; render(); },
       }, [h('i', { class: 'kind-dot ' + k }), h('span', { class: 'grow' }, M.KIND_LABELS[k]), h('span', { class: 'count' }, state.project.catalog[M.CATALOG_KEY[k]].length)]);
     })));
 
     const rowFor = function (s) {
       const text = cols.map(function (c) { return s[c[0]]; }).join(' ').toLocaleLowerCase('tr');
+      if (group && (s[groupKey] || '—') !== group) return null;
       return h('tr', { hidden: q && text.indexOf(q) < 0 ? true : undefined, 'data-search': text }, [
         cols.map(function (c) {
           return h('td', { class: c[2] === 'number' ? 'num' : (c[0] === 'code' ? 'code-col' : '') }, field(null, s, c[0], { type: c[2], min: c[2] === 'number' ? 1 : undefined }));
@@ -311,6 +317,13 @@
       ],
     }, [
       h('p', { class: 'hint' }, CATALOG_HINTS[kind]),
+      groups.length > 1 ? h('div', { class: 'group-chips' }, [
+        h('button', { class: 'small group-chip' + (group ? '' : ' on'), onclick: function () { state.catalogGroup = ''; render(); } }, ['Tümü ', h('span', { class: 'count' }, list.length)]),
+        groups.map(function (g) {
+          const n = list.filter(function (s) { return (s[groupKey] || '—') === g; }).length;
+          return h('button', { class: 'small group-chip' + (g === group ? ' on' : ''), onclick: function () { state.catalogGroup = g; render(); } }, [g + ' ', h('span', { class: 'count' }, n)]);
+        }),
+      ]) : null,
       list.length
         ? h('div', { class: 'table-wrap' }, h('table', { class: 'catalog-table' }, [
           h('thead', {}, h('tr', {}, cols.map(function (c) { return h('th', {}, c[1]); }).concat([h('th', {}, '')]))),
@@ -939,11 +952,25 @@
     return project;
   }
 
+  /* Eski projelere, standart katalogun yeni sürümündeki eksik öğeleri ekler (mevcutlara dokunmaz). */
+  function upgradeCatalog(project) {
+    if ((project.catalogVersion || 0) >= M.STANDARD_CATALOG_VERSION) return 0;
+    return M.mergeStandardCatalog(project);
+  }
+
   function setProject(p) {
     state.project = arrangeAll(M.normalizeProject(p));
+    const added = upgradeCatalog(state.project);
     state.aircraftId = null;
     state.stationId = null;
     rerender();
+    if (added) toast('Standart katalog güncellendi: ' + added + ' yeni öğe eklendi.', 'ok');
+  }
+
+  function newProject() {
+    const p = M.emptyProject();
+    M.mergeStandardCatalog(p);
+    return p;
   }
 
   document.getElementById('project-name').addEventListener('input', function (e) {
@@ -973,7 +1000,7 @@
     const b = e.target.closest('button[data-action]');
     if (!b) return;
     const action = b.getAttribute('data-action');
-    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(M.emptyProject());
+    if (action === 'new' && window.confirm('Mevcut proje temizlensin mi? (Önce JSON olarak kaydetmeniz önerilir.)')) setProject(newProject());
     if (action === 'sample' && window.confirm('Mevcut proje örnek veriyle değiştirilsin mi?')) setProject(M.sampleProject());
     if (action === 'open') fileInput.click();
     if (action === 'save') {
@@ -983,5 +1010,8 @@
   });
 
   state.project = arrangeAll(loadFromStorage() || M.sampleProject());
+  const upgraded = upgradeCatalog(state.project);
+  if (upgraded) persist();
   render();
+  if (upgraded) toast('Standart katalog güncellendi: ' + upgraded + ' yeni öğe eklendi (top ve top mühimmatı dahil).', 'ok');
 })();
